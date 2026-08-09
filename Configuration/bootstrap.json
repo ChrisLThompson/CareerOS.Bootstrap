@@ -1,0 +1,14 @@
+{
+  "profiles": [
+    {
+      "name": "Chris",
+      "directory": "CareerOS_Chris",
+      "template": "CareerProfessional"
+    },
+    {
+      "name": "Katie",
+      "directory": "CareerOS_Katie",
+      "template": "HealthcareProfessional"
+    }
+  ]
+}

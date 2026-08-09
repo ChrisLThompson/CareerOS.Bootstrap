@@ -1,0 +1,84 @@
+{
+  "templates": [
+    {
+      "name": "CareerProfessional",
+      "directories": [
+        {
+          "name": "Resume",
+          "children": [
+            {
+              "name": "Master"
+            },
+            {
+              "name": "RC"
+            },
+            {
+              "name": "Archived"
+            }
+          ]
+        },
+        {
+          "name": "Accomplishment Library"
+        },
+        {
+          "name": "Professional Impact Stories"
+        },
+        {
+          "name": "Interview Questions"
+        },
+        {
+          "name": "Certifications"
+        },
+        {
+          "name": "References"
+        },
+        {
+          "name": "Cover Letters"
+        },
+        {
+          "name": "Applications"
+        }
+      ]
+    },
+    {
+      "name": "HealthcareProfessional",
+      "directories": [
+        {
+          "name": "Resume",
+          "children": [
+            {
+              "name": "Master"
+            },
+            {
+              "name": "RC"
+            },
+            {
+              "name": "Archived"
+            }
+          ]
+        },
+        {
+          "name": "Accomplishment Library"
+        },
+        {
+          "name": "Professional Impact Stories"
+        },
+        {
+          "name": "Interview Questions"
+        },
+        {
+          "name": "Certifications"
+        },
+        {
+          "name": "References"
+        },
+        {
+          "name": "Cover Letters"
+        },
+        {
+          "name": "Applications"
+        }
+      ]
+    }
+  ]
+}
