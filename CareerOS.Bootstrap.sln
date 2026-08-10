@@ -34,6 +34,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Development", "Development"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Diagrams", "Diagrams", "{07EFA265-0380-4B5B-ABD6-F1482AA50EF8}"
 	ProjectSection(SolutionItems) = preProject
+		Documentation\Diagrams\BOOTSTRAP_PROCESS_FLOW.md = Documentation\Diagrams\BOOTSTRAP_PROCESS_FLOW.md
+		Documentation\Diagrams\COMPONENT_DIAGRAM.md = Documentation\Diagrams\COMPONENT_DIAGRAM.md
+		Documentation\Diagrams\DATA_FLOW_DIAGRAM.md = Documentation\Diagrams\DATA_FLOW_DIAGRAM.md
+		Documentation\Diagrams\FUTURE_STATE_DIAGRAM.md = Documentation\Diagrams\FUTURE_STATE_DIAGRAM.md
 		Documentation\Diagrams\SYSTEM_CONTEXT.md = Documentation\Diagrams\SYSTEM_CONTEXT.md
 	EndProjectSection
 EndProject
