@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.14.37411.7 d17.14
+VisualStudioVersion = 17.14.37411.7
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CareerOS.Bootstrap", "CareerOS.Bootstrap\CareerOS.Bootstrap.csproj", "{73BE2673-7637-409D-A811-242FF6BCA48B}"
 EndProject
@@ -9,9 +9,45 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 	ProjectSection(SolutionItems) = preProject
 		.gitignore = .gitignore
 		CHANGELOG.md = CHANGELOG.md
+		.github\copilot-instructions.md = .github\copilot-instructions.md
 		LICENSE = LICENSE
 		README.md = README.md
 	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Documentation", "Documentation", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Architecture", "Architecture", "{DA7D3CA0-27B7-4B53-A89D-C4D7A1D5811F}"
+	ProjectSection(SolutionItems) = preProject
+		Documentation\Architecture\ARCHITECTURE.md = Documentation\Architecture\ARCHITECTURE.md
+		Documentation\Architecture\COMPONENTS.md = Documentation\Architecture\COMPONENTS.md
+		Documentation\Architecture\CURRENT_STATE.md = Documentation\Architecture\CURRENT_STATE.md
+		Documentation\Architecture\DATA_FLOW.md = Documentation\Architecture\DATA_FLOW.md
+		Documentation\Architecture\FUTURE_STATE.md = Documentation\Architecture\FUTURE_STATE.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Development", "Development", "{EF49F6E9-D39E-4E1C-8DB7-A5295445E2D7}"
+	ProjectSection(SolutionItems) = preProject
+		Documentation\Development\CODING_STANDARDS.md = Documentation\Development\CODING_STANDARDS.md
+		Documentation\Development\DEVELOPMENT_GUIDE.md = Documentation\Development\DEVELOPMENT_GUIDE.md
+		Documentation\Development\TESTING_STRATEGY.md = Documentation\Development\TESTING_STRATEGY.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Diagrams", "Diagrams", "{07EFA265-0380-4B5B-ABD6-F1482AA50EF8}"
+	ProjectSection(SolutionItems) = preProject
+		Documentation\Diagrams\SYSTEM_CONTEXT.md = Documentation\Diagrams\SYSTEM_CONTEXT.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "References", "References", "{5C652148-0692-4BF2-AF61-8F7D81851DB0}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Requirements", "Requirements", "{D82E393C-A9AE-42B6-AFFF-75653EC3DD5A}"
+	ProjectSection(SolutionItems) = preProject
+		Documentation\Requirements\FUNCTIONAL_REQUIREMENTS.md = Documentation\Requirements\FUNCTIONAL_REQUIREMENTS.md
+		Documentation\Requirements\NON_FUNCTIONAL_REQUIREMENTS.md = Documentation\Requirements\NON_FUNCTIONAL_REQUIREMENTS.md
+		Documentation\Requirements\TRACEABILITY.md = Documentation\Requirements\TRACEABILITY.md
+		Documentation\Requirements\USER_STORIES.md = Documentation\Requirements\USER_STORIES.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Roadmap", "Roadmap", "{83DBF807-CE81-4528-9E77-CF6B69B0D1FB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -26,6 +62,14 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{DA7D3CA0-27B7-4B53-A89D-C4D7A1D5811F} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+		{EF49F6E9-D39E-4E1C-8DB7-A5295445E2D7} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+		{07EFA265-0380-4B5B-ABD6-F1482AA50EF8} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+		{5C652148-0692-4BF2-AF61-8F7D81851DB0} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+		{D82E393C-A9AE-42B6-AFFF-75653EC3DD5A} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+		{83DBF807-CE81-4528-9E77-CF6B69B0D1FB} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {5DA83951-C602-4CEF-83D9-5D889A4471AD}
