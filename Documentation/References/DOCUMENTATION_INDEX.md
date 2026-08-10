@@ -546,7 +546,7 @@ Use this document for:
 
 ## `DOCUMENTATION_INDEX.md`
 
-**Location:** `Documentation/References/DOCUMENTATION_INDEX.md`
+**Location:** [`DOCUMENTATION_INDEX.md`](DOCUMENTATION_INDEX.md)
 
 This document.
 
@@ -558,7 +558,7 @@ Its purpose is to provide a single navigation point for the complete documentati
 
 ## `ROADMAP.md`
 
-**Location:** `../Roadmap/ROADMAP.md`
+**Location:** [`../Roadmap/ROADMAP.md`](../Roadmap/ROADMAP.md)
 
 Planned documentation.
 
@@ -568,7 +568,7 @@ Its purpose is to describe the intended evolution of `CareerOS.Bootstrap` across
 
 ## `MILESTONES.md`
 
-**Location:** `../Roadmap/MILESTONES.md`
+**Location:** [`../Roadmap/MILESTONES.md`](../Roadmap/MILESTONES.md)
 
 Planned documentation.
 
@@ -608,7 +608,7 @@ Use it to record notable additions, changes, fixes, and releases as the project 
 
 ## `.github/copilot-instructions.md`
 
-**Location:** `../../.github/copilot-instructions.md`
+**Location:** [`../../.github/copilot-instructions.md`](../../.github/copilot-instructions.md)
 
 Repository-specific AI coding guidance.
 
