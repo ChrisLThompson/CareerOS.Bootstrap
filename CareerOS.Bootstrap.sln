@@ -42,6 +42,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Diagrams", "Diagrams", "{07
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "References", "References", "{5C652148-0692-4BF2-AF61-8F7D81851DB0}"
+	ProjectSection(SolutionItems) = preProject
+		Documentation\References\CONFIGURATION_REFERENCE.md = Documentation\References\CONFIGURATION_REFERENCE.md
+		Documentation\References\DOCUMENTATION_INDEX.md = Documentation\References\DOCUMENTATION_INDEX.md
+		Documentation\References\GLOSSARY.md = Documentation\References\GLOSSARY.md
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Requirements", "Requirements", "{D82E393C-A9AE-42B6-AFFF-75653EC3DD5A}"
 	ProjectSection(SolutionItems) = preProject
@@ -52,6 +57,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Requirements", "Requirement
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Roadmap", "Roadmap", "{83DBF807-CE81-4528-9E77-CF6B69B0D1FB}"
+	ProjectSection(SolutionItems) = preProject
+		Documentation\Roadmap\MILESTONES.md = Documentation\Roadmap\MILESTONES.md
+		Documentation\Roadmap\ROADMAP.md = Documentation\Roadmap\ROADMAP.md
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
