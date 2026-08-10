@@ -1,4 +1,4 @@
-﻿# CareerOS.Bootstrap â€” Current State
+# CareerOS.Bootstrap — Current State
 
 ## Purpose
 
@@ -92,43 +92,43 @@ The current repository contains:
 
 ```text
 CareerOS.Bootstrap/
-â”‚
-â”œâ”€â”€ .github/
-â”‚   â””â”€â”€ copilot-instructions.md
-â”‚
-â”œâ”€â”€ CareerOS.Bootstrap/
-â”‚   â”œâ”€â”€ Models/
-â”‚   â”‚   â”œâ”€â”€ BootstrapConfiguration.cs
-â”‚   â”‚   â”œâ”€â”€ DirectoryNode.cs
-â”‚   â”‚   â”œâ”€â”€ ProfileConfiguration.cs
-â”‚   â”‚   â””â”€â”€ TemplateConfiguration.cs
-â”‚   â”‚
-â”‚   â”œâ”€â”€ Services/
-â”‚   â”‚   â”œâ”€â”€ DirectoryPlanService.cs
-â”‚   â”‚   â”œâ”€â”€ JsonConfigurationService.cs
-â”‚   â”‚   â”œâ”€â”€ PathService.cs
-â”‚   â”‚   â””â”€â”€ TemplateResolverService.cs
-â”‚   â”‚
-â”‚   â”œâ”€â”€ CareerOS.Bootstrap.csproj
-â”‚   â””â”€â”€ Program.cs
-â”‚
-â”œâ”€â”€ Configuration/
-â”‚   â”œâ”€â”€ bootstrap.json
-â”‚   â””â”€â”€ templates.json
-â”‚
-â”œâ”€â”€ Documentation/
-â”‚   â”œâ”€â”€ Architecture/
-â”‚   â”œâ”€â”€ Development/
-â”‚   â”œâ”€â”€ Diagrams/
-â”‚   â”œâ”€â”€ References/
-â”‚   â”œâ”€â”€ Requirements/
-â”‚   â””â”€â”€ Roadmap/
-â”‚
-â”œâ”€â”€ .gitignore
-â”œâ”€â”€ CHANGELOG.md
-â”œâ”€â”€ CareerOS.Bootstrap.sln
-â”œâ”€â”€ LICENSE
-â””â”€â”€ README.md
+│
+├── .github/
+│   └── copilot-instructions.md
+│
+├── CareerOS.Bootstrap/
+│   ├── Models/
+│   │   ├── BootstrapConfiguration.cs
+│   │   ├── DirectoryNode.cs
+│   │   ├── ProfileConfiguration.cs
+│   │   └── TemplateConfiguration.cs
+│   │
+│   ├── Services/
+│   │   ├── DirectoryPlanService.cs
+│   │   ├── JsonConfigurationService.cs
+│   │   ├── PathService.cs
+│   │   └── TemplateResolverService.cs
+│   │
+│   ├── CareerOS.Bootstrap.csproj
+│   └── Program.cs
+│
+├── Configuration/
+│   ├── bootstrap.json
+│   └── templates.json
+│
+├── Documentation/
+│   ├── Architecture/
+│   ├── Development/
+│   ├── Diagrams/
+│   ├── References/
+│   ├── Requirements/
+│   └── Roadmap/
+│
+├── .gitignore
+├── CHANGELOG.md
+├── CareerOS.Bootstrap.sln
+├── LICENSE
+└── README.md
 ```
 
 The documentation hierarchy is currently being established on the `docs/documentation-v1` branch.
@@ -342,7 +342,7 @@ Current structure:
 
 ```text
 BootstrapConfiguration
-â””â”€â”€ Profiles[]
+└── Profiles[]
 ```
 
 ---
@@ -363,9 +363,9 @@ Conceptually:
 
 ```text
 Profile
-â”œâ”€â”€ Name
-â”œâ”€â”€ Destination Directory Name
-â””â”€â”€ Assigned Template Name
+├── Name
+├── Destination Directory Name
+└── Assigned Template Name
 ```
 
 The profile does not contain its own duplicated directory tree.
@@ -386,7 +386,7 @@ Current structure:
 
 ```text
 TemplateConfiguration
-â””â”€â”€ Templates[]
+└── Templates[]
 ```
 
 The same source file also currently defines:
@@ -425,10 +425,10 @@ The model is recursive:
 
 ```text
 DirectoryNode
-â””â”€â”€ Children[]
-    â””â”€â”€ DirectoryNode
-        â””â”€â”€ Children[]
-            â””â”€â”€ DirectoryNode
+└── Children[]
+    └── DirectoryNode
+        └── Children[]
+            └── DirectoryNode
 ```
 
 No fixed nesting depth is imposed by the model itself.
@@ -474,9 +474,9 @@ Example:
 
 ```text
 Resume
-â”œâ”€â”€ Master
-â”œâ”€â”€ RC
-â””â”€â”€ Archived
+├── Master
+├── RC
+└── Archived
 ```
 
 This structure verifies recursive `DirectoryNode.Children` processing.
@@ -495,9 +495,9 @@ Conceptually:
 
 ```text
 Repository Root
-â””â”€â”€ _Preview
-    â”œâ”€â”€ CareerOS_Chris
-    â””â”€â”€ CareerOS_Katie
+└── _Preview
+    ├── CareerOS_Chris
+    └── CareerOS_Katie
 ```
 
 This path is used only to construct readable planned paths.

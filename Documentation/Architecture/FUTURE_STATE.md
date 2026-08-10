@@ -1,4 +1,4 @@
-﻿# CareerOS.Bootstrap --- Future State
+# CareerOS.Bootstrap --- Future State
 
 ## Purpose
 
@@ -23,7 +23,7 @@ capable of creating and maintaining standardized CareerOS environments.
 
 The target lifecycle is:
 
-``` text
+```text
 Input
   |
   v
@@ -100,7 +100,7 @@ separated sufficiently to support focused automated testing.
 
 ## Target High-Level Architecture
 
-``` mermaid
+```mermaid
 flowchart TD
     A[User / Automation] --> B[Command-Line Interface]
     B --> C[Application Orchestrator]
@@ -136,7 +136,7 @@ application options.
 
 Potential capabilities include:
 
-``` text
+```text
 --dry-run
 --profile
 --root
@@ -159,7 +159,7 @@ execution mode, provisioning, reporting, and exit-code mapping.
 
 Conceptually:
 
-``` text
+```text
 Program.Main
     |
     v
@@ -214,7 +214,7 @@ provisioning is permitted.
 
 A future validation result may conceptually contain:
 
-``` text
+```text
 Severity
 Code
 Message
@@ -233,19 +233,19 @@ directory paths.
 
 Future planning may evolve toward a richer plan model:
 
-``` text
+```text
 ProvisioningPlan
-â””â”€â”€ Actions[]
-    â”œâ”€â”€ TargetPath
-    â”œâ”€â”€ ActionType
-    â”œâ”€â”€ CurrentState
-    â”œâ”€â”€ DesiredState
-    â””â”€â”€ Reason
+└── Actions[]
+    ├── TargetPath
+    ├── ActionType
+    ├── CurrentState
+    ├── DesiredState
+    └── Reason
 ```
 
 Possible action types could include:
 
-``` text
+```text
 Create
 Exists
 Skip
@@ -266,7 +266,7 @@ changes.
 
 Conceptually:
 
-``` text
+```text
 DirectoryProvisioningService
 ```
 
@@ -290,7 +290,7 @@ uses. It should operate on a plan produced earlier in the workflow.
 Before creating anything, future provisioning should determine what
 already exists.
 
-``` text
+```text
 Desired: CareerOS\User\Resume
 Current: Missing
 Result:  Create
@@ -313,7 +313,7 @@ true command-line execution mode.
 
 Future behavior should support an explicit option such as:
 
-``` powershell
+```powershell
 CareerOS.Bootstrap --dry-run
 ```
 
@@ -336,7 +336,7 @@ a hard-coded machine-specific location.
 
 Potential precedence may eventually be:
 
-``` text
+```text
 Command-line override
         |
         v
@@ -376,7 +376,7 @@ than relying solely on exception messages.
 
 Potential categories include:
 
-``` text
+```text
 Configuration Error
 Validation Error
 Path Error
@@ -395,13 +395,13 @@ CI usage. The taxonomy is not yet finalized.
 
 A dedicated automated test project is planned:
 
-``` text
+```text
 CareerOS.Bootstrap.Tests
 ```
 
 Expected initial coverage includes:
 
-``` text
+```text
 TemplateResolverServiceTests
 DirectoryPlanServiceTests
 JsonConfigurationServiceTests
@@ -410,7 +410,7 @@ PathServiceTests
 
 Future provisioning will require additional tests such as:
 
-``` text
+```text
 DirectoryProvisioningServiceTests
 ConfigurationValidationServiceTests
 ApplicationWorkflowTests
@@ -422,7 +422,7 @@ temporary directories rather than real CareerOS environments.
 
 A typical filesystem test lifecycle should be:
 
-``` text
+```text
 Create isolated temporary test root
         |
         v
@@ -448,7 +448,7 @@ Remove temporary test root
 Future requirements documentation should connect business intent to
 implementation.
 
-``` text
+```text
 Business Need
       |
       v
@@ -472,7 +472,7 @@ Acceptance Result
 
 Stable identifiers should include:
 
-``` text
+```text
 US-###
 FR-###
 NFR-###
@@ -508,7 +508,7 @@ GitHub-based continuous integration is planned.
 
 A future workflow may perform:
 
-``` text
+```text
 Checkout
    |
    v
@@ -543,7 +543,7 @@ users to run from source.
 
 Potential lifecycle:
 
-``` text
+```text
 Source
   |
   v
@@ -578,7 +578,7 @@ tested and supported.
 As configuration evolves, future JSON schemas may require version
 information:
 
-``` json
+```json
 {
   "schemaVersion": 1
 }
@@ -620,7 +620,7 @@ modify an existing repository.
 
 ## Future Application Flow
 
-``` mermaid
+```mermaid
 sequenceDiagram
     actor User
     participant CLI
@@ -666,7 +666,7 @@ implementation decisions are made.
 
 Potential future components include:
 
-``` text
+```text
 ApplicationRunner
 CommandLineOptions
 ConfigurationValidationService
@@ -767,7 +767,7 @@ A mature initial provisioning feature should demonstrate:
 
 Preferred sequence:
 
-``` text
+```text
 Documentation Foundation
         |
         v
@@ -804,7 +804,7 @@ This sequence may change when requirements justify a different priority.
 The future architecture builds directly on existing components rather
 than discarding the current foundation.
 
-``` text
+```text
 CURRENT
 PathService
 JsonConfigurationService
@@ -839,7 +839,7 @@ declared CareerOS structure to verified filesystem state.
 
 The intended future lifecycle is:
 
-``` text
+```text
 Declare
   |
   v

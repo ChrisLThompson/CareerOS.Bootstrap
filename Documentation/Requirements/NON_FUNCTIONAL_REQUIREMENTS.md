@@ -1,4 +1,4 @@
-﻿# CareerOS.Bootstrap --- Non-Functional Requirements
+# CareerOS.Bootstrap --- Non-Functional Requirements
 
 ## Purpose
 
@@ -519,7 +519,7 @@ quality attributes relevant to the planned bootstrap architecture.
 
 Substantially implemented or established today:
 
-``` text
+```text
 NFR-001
 NFR-009
 NFR-011
@@ -533,7 +533,7 @@ NFR-035
 
 Partially implemented, process-based, or currently being established:
 
-``` text
+```text
 NFR-006
 NFR-008
 NFR-013
@@ -561,8 +561,8 @@ capabilities.
 Non-functional requirements constrain multiple functional capabilities.
 For example:
 
-``` text
-FR-023 â€” Create Missing Directories
+```text
+FR-023 — Create Missing Directories
             |
             +--> NFR-002 Preserve Existing Content
             +--> NFR-004 Validate Before Modification
@@ -575,8 +575,8 @@ FR-023 â€” Create Missing Directories
 
 And:
 
-``` text
-FR-036 â€” Record Execution Logs
+```text
+FR-036 — Record Execution Logs
             |
             +--> NFR-023 Diagnostic Logging
             +--> NFR-025 Sensitive Data Minimization
@@ -592,7 +592,7 @@ non-functional requirements, components, and tests belongs in
 
 Verification mechanisms may include:
 
-``` text
+```text
 Documentation Review
 Code Review
 Static Inspection
@@ -634,7 +634,7 @@ boundaries around its functional behavior.
 
 The central quality progression is:
 
-``` text
+```text
 Safety
   |
   v

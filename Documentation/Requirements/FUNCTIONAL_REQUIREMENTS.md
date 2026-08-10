@@ -1,4 +1,4 @@
-﻿# CareerOS.Bootstrap â€” Functional Requirements
+# CareerOS.Bootstrap — Functional Requirements
 
 ## Purpose
 
@@ -25,17 +25,17 @@ TRACEABILITY.md
 Functional requirements use stable identifiers:
 
 ```text
-FR-### â€” Requirement Title
+FR-### — Requirement Title
 ```
 
 Each requirement includes:
 
-- **Status** â€” Implemented, Partially Implemented, Planned, or Future
-- **Priority** â€” High, Medium, or Low
-- **Source Stories** â€” User stories that establish the need
-- **Requirement** â€” Testable system behavior
-- **Acceptance Criteria** â€” Conditions required for satisfaction
-- **Notes / Current State** â€” Current implementation context where appropriate
+- **Status** — Implemented, Partially Implemented, Planned, or Future
+- **Priority** — High, Medium, or Low
+- **Source Stories** — User stories that establish the need
+- **Requirement** — Testable system behavior
+- **Acceptance Criteria** — Conditions required for satisfaction
+- **Notes / Current State** — Current implementation context where appropriate
 
 A requirement may support more than one user story, and a user story may require more than one functional requirement.
 
@@ -43,7 +43,7 @@ A requirement may support more than one user story, and a user story may require
 
 # Configuration and Profile Requirements
 
-## FR-001 â€” Load Profile Configuration
+## FR-001 — Load Profile Configuration
 
 **Status:** Implemented
 **Priority:** High
@@ -67,7 +67,7 @@ Implemented through `JsonConfigurationService`, `BootstrapConfiguration`, `Profi
 
 ---
 
-## FR-002 â€” Load Template Configuration
+## FR-002 — Load Template Configuration
 
 **Status:** Implemented
 **Priority:** High
@@ -91,7 +91,7 @@ Implemented through `JsonConfigurationService`, `TemplateConfiguration`, `Career
 
 ---
 
-## FR-003 â€” Support Multiple Profiles
+## FR-003 — Support Multiple Profiles
 
 **Status:** Implemented
 **Priority:** High
@@ -110,7 +110,7 @@ The application shall support processing multiple CareerOS profiles from one pro
 
 ---
 
-## FR-004 â€” Associate a Profile With a Template
+## FR-004 — Associate a Profile With a Template
 
 **Status:** Implemented
 **Priority:** High
@@ -129,7 +129,7 @@ Each CareerOS profile shall be able to reference a reusable template by name.
 
 ---
 
-## FR-005 â€” Resolve Templates Case-Insensitively
+## FR-005 — Resolve Templates Case-Insensitively
 
 **Status:** Implemented
 **Priority:** Medium
@@ -151,7 +151,7 @@ Implemented with ordinal case-insensitive comparison in `TemplateResolverService
 
 ---
 
-## FR-006 â€” Support Recursive Directory Definitions
+## FR-006 — Support Recursive Directory Definitions
 
 **Status:** Implemented
 **Priority:** High
@@ -176,7 +176,7 @@ Implemented through `DirectoryNode.Children` and recursive traversal in `Directo
 
 # Path Discovery and Destination Requirements
 
-## FR-007 â€” Discover Repository Root Dynamically
+## FR-007 — Discover Repository Root Dynamically
 
 **Status:** Implemented
 **Priority:** High
@@ -199,7 +199,7 @@ Implemented in `PathService` by walking parent directories until `CareerOS.Boots
 
 ---
 
-## FR-008 â€” Discover Configuration Directory From Repository Root
+## FR-008 — Discover Configuration Directory From Repository Root
 
 **Status:** Implemented
 **Priority:** High
@@ -217,7 +217,7 @@ The application shall derive the repository-level configuration directory from t
 
 ---
 
-## FR-009 â€” Configure CareerOS Destination Root
+## FR-009 — Configure CareerOS Destination Root
 
 **Status:** Planned
 **Priority:** High
@@ -237,7 +237,7 @@ The application shall allow the target CareerOS root directory to be supplied th
 
 ---
 
-## FR-010 â€” Override Destination Root From Command Line
+## FR-010 — Override Destination Root From Command Line
 
 **Status:** Future
 **Priority:** Medium
@@ -258,7 +258,7 @@ The application should support a command-line destination-root override when a C
 
 # Planning and Preview Requirements
 
-## FR-011 â€” Generate a Directory Plan for Each Processed Profile
+## FR-011 — Generate a Directory Plan for Each Processed Profile
 
 **Status:** Implemented
 **Priority:** High
@@ -278,7 +278,7 @@ The application shall generate a complete planned directory path collection for 
 
 ---
 
-## FR-012 â€” Traverse Nested Directory Nodes Recursively
+## FR-012 — Traverse Nested Directory Nodes Recursively
 
 **Status:** Implemented
 **Priority:** High
@@ -297,7 +297,7 @@ The directory planning process shall recursively traverse all child directory no
 
 ---
 
-## FR-013 â€” Display Planned Directory Paths
+## FR-013 — Display Planned Directory Paths
 
 **Status:** Implemented
 **Priority:** High
@@ -316,7 +316,7 @@ The application shall display planned directory paths to the user during the cur
 
 ---
 
-## FR-014 â€” Perform No Filesystem Writes During Current Preview
+## FR-014 — Perform No Filesystem Writes During Current Preview
 
 **Status:** Implemented
 **Priority:** High
@@ -335,7 +335,7 @@ The current preview workflow shall not create, modify, rename, or delete CareerO
 
 ---
 
-## FR-015 â€” Support Explicit Dry-Run Execution Mode
+## FR-015 — Support Explicit Dry-Run Execution Mode
 
 **Status:** Planned / Partially Implemented
 **Priority:** High
@@ -357,7 +357,7 @@ Once provisioning exists, the application shall provide an explicit dry-run mode
 
 # Validation Requirements
 
-## FR-016 â€” Validate Required Configuration Files
+## FR-016 — Validate Required Configuration Files
 
 **Status:** Implemented
 **Priority:** High
@@ -376,7 +376,7 @@ The application shall verify that required configuration files exist before atte
 
 ---
 
-## FR-017 â€” Validate Required Planning Inputs
+## FR-017 — Validate Required Planning Inputs
 
 **Status:** Partially Implemented
 **Priority:** High
@@ -403,7 +403,7 @@ Several of these checks are already implemented within existing services. A cent
 
 ---
 
-## FR-018 â€” Reject Unknown Template References
+## FR-018 — Reject Unknown Template References
 
 **Status:** Implemented
 **Priority:** High
@@ -421,7 +421,7 @@ The application shall reject a profile that references a template that cannot be
 
 ---
 
-## FR-019 â€” Perform Comprehensive Configuration Validation Before Provisioning
+## FR-019 — Perform Comprehensive Configuration Validation Before Provisioning
 
 **Status:** Planned
 **Priority:** High
@@ -451,7 +451,7 @@ Provisioning shall not begin when blocking validation errors exist.
 
 ---
 
-## FR-020 â€” Return Structured Validation Results
+## FR-020 — Return Structured Validation Results
 
 **Status:** Future
 **Priority:** Medium
@@ -475,7 +475,7 @@ Each result should be capable of representing:
 
 # Provisioning and Filesystem Requirements
 
-## FR-021 â€” Inspect Existing Directory State Before Creation
+## FR-021 — Inspect Existing Directory State Before Creation
 
 **Status:** Planned
 **Priority:** High
@@ -493,7 +493,7 @@ Before creating a planned directory, provision mode shall determine whether that
 
 ---
 
-## FR-022 â€” Preserve Existing Valid Directories
+## FR-022 — Preserve Existing Valid Directories
 
 **Status:** Planned
 **Priority:** High
@@ -512,7 +512,7 @@ Provision mode shall preserve expected directories that already exist.
 
 ---
 
-## FR-023 â€” Create Missing Planned Directories
+## FR-023 — Create Missing Planned Directories
 
 **Status:** Planned
 **Priority:** High
@@ -531,7 +531,7 @@ Provision mode shall create expected directories that are missing from the targe
 
 ---
 
-## FR-024 â€” Support Idempotent Repeat Provisioning
+## FR-024 — Support Idempotent Repeat Provisioning
 
 **Status:** Planned
 **Priority:** High
@@ -551,7 +551,7 @@ Provisioning shall be safe to execute repeatedly against the same valid configur
 
 ---
 
-## FR-025 â€” Do Not Automatically Delete Removed Configuration Directories
+## FR-025 — Do Not Automatically Delete Removed Configuration Directories
 
 **Status:** Planned Safety Requirement
 **Priority:** High
@@ -569,7 +569,7 @@ Normal provisioning shall not automatically delete a physical directory merely b
 
 ---
 
-## FR-026 â€” Use a Shared Validated Plan for Preview and Provisioning
+## FR-026 — Use a Shared Validated Plan for Preview and Provisioning
 
 **Status:** Future
 **Priority:** High
@@ -589,7 +589,7 @@ Dry-run and real provisioning should consume the same validated provisioning-pla
 
 # Profile and Execution Selection Requirements
 
-## FR-027 â€” Process a Specific Profile on Request
+## FR-027 — Process a Specific Profile on Request
 
 **Status:** Planned
 **Priority:** Medium
@@ -608,7 +608,7 @@ The application shall provide a supported way to limit execution to a selected c
 
 ---
 
-## FR-028 â€” Support Controlled Template Override
+## FR-028 — Support Controlled Template Override
 
 **Status:** Future
 **Priority:** Low
@@ -627,7 +627,7 @@ The application may support an explicit temporary template override for a select
 
 ---
 
-## FR-029 â€” Provide Help Information
+## FR-029 — Provide Help Information
 
 **Status:** Planned
 **Priority:** Medium
@@ -645,7 +645,7 @@ Once command-line options exist, the application shall provide built-in usage gu
 
 ---
 
-## FR-030 â€” Provide Version Information
+## FR-030 — Provide Version Information
 
 **Status:** Planned
 **Priority:** Medium
@@ -665,7 +665,7 @@ The application shall provide a supported way to identify the version being exec
 
 # Reporting and Error Requirements
 
-## FR-031 â€” Display Execution Context
+## FR-031 — Display Execution Context
 
 **Status:** Partially Implemented
 **Priority:** High
@@ -691,7 +691,7 @@ Current output identifies dry-run behavior, profile, template, repository/config
 
 ---
 
-## FR-032 â€” Produce an Execution Summary
+## FR-032 — Produce an Execution Summary
 
 **Status:** Planned / Partially Implemented
 **Priority:** High
@@ -717,7 +717,7 @@ Dry-run summaries shall explicitly state that no provisioning changes were made.
 
 ---
 
-## FR-033 â€” Distinguish Action Statuses
+## FR-033 — Distinguish Action Statuses
 
 **Status:** Planned
 **Priority:** High
@@ -736,7 +736,7 @@ The application shall distinguish the status of relevant planned and executed di
 
 ---
 
-## FR-034 â€” Return Success and Failure Process Exit Codes
+## FR-034 — Return Success and Failure Process Exit Codes
 
 **Status:** Implemented / Future Expansion Planned
 **Priority:** High
@@ -759,7 +759,7 @@ Future expansion may add category-specific nonzero exit codes, but `0` shall rem
 
 ---
 
-## FR-035 â€” Display Actionable Failure Information
+## FR-035 — Display Actionable Failure Information
 
 **Status:** Partially Implemented
 **Priority:** High
@@ -779,7 +779,7 @@ When execution fails, the application shall provide information sufficient to id
 
 ---
 
-## FR-036 â€” Record Execution Logs
+## FR-036 — Record Execution Logs
 
 **Status:** Planned
 **Priority:** Medium
@@ -810,7 +810,7 @@ Log content shall comply with non-functional security and privacy requirements.
 
 # Documentation, Traceability, and Lifecycle Requirements
 
-## FR-037 â€” Maintain Current-State Documentation
+## FR-037 — Maintain Current-State Documentation
 
 **Status:** Implemented / In Progress
 **Priority:** High
@@ -829,7 +829,7 @@ The repository shall maintain documentation that distinguishes currently impleme
 
 ---
 
-## FR-038 â€” Maintain Future-State Documentation
+## FR-038 — Maintain Future-State Documentation
 
 **Status:** Implemented / In Progress
 **Priority:** High
@@ -848,7 +848,7 @@ The repository shall maintain future-state architecture documentation separately
 
 ---
 
-## FR-039 â€” Maintain Requirements Traceability
+## FR-039 — Maintain Requirements Traceability
 
 **Status:** Planned / Documentation In Progress
 **Priority:** High
@@ -869,7 +869,7 @@ The project shall maintain traceability among user stories, functional/non-funct
 
 ---
 
-## FR-040 â€” Record Significant Architecture Decisions
+## FR-040 — Record Significant Architecture Decisions
 
 **Status:** Planned
 **Priority:** Medium
@@ -896,7 +896,7 @@ Superseded ADRs should remain available as historical records.
 
 # Testing, CI, and Release Requirements
 
-## FR-041 â€” Provide Automated Unit Tests for Core Services
+## FR-041 — Provide Automated Unit Tests for Core Services
 
 **Status:** Planned
 **Priority:** High
@@ -920,7 +920,7 @@ Initial automated tests shall cover, at minimum:
 
 ---
 
-## FR-042 â€” Provide Filesystem Integration Tests
+## FR-042 — Provide Filesystem Integration Tests
 
 **Status:** Planned
 **Priority:** High
@@ -940,7 +940,7 @@ Filesystem provisioning behavior shall be validated using automated integration 
 
 ---
 
-## FR-043 â€” Validate Proposed Changes Before Merge
+## FR-043 — Validate Proposed Changes Before Merge
 
 **Status:** Partially Implemented
 **Priority:** High
@@ -960,7 +960,7 @@ Significant project changes shall be developed and validated outside the stable 
 
 ---
 
-## FR-044 â€” Automatically Build and Test Pull Requests
+## FR-044 — Automatically Build and Test Pull Requests
 
 **Status:** Planned
 **Priority:** Medium
@@ -986,7 +986,7 @@ CI failure shall be visible to maintainers reviewing the proposed change.
 
 ---
 
-## FR-045 â€” Produce Versioned Release Artifacts
+## FR-045 — Produce Versioned Release Artifacts
 
 **Status:** Future
 **Priority:** Medium
@@ -1007,7 +1007,7 @@ The project should produce documented, versioned application artifacts that can 
 
 # Optional Git Integration Requirements
 
-## FR-046 â€” Detect Existing Git Repository Before Optional Initialization
+## FR-046 — Detect Existing Git Repository Before Optional Initialization
 
 **Status:** Future
 **Priority:** Low
@@ -1026,7 +1026,7 @@ If optional Git initialization is introduced for generated development areas, th
 
 ---
 
-## FR-047 â€” Initialize Git Only With Explicit User Intent
+## FR-047 — Initialize Git Only With Explicit User Intent
 
 **Status:** Future
 **Priority:** Low

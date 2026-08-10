@@ -1,10 +1,10 @@
-﻿# CareerOS.Bootstrap â€” Requirements Traceability
+# CareerOS.Bootstrap — Requirements Traceability
 
 ## Purpose
 
 This document maps the relationships among CareerOS.Bootstrap user stories, functional requirements, non-functional requirements, architecture/components, implementation state, and planned verification.
 
-It is the projectâ€™s central requirements traceability matrix and is intended to evolve as implementation and automated testing mature.
+It is the project’s central requirements traceability matrix and is intended to evolve as implementation and automated testing mature.
 
 Traceability uses stable identifiers:
 
@@ -103,24 +103,24 @@ The following matrix records the expected verification mechanism at the current 
 
 | FR Range | Area | Current Verification | Target Verification |
 |---|---|---|---|
-| FR-001â€“FR-006 | Configuration, profiles, templates | Manual runtime/code review | Unit tests |
-| FR-007â€“FR-008 | Repository/configuration discovery | Manual runtime | Unit tests where practical + CI runtime/build validation |
-| FR-009â€“FR-010 | Destination root | Not implemented | Unit tests + integration validation |
-| FR-011â€“FR-014 | Recursive planning / preview | Manual runtime | Unit tests + dry-run no-write tests |
+| FR-001–FR-006 | Configuration, profiles, templates | Manual runtime/code review | Unit tests |
+| FR-007–FR-008 | Repository/configuration discovery | Manual runtime | Unit tests where practical + CI runtime/build validation |
+| FR-009–FR-010 | Destination root | Not implemented | Unit tests + integration validation |
+| FR-011–FR-014 | Recursive planning / preview | Manual runtime | Unit tests + dry-run no-write tests |
 | FR-015 | Explicit dry-run | Partial manual behavior | Unit + integration tests |
-| FR-016â€“FR-018 | Existing validation behavior | Manual negative tests / code review | Unit tests |
-| FR-019â€“FR-020 | Comprehensive structured validation | Not implemented | Unit tests + integration workflow tests |
-| FR-021â€“FR-026 | Filesystem provisioning | Not implemented | Isolated filesystem integration tests; selected unit tests |
-| FR-027â€“FR-030 | CLI/profile/help/version | Not implemented | CLI/unit/integration tests |
-| FR-031â€“FR-035 | Reporting/errors/exit codes | Manual runtime | Unit/integration tests |
+| FR-016–FR-018 | Existing validation behavior | Manual negative tests / code review | Unit tests |
+| FR-019–FR-020 | Comprehensive structured validation | Not implemented | Unit tests + integration workflow tests |
+| FR-021–FR-026 | Filesystem provisioning | Not implemented | Isolated filesystem integration tests; selected unit tests |
+| FR-027–FR-030 | CLI/profile/help/version | Not implemented | CLI/unit/integration tests |
+| FR-031–FR-035 | Reporting/errors/exit codes | Manual runtime | Unit/integration tests |
 | FR-036 | Logging | Not implemented | Unit/integration tests |
-| FR-037â€“FR-040 | Documentation/traceability/ADRs | Documentation review | Documentation review + PR review |
+| FR-037–FR-040 | Documentation/traceability/ADRs | Documentation review | Documentation review + PR review |
 | FR-041 | Unit-test foundation | Not implemented | Test runner / CI |
 | FR-042 | Filesystem integration tests | Not implemented | Test runner / CI |
 | FR-043 | Pre-merge validation | Manual branch/build process | PR checks + CI |
 | FR-044 | GitHub CI | Not implemented | GitHub Actions |
 | FR-045 | Versioned releases | Not implemented | Release pipeline validation |
-| FR-046â€“FR-047 | Optional Git integration | Not implemented | Unit/integration tests with isolated repositories |
+| FR-046–FR-047 | Optional Git integration | Not implemented | Unit/integration tests with isolated repositories |
 
 ---
 
@@ -128,17 +128,17 @@ The following matrix records the expected verification mechanism at the current 
 
 | NFR Range | Quality Area | Current Verification | Target Verification |
 |---|---|---|---|
-| NFR-001â€“NFR-004 | Safety / data preservation | Manual review/runtime for preview | Automated dry-run + filesystem safety tests |
-| NFR-005â€“NFR-007 | Reliability / idempotency | Not implemented beyond exit behavior | Repeated-run integration tests + result assertions |
-| NFR-008â€“NFR-010 | Configuration integrity | Manual negative behavior / documentation | Validation unit tests + schema tests |
-| NFR-011â€“NFR-013 | Portability / compatibility | Manual relocation assumptions + documentation | Build/runtime matrix where supported |
-| NFR-014â€“NFR-017 | Maintainability / architecture/docs | Code and documentation review | PR review + ADR/documentation governance |
-| NFR-018â€“NFR-020 | Testability / quality lifecycle | Architecture/process only | Automated tests + CI + protected merge workflow |
-| NFR-021â€“NFR-023 | Observability / diagnostics | Manual console review | Output/result/log tests |
-| NFR-024â€“NFR-027 | Security / privacy / Git safety | Configuration/code review | Security-focused validation + isolated Git tests |
-| NFR-028â€“NFR-031 | Performance / usability / safe defaults | Manual interactive use | Regression checks; targeted automated tests |
-| NFR-032â€“NFR-034 | Compatibility / release / build quality | Documentation + manual build | CI and release validation |
-| NFR-035â€“NFR-036 | Traceability / verifiability | Documentation review | PR/documentation/test traceability review |
+| NFR-001–NFR-004 | Safety / data preservation | Manual review/runtime for preview | Automated dry-run + filesystem safety tests |
+| NFR-005–NFR-007 | Reliability / idempotency | Not implemented beyond exit behavior | Repeated-run integration tests + result assertions |
+| NFR-008–NFR-010 | Configuration integrity | Manual negative behavior / documentation | Validation unit tests + schema tests |
+| NFR-011–NFR-013 | Portability / compatibility | Manual relocation assumptions + documentation | Build/runtime matrix where supported |
+| NFR-014–NFR-017 | Maintainability / architecture/docs | Code and documentation review | PR review + ADR/documentation governance |
+| NFR-018–NFR-020 | Testability / quality lifecycle | Architecture/process only | Automated tests + CI + protected merge workflow |
+| NFR-021–NFR-023 | Observability / diagnostics | Manual console review | Output/result/log tests |
+| NFR-024–NFR-027 | Security / privacy / Git safety | Configuration/code review | Security-focused validation + isolated Git tests |
+| NFR-028–NFR-031 | Performance / usability / safe defaults | Manual interactive use | Regression checks; targeted automated tests |
+| NFR-032–NFR-034 | Compatibility / release / build quality | Documentation + manual build | CI and release validation |
+| NFR-035–NFR-036 | Traceability / verifiability | Documentation review | PR/documentation/test traceability review |
 
 ---
 
@@ -238,9 +238,9 @@ Future components should be added only when implemented or when clearly labeled 
 | `FUTURE_STATE.md` | US-025; FR-038; NFR-017 |
 | `COMPONENTS.md` | US-024, US-025; FR-037, FR-038; NFR-014 |
 | `DATA_FLOW.md` | US-024, US-025; FR-037, FR-038; NFR-015 |
-| `USER_STORIES.md` | US-001â€“US-030; FR-039; NFR-035, NFR-036 |
-| `FUNCTIONAL_REQUIREMENTS.md` | FR-001â€“FR-047; US-026; NFR-035, NFR-036 |
-| `NON_FUNCTIONAL_REQUIREMENTS.md` | NFR-001â€“NFR-036; US-026; FR-039 |
+| `USER_STORIES.md` | US-001–US-030; FR-039; NFR-035, NFR-036 |
+| `FUNCTIONAL_REQUIREMENTS.md` | FR-001–FR-047; US-026; NFR-035, NFR-036 |
+| `NON_FUNCTIONAL_REQUIREMENTS.md` | NFR-001–NFR-036; US-026; FR-039 |
 | `TRACEABILITY.md` | US-026; FR-039; NFR-035, NFR-036 |
 
 ---

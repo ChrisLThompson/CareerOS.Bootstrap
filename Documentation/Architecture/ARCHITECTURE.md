@@ -1,4 +1,4 @@
-﻿# CareerOS.Bootstrap Architecture
+# CareerOS.Bootstrap Architecture
 
 ## Purpose
 
@@ -78,8 +78,8 @@ Current configuration files:
 
 ```text
 Configuration/
-â”œâ”€â”€ bootstrap.json
-â””â”€â”€ templates.json
+├── bootstrap.json
+└── templates.json
 ```
 
 `bootstrap.json` defines **who** is being provisioned.
@@ -170,9 +170,9 @@ The architecture therefore uses a recursive model:
 
 ```text
 DirectoryNode
-â”œâ”€â”€ Name
-â””â”€â”€ Children[]
-    â””â”€â”€ DirectoryNode
+├── Name
+└── Children[]
+    └── DirectoryNode
 ```
 
 This allows deeply nested structures without requiring new application code for each level.
@@ -467,8 +467,8 @@ Planned ADR directory:
 
 ```text
 Documentation/
-â””â”€â”€ Architecture/
-    â””â”€â”€ Decisions/
+└── Architecture/
+    └── Decisions/
 ```
 
 Example ADRs:

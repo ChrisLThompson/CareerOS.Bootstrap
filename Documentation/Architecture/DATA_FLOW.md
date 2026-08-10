@@ -1,4 +1,4 @@
-﻿# CareerOS.Bootstrap --- Data Flow
+# CareerOS.Bootstrap --- Data Flow
 
 ------------------------------------------------------------------------
 
@@ -25,10 +25,10 @@ is not mistaken for implemented functionality.
 The current application uses two repository-level JSON configuration
 files:
 
-``` text
+```text
 Configuration/
-â”œâ”€â”€ bootstrap.json
-â””â”€â”€ templates.json
+├── bootstrap.json
+└── templates.json
 ```
 
 `bootstrap.json` provides profile configuration.
@@ -42,7 +42,7 @@ workflow.
 
 ## Current End-to-End Flow
 
-``` mermaid
+```mermaid
 flowchart TD
     A[Program.Main] --> B[PathService]
     B --> C[Repository Root]
@@ -82,19 +82,19 @@ Execution begins in `Program.Main()`.
 `PathService` discovers the repository root by walking upward from the
 application's runtime location until it finds:
 
-``` text
+```text
 CareerOS.Bootstrap.sln
 ```
 
 From the repository root, the application determines the location of:
 
-``` text
+```text
 Configuration/
 ```
 
 Conceptually:
 
-``` text
+```text
 AppContext.BaseDirectory
         |
         v
@@ -119,7 +119,7 @@ hard-coded drive letter, Windows username, or absolute repository path.
 
 The discovered configuration directory provides the paths to:
 
-``` text
+```text
 bootstrap.json
 templates.json
 ```
@@ -129,7 +129,7 @@ strongly typed C# models.
 
 ### Profile flow
 
-``` text
+```text
 bootstrap.json
       |
       v
@@ -147,7 +147,7 @@ ProfileConfiguration
 
 A profile currently provides:
 
-``` text
+```text
 Name
 Directory
 Template
@@ -155,7 +155,7 @@ Template
 
 ### Template flow
 
-``` text
+```text
 templates.json
       |
       v
@@ -185,7 +185,7 @@ Each profile contains a template name.
 
 Conceptually:
 
-``` text
+```text
 ProfileConfiguration.Template
             |
             v
@@ -201,7 +201,7 @@ Template matching is currently case-insensitive.
 
 Example relationship:
 
-``` text
+```text
 Chris
   |
   +--> CareerProfessional
@@ -225,29 +225,29 @@ A resolved `CareerTemplate` contains top-level directory nodes.
 
 Each `DirectoryNode` can contain child nodes:
 
-``` text
+```text
 DirectoryNode
-â”œâ”€â”€ Name
-â””â”€â”€ Children[]
-    â””â”€â”€ DirectoryNode
+├── Name
+└── Children[]
+    └── DirectoryNode
 ```
 
 This creates a recursive tree.
 
 Example:
 
-``` text
+```text
 Resume
-â”œâ”€â”€ Master
-â”œâ”€â”€ RC
-â””â”€â”€ Archived
+├── Master
+├── RC
+└── Archived
 ```
 
 `DirectoryPlanService` walks this structure recursively.
 
 Conceptually:
 
-``` text
+```text
 CareerTemplate
       |
       v
@@ -283,7 +283,7 @@ It combines these inputs into planned directory paths.
 
 Conceptually:
 
-``` text
+```text
 Base Preview Path
         +
 Profile Directory
@@ -296,7 +296,7 @@ Planned Directory Path
 
 For nested nodes:
 
-``` text
+```text
 Parent Planned Path
         +
 Child DirectoryNode.Name
@@ -317,11 +317,11 @@ path planning.
 
 Conceptually:
 
-``` text
+```text
 Repository Root
-â””â”€â”€ _Preview
-    â””â”€â”€ Profile Directory
-        â””â”€â”€ Planned Template Structure
+└── _Preview
+    └── Profile Directory
+        └── Planned Template Structure
 ```
 
 The `_Preview` tree is not created on disk by the current planning
@@ -329,7 +329,7 @@ workflow.
 
 The important current boundary is:
 
-``` text
+```text
 Configuration
      |
      v
@@ -363,7 +363,7 @@ service.
 The generated directory paths return to the orchestration layer and are
 displayed to the console.
 
-``` text
+```text
 DirectoryPlanService
         |
         v
@@ -387,7 +387,7 @@ The console is currently the terminal consumer of planning data.
 
 Errors can originate from several stages:
 
-``` text
+```text
 Path Discovery
 Configuration File Access
 JSON Deserialization
@@ -400,7 +400,7 @@ Exceptions that reach the application boundary are handled by
 
 Conceptually:
 
-``` text
+```text
 Component Failure
       |
       v
@@ -425,7 +425,7 @@ pipeline or persistent error logging.
 
 The most important current transformation is:
 
-``` text
+```text
 JSON Text
    |
    v
@@ -454,7 +454,7 @@ in the current data flow.
 The planned architecture extends the existing pipeline rather than
 replacing its core configuration-driven model.
 
-``` mermaid
+```mermaid
 flowchart TD
     A[CLI / User Input] --> B[Execution Request]
     B --> C[Configuration + Environment Resolution]
@@ -494,7 +494,7 @@ is reflected in `CURRENT_STATE.md`.
 
 Future execution may combine several input sources:
 
-``` text
+```text
 Command-Line Options
         |
         +------------------+
@@ -510,7 +510,7 @@ Execution Settings   Configuration Files
 
 Potential inputs may include:
 
-``` text
+```text
 --dry-run
 --profile
 --root
@@ -529,7 +529,7 @@ documented and validated before implementation.
 
 A dedicated validation stage is planned before provisioning.
 
-``` text
+```text
 Configuration Models
         +
 Execution Request
@@ -548,7 +548,7 @@ ConfigurationValidationService
 
 Potential validation results may carry:
 
-``` text
+```text
 Severity
 Code
 Message
@@ -566,19 +566,19 @@ The current planner returns paths.
 
 A future design may represent each intended action explicitly:
 
-``` text
+```text
 ProvisioningPlan
-â””â”€â”€ Actions[]
-    â”œâ”€â”€ TargetPath
-    â”œâ”€â”€ ActionType
-    â”œâ”€â”€ CurrentState
-    â”œâ”€â”€ DesiredState
-    â””â”€â”€ Reason
+└── Actions[]
+    ├── TargetPath
+    ├── ActionType
+    ├── CurrentState
+    ├── DesiredState
+    └── Reason
 ```
 
 This creates an important future relationship:
 
-``` text
+```text
                     +--> Dry-Run Renderer
                     |
 Validated Plan -----+
@@ -599,7 +599,7 @@ application intends to perform.
 Actual provisioning will require comparing desired state with current
 state.
 
-``` text
+```text
 Desired Directory
         |
         v
@@ -625,7 +625,7 @@ Filesystem execution should return structured results.
 
 Conceptually:
 
-``` text
+```text
 ProvisioningPlan
        |
        v
@@ -657,7 +657,7 @@ future automation more reliably than parsing free-form text.
 Logging/reporting should consume application results rather than control
 business behavior.
 
-``` text
+```text
 Validation Results
 Planning Results
 Provisioning Results
@@ -682,7 +682,7 @@ verified filesystem results.
 
 The target architecture should support repeated execution:
 
-``` text
+```text
 Desired State
      |
      v
@@ -713,7 +713,7 @@ boundaries.
 
 ### Unit tests
 
-``` text
+```text
 Controlled Input
       |
       v
@@ -730,7 +730,7 @@ Examples include template resolution and recursive plan generation.
 
 ### Filesystem integration tests
 
-``` text
+```text
 Test Configuration
       |
       v
@@ -798,7 +798,7 @@ The following principles should remain true as the architecture evolves:
 
 ## Current-to-Future Evolution
 
-``` text
+```text
 CURRENT
 
 JSON
@@ -861,7 +861,7 @@ observability stages.
 As requirements documentation is established, significant data flows
 should become traceable to:
 
-``` text
+```text
 User Story
    |
    v
@@ -894,7 +894,7 @@ rather than duplicated in this file.
 
 The current CareerOS.Bootstrap data flow is intentionally simple:
 
-``` text
+```text
 Discover
   |
   v
@@ -918,7 +918,7 @@ Display
 
 The target flow extends that foundation:
 
-``` text
+```text
 Input
   |
   v

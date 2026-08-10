@@ -1,4 +1,4 @@
-﻿# CareerOS.Bootstrap â€” Components
+# CareerOS.Bootstrap — Components
 
 ## Purpose
 
@@ -8,10 +8,10 @@ It focuses on **component ownership and boundaries** rather than repeating the c
 
 Related documents:
 
-- `ARCHITECTURE.md` â€” architectural overview and principles
-- `CURRENT_STATE.md` â€” functionality implemented today
-- `FUTURE_STATE.md` â€” planned architectural direction
-- `DATA_FLOW.md` â€” movement of configuration and planning data through the system
+- `ARCHITECTURE.md` — architectural overview and principles
+- `CURRENT_STATE.md` — functionality implemented today
+- `FUTURE_STATE.md` — planned architectural direction
+- `DATA_FLOW.md` — movement of configuration and planning data through the system
 
 ---
 
@@ -137,10 +137,10 @@ As these capabilities are introduced, they should remain in focused components.
 
 ```text
 Program
-â”œâ”€â”€ PathService
-â”œâ”€â”€ JsonConfigurationService
-â”œâ”€â”€ TemplateResolverService
-â””â”€â”€ DirectoryPlanService
+├── PathService
+├── JsonConfigurationService
+├── TemplateResolverService
+└── DirectoryPlanService
 ```
 
 ### Future direction
@@ -409,7 +409,7 @@ Represent the root of bootstrap/profile configuration loaded from `bootstrap.jso
 
 ```text
 BootstrapConfiguration
-â””â”€â”€ Profiles[]
+└── Profiles[]
 ```
 
 ### Boundary
@@ -442,9 +442,9 @@ Template
 
 ### Meaning
 
-- `Name` â€” human-readable profile identity
-- `Directory` â€” profile destination directory name used during planning
-- `Template` â€” name of the reusable template assigned to the profile
+- `Name` — human-readable profile identity
+- `Directory` — profile destination directory name used during planning
+- `Template` — name of the reusable template assigned to the profile
 
 ### Architectural importance
 
@@ -470,7 +470,7 @@ Represent the root of reusable template configuration loaded from `templates.jso
 
 ```text
 TemplateConfiguration
-â””â”€â”€ Templates[]
+└── Templates[]
 ```
 
 The same source file currently also contains the `CareerTemplate` model.
@@ -498,7 +498,7 @@ Directories[]
 
 ```text
 CareerTemplate
-â””â”€â”€ DirectoryNode[]
+└── DirectoryNode[]
 ```
 
 ### Boundary
@@ -532,11 +532,11 @@ Children[]
 
 ```text
 DirectoryNode
-â”œâ”€â”€ Name
-â””â”€â”€ Children[]
-    â”œâ”€â”€ DirectoryNode
-    â””â”€â”€ DirectoryNode
-        â””â”€â”€ Children[]
+├── Name
+└── Children[]
+    ├── DirectoryNode
+    └── DirectoryNode
+        └── Children[]
 ```
 
 This recursive structure removes the need for fixed-depth directory models such as separate parent/child/grandchild types.
@@ -772,16 +772,16 @@ Conceptually:
 
 ```text
 CareerOS.Bootstrap.Tests/
-â”œâ”€â”€ Services/
-â”‚   â”œâ”€â”€ DirectoryPlanServiceTests
-â”‚   â”œâ”€â”€ JsonConfigurationServiceTests
-â”‚   â”œâ”€â”€ PathServiceTests
-â”‚   â”œâ”€â”€ TemplateResolverServiceTests
-â”‚   â”œâ”€â”€ ConfigurationValidationServiceTests
-â”‚   â””â”€â”€ DirectoryProvisioningServiceTests
-â”‚
-â””â”€â”€ Integration/
-    â””â”€â”€ ApplicationWorkflowTests
+├── Services/
+│   ├── DirectoryPlanServiceTests
+│   ├── JsonConfigurationServiceTests
+│   ├── PathServiceTests
+│   ├── TemplateResolverServiceTests
+│   ├── ConfigurationValidationServiceTests
+│   └── DirectoryProvisioningServiceTests
+│
+└── Integration/
+    └── ApplicationWorkflowTests
 ```
 
 Exact organization should be chosen when the test project is implemented.

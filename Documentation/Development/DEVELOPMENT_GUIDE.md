@@ -1,4 +1,4 @@
-﻿# CareerOS.Bootstrap â€” Development Guide
+# CareerOS.Bootstrap — Development Guide
 
 ## Purpose
 
@@ -8,16 +8,16 @@ This guide deliberately distinguishes current practices from planned capabilitie
 
 Related documentation:
 
-- `README.md` â€” repository overview and entry point
-- `Documentation/Architecture/ARCHITECTURE.md` â€” architecture overview
-- `Documentation/Architecture/CURRENT_STATE.md` â€” implemented behavior
-- `Documentation/Architecture/FUTURE_STATE.md` â€” target direction
-- `Documentation/Architecture/COMPONENTS.md` â€” component responsibilities
-- `Documentation/Architecture/DATA_FLOW.md` â€” current and future data flow
-- `Documentation/Requirements/USER_STORIES.md` â€” user-centered requirements
-- `Documentation/Requirements/FUNCTIONAL_REQUIREMENTS.md` â€” functional requirements
-- `Documentation/Requirements/NON_FUNCTIONAL_REQUIREMENTS.md` â€” quality constraints
-- `Documentation/Requirements/TRACEABILITY.md` â€” requirements relationships and verification
+- `README.md` — repository overview and entry point
+- `Documentation/Architecture/ARCHITECTURE.md` — architecture overview
+- `Documentation/Architecture/CURRENT_STATE.md` — implemented behavior
+- `Documentation/Architecture/FUTURE_STATE.md` — target direction
+- `Documentation/Architecture/COMPONENTS.md` — component responsibilities
+- `Documentation/Architecture/DATA_FLOW.md` — current and future data flow
+- `Documentation/Requirements/USER_STORIES.md` — user-centered requirements
+- `Documentation/Requirements/FUNCTIONAL_REQUIREMENTS.md` — functional requirements
+- `Documentation/Requirements/NON_FUNCTIONAL_REQUIREMENTS.md` — quality constraints
+- `Documentation/Requirements/TRACEABILITY.md` — requirements relationships and verification
 
 ---
 
@@ -46,27 +46,27 @@ The repository currently follows this high-level structure:
 
 ```text
 CareerOS.Bootstrap/
-â”œâ”€â”€ .github/
-â”œâ”€â”€ Configuration/
-â”‚   â”œâ”€â”€ bootstrap.json
-â”‚   â””â”€â”€ templates.json
-â”œâ”€â”€ Documentation/
-â”‚   â”œâ”€â”€ Architecture/
-â”‚   â”œâ”€â”€ Development/
-â”‚   â”œâ”€â”€ Diagrams/
-â”‚   â”œâ”€â”€ References/
-â”‚   â”œâ”€â”€ Requirements/
-â”‚   â””â”€â”€ Roadmap/
-â”œâ”€â”€ CareerOS.Bootstrap/
-â”‚   â”œâ”€â”€ Models/
-â”‚   â”œâ”€â”€ Services/
-â”‚   â”œâ”€â”€ CareerOS.Bootstrap.csproj
-â”‚   â””â”€â”€ Program.cs
-â”œâ”€â”€ .gitignore
-â”œâ”€â”€ CHANGELOG.md
-â”œâ”€â”€ CareerOS.Bootstrap.sln
-â”œâ”€â”€ LICENSE
-â””â”€â”€ README.md
+├── .github/
+├── Configuration/
+│   ├── bootstrap.json
+│   └── templates.json
+├── Documentation/
+│   ├── Architecture/
+│   ├── Development/
+│   ├── Diagrams/
+│   ├── References/
+│   ├── Requirements/
+│   └── Roadmap/
+├── CareerOS.Bootstrap/
+│   ├── Models/
+│   ├── Services/
+│   ├── CareerOS.Bootstrap.csproj
+│   └── Program.cs
+├── .gitignore
+├── CHANGELOG.md
+├── CareerOS.Bootstrap.sln
+├── LICENSE
+└── README.md
 ```
 
 Solution folders displayed in Visual Studio are organizational views and are not the same thing as physical filesystem directories or C# project folders.
@@ -110,15 +110,15 @@ The intended high-level Visual Studio organization is conceptually:
 
 ```text
 Solution 'CareerOS.Bootstrap'
-â”œâ”€â”€ Solution Items
-â”œâ”€â”€ Documentation
-â”‚   â”œâ”€â”€ Architecture
-â”‚   â”œâ”€â”€ Development
-â”‚   â”œâ”€â”€ Diagrams
-â”‚   â”œâ”€â”€ References
-â”‚   â”œâ”€â”€ Requirements
-â”‚   â””â”€â”€ Roadmap
-â””â”€â”€ CareerOS.Bootstrap
+├── Solution Items
+├── Documentation
+│   ├── Architecture
+│   ├── Development
+│   ├── Diagrams
+│   ├── References
+│   ├── Requirements
+│   └── Roadmap
+└── CareerOS.Bootstrap
 ```
 
 Empty physical documentation directories may exist even when corresponding Visual Studio Solution Folders have not yet been added.
@@ -427,12 +427,12 @@ Program.cs
 
 Current responsibilities include:
 
-- `Program.Main()` â€” application entry/orchestration boundary
-- `PathService` â€” repository/configuration path discovery
-- `JsonConfigurationService` â€” JSON loading/deserialization
-- `TemplateResolverService` â€” profile-to-template resolution
-- `DirectoryPlanService` â€” recursive desired-directory planning
-- Models â€” structured configuration and recursive directory data
+- `Program.Main()` — application entry/orchestration boundary
+- `PathService` — repository/configuration path discovery
+- `JsonConfigurationService` — JSON loading/deserialization
+- `TemplateResolverService` — profile-to-template resolution
+- `DirectoryPlanService` — recursive desired-directory planning
+- Models — structured configuration and recursive directory data
 
 Developers should preserve separation of concerns. In particular:
 
@@ -480,12 +480,12 @@ Current documentation categories are:
 
 ```text
 Documentation/
-â”œâ”€â”€ Architecture/
-â”œâ”€â”€ Development/
-â”œâ”€â”€ Diagrams/
-â”œâ”€â”€ References/
-â”œâ”€â”€ Requirements/
-â””â”€â”€ Roadmap/
+├── Architecture/
+├── Development/
+├── Diagrams/
+├── References/
+├── Requirements/
+└── Roadmap/
 ```
 
 When a planned capability becomes implemented, review at minimum:

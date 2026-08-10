@@ -1,4 +1,4 @@
-﻿# CareerOS.Bootstrap --- System Context
+# CareerOS.Bootstrap --- System Context
 
 ## Purpose
 
@@ -17,12 +17,12 @@ Status labels used throughout:
 
 ## System Context Diagram
 
-``` mermaid
+```mermaid
 flowchart LR
     Dev["Developer / Maintainer<br/>CURRENT"]
     User["CareerOS User<br/>CURRENT / PLANNED"]
 
-    subgraph Repo["CareerOS.Bootstrap Repository â€” CURRENT"]
+    subgraph Repo["CareerOS.Bootstrap Repository — CURRENT"]
         App["CareerOS.Bootstrap<br/>.NET 8 Console Application"]
         Config["JSON Configuration<br/>bootstrap.json / templates.json"]
         Docs["Version-Controlled Documentation"]
@@ -61,7 +61,7 @@ flowchart LR
 The current executable is a local `.NET 8` console application. Its
 active flow is:
 
-``` text
+```text
 Developer
     |
     v
@@ -102,10 +102,10 @@ The final user interface is not yet fixed.
 
 Repository configuration currently includes:
 
-``` text
+```text
 Configuration/
-â”œâ”€â”€ bootstrap.json
-â””â”€â”€ templates.json
+├── bootstrap.json
+└── templates.json
 ```
 
 These provide profile and template definitions. Configuration remains
@@ -132,7 +132,7 @@ structured results, and isolated filesystem tests.
 
 Git/GitHub already belong to the development lifecycle:
 
-``` text
+```text
 Purpose-Specific Branch
         |
         v
@@ -159,7 +159,7 @@ clearly report failures.
 
 The primary planned external output is a reusable filesystem workspace:
 
-``` text
+```text
 CareerOS.Bootstrap
         |
         v
@@ -188,7 +188,7 @@ current Bootstrap runtime**.
 
 Potential structured entities include:
 
-``` text
+```text
 User Stories
 Functional Requirements
 Non-Functional Requirements
@@ -208,7 +208,7 @@ API access, and a future website.
 
 For example:
 
-``` text
+```text
 Which functional requirements do not yet have an automated test?
 ```
 
@@ -223,7 +223,7 @@ documentation even if a database layer is introduced.
 A future browser experience could consume version-controlled
 documentation and structured project data:
 
-``` text
+```text
 Git / Markdown
       |
       +----------+
@@ -248,7 +248,7 @@ Bootstrap engine.
 
 ### Configuration to Application
 
-``` text
+```text
 Configuration
      |
      v
@@ -267,7 +267,7 @@ Invalid configuration must not reach future filesystem modification.
 
 ### Planning to Provisioning
 
-``` text
+```text
 Desired-State Planning
         |
         v
@@ -285,7 +285,7 @@ Planning must remain independently executable.
 
 ### Repository to User Workspace
 
-``` text
+```text
 CareerOS.Bootstrap Repository
           |
           | generates / provisions
@@ -311,7 +311,7 @@ implementation scope.
 
 ### Current
 
-``` text
+```text
 Developer
    |
    v
@@ -331,7 +331,7 @@ Console
 
 ### Planned
 
-``` text
+```text
 Developer / User
        |
        v
@@ -356,7 +356,7 @@ Provisioning Plan
 
 ### Future Extension
 
-``` text
+```text
 Git / Markdown
       |
       +----------+
@@ -392,7 +392,7 @@ SQL Server ------+
 
 ## Related Documentation
 
-``` text
+```text
 Documentation/Architecture/ARCHITECTURE.md
 Documentation/Architecture/CURRENT_STATE.md
 Documentation/Architecture/FUTURE_STATE.md
@@ -413,7 +413,7 @@ Documentation/Development/TESTING_STRATEGY.md
 
 The current context is intentionally small:
 
-``` text
+```text
 Configuration
      |
      v
@@ -425,7 +425,7 @@ Read-Only Plan
 
 The planned context adds controlled provisioning:
 
-``` text
+```text
 Configuration + User Intent
             |
             v

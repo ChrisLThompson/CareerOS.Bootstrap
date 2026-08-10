@@ -1,4 +1,4 @@
-﻿# CareerOS.Bootstrap â€” Coding Standards
+# CareerOS.Bootstrap — Coding Standards
 
 ## Purpose
 
@@ -77,10 +77,10 @@ Current structure:
 
 ```text
 CareerOS.Bootstrap/
-â”œâ”€â”€ Models/
-â”œâ”€â”€ Services/
-â”œâ”€â”€ Program.cs
-â””â”€â”€ CareerOS.Bootstrap.csproj
+├── Models/
+├── Services/
+├── Program.cs
+└── CareerOS.Bootstrap.csproj
 ```
 
 Future directories should be introduced only when real implementation complexity justifies them.

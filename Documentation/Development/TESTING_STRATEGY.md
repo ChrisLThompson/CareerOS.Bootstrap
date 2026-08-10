@@ -1,4 +1,4 @@
-﻿# CareerOS.Bootstrap â€” Testing Strategy
+# CareerOS.Bootstrap — Testing Strategy
 
 ## Purpose
 
@@ -10,10 +10,10 @@ This strategy supports the requirements already established in:
 
 ```text
 Documentation/Requirements/
-â”œâ”€â”€ USER_STORIES.md
-â”œâ”€â”€ FUNCTIONAL_REQUIREMENTS.md
-â”œâ”€â”€ NON_FUNCTIONAL_REQUIREMENTS.md
-â””â”€â”€ TRACEABILITY.md
+├── USER_STORIES.md
+├── FUNCTIONAL_REQUIREMENTS.md
+├── NON_FUNCTIONAL_REQUIREMENTS.md
+└── TRACEABILITY.md
 ```
 
 Testing is intended to provide evidence that requirements are satisfied. A feature should not be considered complete solely because its implementation compiles or appears to work during one manual run.
@@ -586,17 +586,17 @@ A future test project may begin with a structure similar to:
 
 ```text
 CareerOS.Bootstrap.Tests/
-â”œâ”€â”€ Services/
-â”‚   â”œâ”€â”€ DirectoryPlanServiceTests.cs
-â”‚   â”œâ”€â”€ JsonConfigurationServiceTests.cs
-â”‚   â”œâ”€â”€ PathServiceTests.cs
-â”‚   â””â”€â”€ TemplateResolverServiceTests.cs
-â”‚
-â”œâ”€â”€ Models/
-â”œâ”€â”€ Fixtures/
-â”œâ”€â”€ Integration/
-â”‚   â””â”€â”€ Filesystem/
-â””â”€â”€ CareerOS.Bootstrap.Tests.csproj
+├── Services/
+│   ├── DirectoryPlanServiceTests.cs
+│   ├── JsonConfigurationServiceTests.cs
+│   ├── PathServiceTests.cs
+│   └── TemplateResolverServiceTests.cs
+│
+├── Models/
+├── Fixtures/
+├── Integration/
+│   └── Filesystem/
+└── CareerOS.Bootstrap.Tests.csproj
 ```
 
 As functionality evolves, additional areas may be introduced for validation, CLI, orchestration, provisioning, logging, and release-related behavior.
@@ -766,7 +766,7 @@ When packaged releases exist, release validation should verify:
 
 ---
 
-# Definition of Done â€” Testing Perspective
+# Definition of Done — Testing Perspective
 
 A significant feature should not be considered complete until the applicable items below are satisfied:
 

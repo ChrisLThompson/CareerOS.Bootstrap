@@ -1,4 +1,4 @@
-﻿# CareerOS.Bootstrap â€” User Stories
+# CareerOS.Bootstrap — User Stories
 
 ## Purpose
 
@@ -31,7 +31,7 @@ TRACEABILITY.md
 User stories use the following structure:
 
 ```text
-US-### â€” Title
+US-### — Title
 
 As a <role>,
 I want <capability>,
@@ -40,11 +40,11 @@ so that <business/user value>.
 
 Each story also includes:
 
-- **Status** â€” Implemented, Partially Implemented, Planned, or Future
-- **Priority** â€” High, Medium, or Low
-- **Rationale** â€” Why the story matters
-- **Acceptance Intent** â€” High-level conditions that indicate the story is satisfied
-- **Related Areas** â€” Components or architectural concerns likely to support the story
+- **Status** — Implemented, Partially Implemented, Planned, or Future
+- **Priority** — High, Medium, or Low
+- **Rationale** — Why the story matters
+- **Acceptance Intent** — High-level conditions that indicate the story is satisfied
+- **Related Areas** — Components or architectural concerns likely to support the story
 
 Acceptance Intent is deliberately less detailed than formal acceptance criteria. Exact testable conditions will be established through functional requirements and test cases.
 
@@ -52,7 +52,7 @@ Acceptance Intent is deliberately less detailed than formal acceptance criteria.
 
 # Core Configuration Stories
 
-## US-001 â€” Define Multiple CareerOS Profiles
+## US-001 — Define Multiple CareerOS Profiles
 
 **Status:** Implemented
 **Priority:** High
@@ -80,7 +80,7 @@ CareerOS must scale beyond a single individual. Profile-specific data should be 
 
 ---
 
-## US-002 â€” Assign Reusable Templates to Profiles
+## US-002 — Assign Reusable Templates to Profiles
 
 **Status:** Implemented
 **Priority:** High
@@ -109,7 +109,7 @@ Duplicating full directory structures inside every profile would increase mainte
 
 ---
 
-## US-003 â€” Define Nested Directory Structures in Configuration
+## US-003 — Define Nested Directory Structures in Configuration
 
 **Status:** Implemented
 **Priority:** High
@@ -137,7 +137,7 @@ CareerOS directories are hierarchical and may evolve to contain multiple levels 
 
 ---
 
-## US-004 â€” Modify Structure Without Recompiling the Application
+## US-004 — Modify Structure Without Recompiling the Application
 
 **Status:** Implemented
 **Priority:** High
@@ -166,7 +166,7 @@ The bootstrapper should separate configuration from implementation so the struct
 
 # Discovery and Portability Stories
 
-## US-005 â€” Locate Repository Resources Without Hard-Coded Paths
+## US-005 — Locate Repository Resources Without Hard-Coded Paths
 
 **Status:** Implemented
 **Priority:** High
@@ -193,7 +193,7 @@ Hard-coded machine paths reduce portability and make the project fragile when mo
 
 ---
 
-## US-006 â€” Configure the CareerOS Destination Root
+## US-006 — Configure the CareerOS Destination Root
 
 **Status:** Planned
 **Priority:** High
@@ -222,7 +222,7 @@ The final destination should not be tied to the application repository or a deve
 
 # Planning and Safety Stories
 
-## US-007 â€” Preview the Complete Directory Plan
+## US-007 — Preview the Complete Directory Plan
 
 **Status:** Implemented
 **Priority:** High
@@ -250,7 +250,7 @@ Visibility into intended changes reduces risk and supports user trust.
 
 ---
 
-## US-008 â€” Run an Explicit Dry-Run Mode
+## US-008 — Run an Explicit Dry-Run Mode
 
 **Status:** Partially Implemented
 **Priority:** High
@@ -278,7 +278,7 @@ The current application behaves as a read-only preview, but a formal execution m
 
 ---
 
-## US-009 â€” Validate Configuration Before Provisioning
+## US-009 — Validate Configuration Before Provisioning
 
 **Status:** Planned
 **Priority:** High
@@ -306,7 +306,7 @@ Filesystem modification should occur only after the application's intent has bee
 
 ---
 
-## US-010 â€” Preserve Existing Valid Directories
+## US-010 — Preserve Existing Valid Directories
 
 **Status:** Planned
 **Priority:** High
@@ -334,7 +334,7 @@ CareerOS contains long-lived user data. Existing structures should be treated as
 
 ---
 
-## US-011 â€” Create Only Missing Directories
+## US-011 — Create Only Missing Directories
 
 **Status:** Planned
 **Priority:** High
@@ -362,7 +362,7 @@ The system should converge toward the configured desired state instead of rebuil
 
 ---
 
-## US-012 â€” Rerun Provisioning Safely
+## US-012 — Rerun Provisioning Safely
 
 **Status:** Planned
 **Priority:** High
@@ -390,7 +390,7 @@ Idempotency is central to reliable provisioning and recovery.
 
 ---
 
-## US-013 â€” Prevent Automatic Destructive Deletion
+## US-013 — Prevent Automatic Destructive Deletion
 
 **Status:** Planned Safety Requirement
 **Priority:** High
@@ -419,7 +419,7 @@ CareerOS may contain resumes, application records, professional documentation, p
 
 # Execution and Usability Stories
 
-## US-014 â€” Select a Specific Profile
+## US-014 — Select a Specific Profile
 
 **Status:** Planned
 **Priority:** Medium
@@ -442,7 +442,7 @@ I want to provision or preview a specific profile,
 
 ---
 
-## US-015 â€” Override a Profile Template When Appropriate
+## US-015 — Override a Profile Template When Appropriate
 
 **Status:** Future
 **Priority:** Low
@@ -466,7 +466,7 @@ I want an optional, controlled way to override the configured template for a pro
 
 ---
 
-## US-016 â€” Receive a Clear Execution Summary
+## US-016 — Receive a Clear Execution Summary
 
 **Status:** Planned
 **Priority:** High
@@ -497,7 +497,7 @@ Dry-run summaries must clearly state that no filesystem changes were made.
 
 ---
 
-## US-017 â€” Receive Actionable Error Messages
+## US-017 — Receive Actionable Error Messages
 
 **Status:** Partially Implemented
 **Priority:** High
@@ -525,7 +525,7 @@ The current application already surfaces top-level exception messages, but futur
 
 ---
 
-## US-018 â€” Access Built-In Help and Version Information
+## US-018 — Access Built-In Help and Version Information
 
 **Status:** Planned
 **Priority:** Medium
@@ -554,7 +554,7 @@ Exact implementation is not finalized.
 
 # Observability Stories
 
-## US-019 â€” Record Execution Logs
+## US-019 — Record Execution Logs
 
 **Status:** Planned
 **Priority:** Medium
@@ -586,7 +586,7 @@ Logs must avoid unnecessary exposure of sensitive information.
 
 ---
 
-## US-020 â€” Distinguish Planned, Created, Existing, and Failed Actions
+## US-020 — Distinguish Planned, Created, Existing, and Failed Actions
 
 **Status:** Planned
 **Priority:** High
@@ -621,7 +621,7 @@ Final terminology will be established in functional requirements and implementat
 
 # Testing and Quality Stories
 
-## US-021 â€” Automatically Verify Core Planning Behavior
+## US-021 — Automatically Verify Core Planning Behavior
 
 **Status:** Planned
 **Priority:** High
@@ -648,7 +648,7 @@ Initial automated testing should cover at minimum:
 
 ---
 
-## US-022 â€” Verify Filesystem Provisioning in Isolation
+## US-022 — Verify Filesystem Provisioning in Isolation
 
 **Status:** Planned
 **Priority:** High
@@ -672,7 +672,7 @@ I want provisioning behavior tested against isolated temporary directories,
 
 ---
 
-## US-023 â€” Validate Changes Before Merge to Main
+## US-023 — Validate Changes Before Merge to Main
 
 **Status:** Partially Implemented
 **Priority:** High
@@ -702,7 +702,7 @@ The project has begun using dedicated branches such as `docs/documentation-v1`.
 
 # Documentation and Traceability Stories
 
-## US-024 â€” Understand the Current System State
+## US-024 — Understand the Current System State
 
 **Status:** Implemented / Documentation In Progress
 **Priority:** High
@@ -725,7 +725,7 @@ I want documentation that clearly describes what the application currently does,
 
 ---
 
-## US-025 â€” Understand the Target Future State
+## US-025 — Understand the Target Future State
 
 **Status:** Implemented / Documentation In Progress
 **Priority:** High
@@ -748,7 +748,7 @@ I want future-state architecture documented separately from current implementati
 
 ---
 
-## US-026 â€” Trace Requirements to Implementation and Tests
+## US-026 — Trace Requirements to Implementation and Tests
 
 **Status:** Planned
 **Priority:** High
@@ -786,7 +786,7 @@ TEST-###
 
 ---
 
-## US-027 â€” Preserve Architectural Decisions
+## US-027 — Preserve Architectural Decisions
 
 **Status:** Planned
 **Priority:** Medium
@@ -810,7 +810,7 @@ I want significant architectural decisions recorded with their rationale,
 
 # Release and Distribution Stories
 
-## US-028 â€” Run CareerOS.Bootstrap Without Opening the Source Project
+## US-028 — Run CareerOS.Bootstrap Without Opening the Source Project
 
 **Status:** Future
 **Priority:** Medium
@@ -834,7 +834,7 @@ I want a packaged application release,
 
 ---
 
-## US-029 â€” Automatically Validate Builds in GitHub
+## US-029 — Automatically Validate Builds in GitHub
 
 **Status:** Planned
 **Priority:** Medium
@@ -865,7 +865,7 @@ Report Result
 
 # Optional Future Integration Stories
 
-## US-030 â€” Optionally Initialize Git for Generated Development Areas
+## US-030 — Optionally Initialize Git for Generated Development Areas
 
 **Status:** Future
 **Priority:** Low
