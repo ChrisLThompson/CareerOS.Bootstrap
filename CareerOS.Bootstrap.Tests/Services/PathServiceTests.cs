@@ -1,4 +1,5 @@
 using CareerOS.Bootstrap.Services;
+using CareerOS.Bootstrap.Tests.Fixtures;
 
 namespace CareerOS.Bootstrap.Tests.Services;
 
@@ -58,6 +59,51 @@ public class PathServiceTests
         Assert.True(
             Path.IsPathFullyQualified(repositoryRoot),
             $"Expected an absolute repository path but received: {repositoryRoot}");
+    }
+
+    [Fact]
+    public void FindRepositoryRoot_WithInjectedNestedStartDirectory_ReturnsContainingRepositoryRoot()
+    {
+        using TemporaryDirectoryFixture fixture =
+            new();
+
+        fixture.CreateFile(
+            "CareerOS.Bootstrap.sln",
+            string.Empty);
+
+        string nestedDirectory =
+            fixture.CreateDirectory(
+                "src",
+                "nested",
+                "bin");
+
+        PathService service =
+            new(nestedDirectory);
+
+        string result =
+            service.FindRepositoryRoot();
+
+        Assert.Equal(
+            Path.GetFullPath(fixture.RootPath),
+            Path.GetFullPath(result));
+    }
+
+    [Fact]
+    public void FindRepositoryRoot_WhenSolutionFileCannotBeFound_ThrowsDirectoryNotFoundException()
+    {
+        using TemporaryDirectoryFixture fixture =
+            new();
+
+        PathService service =
+            new(fixture.RootPath);
+
+        DirectoryNotFoundException exception =
+            Assert.Throws<DirectoryNotFoundException>(
+                service.FindRepositoryRoot);
+
+        Assert.Equal(
+            "Unable to locate the CareerOS.Bootstrap repository root.",
+            exception.Message);
     }
 
     [Fact]
@@ -124,6 +170,86 @@ public class PathServiceTests
         Assert.True(
             File.Exists(templateConfiguration),
             $"Expected template configuration file to exist: {templateConfiguration}");
+    }
+
+    [Fact]
+    public void GetConfigurationDirectory_WithInjectedRepositoryRoot_ReturnsInjectedConfigurationDirectory()
+    {
+        using TemporaryDirectoryFixture fixture =
+            new();
+
+        fixture.CreateFile(
+            "CareerOS.Bootstrap.sln",
+            string.Empty);
+
+        string configurationDirectory =
+            fixture.CreateDirectory(
+                "Configuration");
+
+        string nestedStartDirectory =
+            fixture.CreateDirectory(
+                "src",
+                "bin");
+
+        PathService service =
+            new(nestedStartDirectory);
+
+        string result =
+            service.GetConfigurationDirectory();
+
+        Assert.Equal(
+            Path.GetFullPath(configurationDirectory),
+            Path.GetFullPath(result));
+    }
+
+    [Fact]
+    public void GetConfigurationDirectory_WhenConfigurationDirectoryDoesNotExist_ThrowsDirectoryNotFoundException()
+    {
+        using TemporaryDirectoryFixture fixture =
+            new();
+
+        fixture.CreateFile(
+            "CareerOS.Bootstrap.sln",
+            string.Empty);
+
+        string nestedStartDirectory =
+            fixture.CreateDirectory(
+                "src",
+                "bin");
+
+        PathService service =
+            new(nestedStartDirectory);
+
+        string expectedConfigurationDirectory =
+            Path.Combine(
+                fixture.RootPath,
+                "Configuration");
+
+        DirectoryNotFoundException exception =
+            Assert.Throws<DirectoryNotFoundException>(
+                service.GetConfigurationDirectory);
+
+        Assert.Equal(
+            $"Configuration directory was not found: {expectedConfigurationDirectory}",
+            exception.Message);
+    }
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    [InlineData("   ")]
+    [InlineData("\t")]
+    public void Constructor_WithMissingStartDirectory_ThrowsArgumentException(
+        string? startDirectory)
+    {
+        ArgumentException exception =
+            Assert.ThrowsAny<ArgumentException>(
+                () => new PathService(
+                    startDirectory!));
+
+        Assert.Equal(
+            "startDirectory",
+            exception.ParamName);
     }
 
     private static string EnsureTrailingDirectorySeparator(

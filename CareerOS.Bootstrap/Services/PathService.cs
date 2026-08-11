@@ -2,10 +2,25 @@
 
 public class PathService
 {
+    private readonly string _startDirectory;
+
+    public PathService()
+        : this(AppContext.BaseDirectory)
+    {
+    }
+
+    public PathService(string startDirectory)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(startDirectory);
+
+        _startDirectory =
+            Path.GetFullPath(startDirectory);
+    }
+
     public string FindRepositoryRoot()
     {
         DirectoryInfo? currentDirectory =
-            new(AppContext.BaseDirectory);
+            new(_startDirectory);
 
         while (currentDirectory != null)
         {
