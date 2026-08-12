@@ -381,44 +381,41 @@ This avoids hard-coding a developer-specific absolute repository path.
 
 ## Current Validation Coverage
 
-Validation currently exists in focused locations rather than through a dedicated comprehensive validation service.
+Validation now has a dedicated centralized implementation boundary through
+`ConfigurationValidationService`.
 
-Current checks include selected cases such as:
+Current configuration validation includes:
 
-- Missing configuration files.
-- Failed deserialization.
-- Unknown template references.
-- Empty template names.
-- Empty base paths.
-- Empty profile directory names.
+- Required profile and template values.
+- Empty required profile/template collections.
+- Duplicate profile names.
+- Duplicate profile destination directories.
+- Duplicate template names.
+- Missing template references.
 - Empty directory-node names.
-- Selected null inputs.
+- Invalid Windows filesystem characters.
+- Reserved Windows filesystem names.
+- Duplicate sibling directory names.
+- Recursive validation of nested directory nodes.
 
-The exact location of validation depends on the service receiving the value.
+Current path-safety validation also includes:
 
----
+- Fully qualified destination-root validation.
+- Invalid/reserved destination path-segment rejection.
+- Fully qualified planned-path validation.
+- Parent-traversal escape rejection.
+- Sibling-prefix escape rejection.
+- Planned-path containment beneath the approved destination root.
 
-## Validation Not Yet Centralized
+Validation aggregates blocking errors through `ValidationResult` rather than
+failing on the first semantic issue. `ValidationWarning` remains non-blocking.
 
-A dedicated configuration-validation layer is planned.
+Explicit configuration schema-version validation remains deferred because no
+schema-version contract exists yet.
 
-Future validation may include:
-
-```text
-Duplicate profile names
-Duplicate destination directory names
-Duplicate template names
-Missing template references
-Empty required collections
-Illegal filesystem characters
-Reserved Windows filesystem names
-Conflicting destination paths
-Duplicate sibling directory nodes
-Unsupported schema versions
-Invalid root paths
-```
-
-These items should not be treated as implemented until the codebase contains the corresponding validation behavior.
+Existing-filesystem-object conflicts and reparse/symbolic-link behavior remain
+future provisioning-state concerns rather than current configuration-model
+validation.
 
 ---
 
@@ -658,9 +655,13 @@ flowchart LR
     ProfileModels["BootstrapConfiguration / Profiles"]
     TemplateModels["TemplateConfiguration / Templates"]
 
+    Validator["ConfigurationValidationService"]
+    Validation["ValidationResult"]
+
     Resolver["TemplateResolverService"]
     Planner["DirectoryPlanService"]
-    Output["Dry-Run Directory Plan"]
+    Containment["ValidatePlannedPaths"]
+    Output["Validated Dry-Run Directory Plan"]
 
     Bootstrap --> Loader
     Templates --> Loader
@@ -668,14 +669,24 @@ flowchart LR
     Loader --> ProfileModels
     Loader --> TemplateModels
 
+    ProfileModels --> Validator
+    TemplateModels --> Validator
+    Validator --> Validation
+
+    Validation -->|"valid"| Resolver
     ProfileModels --> Resolver
     TemplateModels --> Resolver
 
     Resolver --> Planner
     TemplateModels --> Planner
 
-    Planner --> Output
+    Planner --> Containment
+    Containment --> Output
 ```
+
+Blocking configuration validation failures stop before normal
+resolution/planning. Planned-path containment is validated before a dry-run plan
+is presented.
 
 ---
 
@@ -693,7 +704,7 @@ flowchart LR
 | JSON deserialization | Application logic | `JsonConfigurationService` |
 | Template lookup | Application logic | `TemplateResolverService` |
 | Directory planning | Application logic | `DirectoryPlanService` |
-| Future comprehensive validation | Planned application logic | Validation layer |
+| Comprehensive configuration validation | Application logic | `ConfigurationValidationService` |
 | Future provisioning | Planned application logic | Provisioning layer |
 
 ---

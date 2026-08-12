@@ -73,6 +73,9 @@ public class BootstrapPlanningWorkflowTests
         DirectoryPlanService directoryPlanService =
             new();
 
+        ConfigurationValidationService validationService =
+            new();
+
         BootstrapConfiguration bootstrapConfiguration =
             configurationService.LoadBootstrapConfiguration(
                 bootstrapPath);
@@ -80,6 +83,13 @@ public class BootstrapPlanningWorkflowTests
         TemplateConfiguration templateConfiguration =
             configurationService.LoadTemplateConfiguration(
                 templatesPath);
+
+        ValidationResult configurationValidation =
+            validationService.Validate(
+                bootstrapConfiguration,
+                templateConfiguration);
+
+        Assert.True(configurationValidation.IsValid);
 
         ProfileConfiguration profile =
             Assert.Single(
@@ -99,6 +109,13 @@ public class BootstrapPlanningWorkflowTests
                 workspaceBasePath,
                 profile,
                 template);
+
+        ValidationResult planValidation =
+            validationService.ValidatePlannedPaths(
+                workspaceBasePath,
+                plan);
+
+        Assert.True(planValidation.IsValid);
 
         string profileRoot =
             Path.Combine(
@@ -185,6 +202,9 @@ public class BootstrapPlanningWorkflowTests
         DirectoryPlanService directoryPlanService =
             new();
 
+        ConfigurationValidationService validationService =
+            new();
+
         BootstrapConfiguration bootstrapConfiguration =
             configurationService.LoadBootstrapConfiguration(
                 bootstrapPath);
@@ -192,6 +212,13 @@ public class BootstrapPlanningWorkflowTests
         TemplateConfiguration templateConfiguration =
             configurationService.LoadTemplateConfiguration(
                 templatesPath);
+
+        ValidationResult configurationValidation =
+            validationService.Validate(
+                bootstrapConfiguration,
+                templateConfiguration);
+
+        Assert.True(configurationValidation.IsValid);
 
         string workspaceBasePath =
             fixture.GetPath(
@@ -207,11 +234,21 @@ public class BootstrapPlanningWorkflowTests
                     templateConfiguration,
                     profile.Template);
 
-            plans[profile.Name] =
+            IReadOnlyList<string> plan =
                 directoryPlanService.BuildPlan(
                     workspaceBasePath,
                     profile,
                     template);
+
+            ValidationResult planValidation =
+                validationService.ValidatePlannedPaths(
+                    workspaceBasePath,
+                    plan);
+
+            Assert.True(planValidation.IsValid);
+
+            plans[profile.Name] =
+                plan;
         }
 
         Assert.Equal(
@@ -298,6 +335,9 @@ public class BootstrapPlanningWorkflowTests
         DirectoryPlanService directoryPlanService =
             new();
 
+        ConfigurationValidationService validationService =
+            new();
+
         BootstrapConfiguration bootstrapConfiguration =
             configurationService.LoadBootstrapConfiguration(
                 bootstrapPath);
@@ -305,6 +345,13 @@ public class BootstrapPlanningWorkflowTests
         TemplateConfiguration templateConfiguration =
             configurationService.LoadTemplateConfiguration(
                 templatesPath);
+
+        ValidationResult configurationValidation =
+            validationService.Validate(
+                bootstrapConfiguration,
+                templateConfiguration);
+
+        Assert.True(configurationValidation.IsValid);
 
         ProfileConfiguration profile =
             Assert.Single(
@@ -325,6 +372,12 @@ public class BootstrapPlanningWorkflowTests
                 profile,
                 template);
 
+        ValidationResult planValidation =
+            validationService.ValidatePlannedPaths(
+                workspaceBasePath,
+                plan);
+
+        Assert.True(planValidation.IsValid);
         Assert.NotEmpty(plan);
 
         Assert.False(
@@ -339,7 +392,7 @@ public class BootstrapPlanningWorkflowTests
     }
 
     [Fact]
-    public void PlanningWorkflow_WithUnknownAssignedTemplate_FailsDuringResolution()
+    public void PlanningWorkflow_WithUnknownAssignedTemplate_FailsValidationBeforeResolution()
     {
         using TemporaryDirectoryFixture fixture =
             new();
@@ -376,7 +429,7 @@ public class BootstrapPlanningWorkflowTests
         JsonConfigurationService configurationService =
             new();
 
-        TemplateResolverService templateResolverService =
+        ConfigurationValidationService validationService =
             new();
 
         BootstrapConfiguration bootstrapConfiguration =
@@ -387,18 +440,132 @@ public class BootstrapPlanningWorkflowTests
             configurationService.LoadTemplateConfiguration(
                 templatesPath);
 
-        ProfileConfiguration profile =
-            Assert.Single(
-                bootstrapConfiguration.Profiles);
+        ValidationResult result =
+            validationService.Validate(
+                bootstrapConfiguration,
+                templateConfiguration);
 
-        InvalidOperationException exception =
-            Assert.Throws<InvalidOperationException>(
-                () => templateResolverService.ResolveTemplate(
-                    templateConfiguration,
-                    profile.Template));
+        Assert.False(result.IsValid);
+
+        ValidationError error =
+            Assert.Single(
+                result.Errors,
+                error => error.Code == "PROFILE_TEMPLATE_NOT_FOUND");
 
         Assert.Equal(
-            "Template 'UnknownTemplate' was not found in the template configuration.",
-            exception.Message);
+            "Profiles[0].Template",
+            error.PropertyName);
     }
+
+    [Fact]
+    public void PlanningWorkflow_WithInvalidNestedDirectory_FailsValidationBeforePlanning()
+    {
+        using TemporaryDirectoryFixture fixture =
+            new();
+
+        string bootstrapPath =
+            fixture.CreateFile(
+                "bootstrap.json",
+                """
+                {
+                  "profiles": [
+                    {
+                      "name": "Chris",
+                      "directory": "CareerOS_Chris",
+                      "template": "CareerProfessional"
+                    }
+                  ]
+                }
+                """);
+
+        string templatesPath =
+            fixture.CreateFile(
+                "templates.json",
+                """
+                {
+                  "templates": [
+                    {
+                      "name": "CareerProfessional",
+                      "directories": [
+                        {
+                          "name": "Resume",
+                          "children": [
+                            {
+                              "name": "Bad:Directory",
+                              "children": []
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+                """);
+
+        JsonConfigurationService configurationService =
+            new();
+
+        ConfigurationValidationService validationService =
+            new();
+
+        BootstrapConfiguration bootstrapConfiguration =
+            configurationService.LoadBootstrapConfiguration(
+                bootstrapPath);
+
+        TemplateConfiguration templateConfiguration =
+            configurationService.LoadTemplateConfiguration(
+                templatesPath);
+
+        ValidationResult result =
+            validationService.Validate(
+                bootstrapConfiguration,
+                templateConfiguration);
+
+        Assert.False(result.IsValid);
+
+        ValidationError error =
+            Assert.Single(
+                result.Errors,
+                error => error.Code == "DIRECTORY_NAME_INVALID");
+
+        Assert.Equal(
+            "Templates[0].Directories[0].Children[0].Name",
+            error.PropertyName);
+    }
+
+    [Fact]
+    public void PlanningWorkflow_WithEscapingPlannedPath_FailsContainmentValidation()
+    {
+        using TemporaryDirectoryFixture fixture =
+            new();
+
+        string destinationRoot =
+            fixture.GetPath(
+                "Workspace");
+
+        string escapingPath =
+            Path.Combine(
+                destinationRoot,
+                "..",
+                "Outside",
+                "Resume");
+
+        ConfigurationValidationService validationService =
+            new();
+
+        ValidationResult result =
+            validationService.ValidatePlannedPaths(
+                destinationRoot,
+                [escapingPath]);
+
+        Assert.False(result.IsValid);
+
+        ValidationError error =
+            Assert.Single(result.Errors);
+
+        Assert.Equal(
+            "PLANNED_PATH_OUTSIDE_DESTINATION_ROOT",
+            error.Code);
+    }
+
 }

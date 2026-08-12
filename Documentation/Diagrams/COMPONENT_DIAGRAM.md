@@ -25,16 +25,20 @@ flowchart TB
     subgraph Services["Application Services — CURRENT"]
         PathService["PathService<br/>Repository + Configuration Discovery"]
         JsonService["JsonConfigurationService<br/>JSON Loading + Deserialization"]
+        Validator["ConfigurationValidationService<br/>Configuration + Path Safety Validation"]
         Resolver["TemplateResolverService<br/>Profile-to-Template Resolution"]
         Planner["DirectoryPlanService<br/>Recursive Read-Only Planning"]
     end
 
-    subgraph Models["Configuration Models — CURRENT"]
+    subgraph Models["Configuration + Validation Models — CURRENT"]
         BootstrapConfig["BootstrapConfiguration"]
         ProfileConfig["ProfileConfiguration"]
         TemplateConfig["TemplateConfiguration"]
         CareerTemplate["CareerTemplate"]
         DirectoryNode["DirectoryNode<br/>Recursive Structure"]
+        ValidationResult["ValidationResult"]
+        ValidationError["ValidationError"]
+        ValidationWarning["ValidationWarning"]
     end
 
     subgraph Config["Repository Configuration — CURRENT"]
@@ -43,11 +47,12 @@ flowchart TB
     end
 
     subgraph Output["Presentation / Output — CURRENT"]
-        Console["Console Output<br/>Dry-Run Plan + Status"]
+        Console["Console Output<br/>Validated Dry-Run Plan / Errors"]
     end
 
     Program --> PathService
     Program --> JsonService
+    Program --> Validator
     Program --> Resolver
     Program --> Planner
 
@@ -64,6 +69,12 @@ flowchart TB
     TemplateConfig --> CareerTemplate
     CareerTemplate --> DirectoryNode
 
+    BootstrapConfig --> Validator
+    TemplateConfig --> Validator
+    Validator --> ValidationResult
+    ValidationResult --> ValidationError
+    ValidationResult --> ValidationWarning
+
     ProfileConfig --> Resolver
     TemplateConfig --> Resolver
     Resolver --> CareerTemplate
@@ -72,13 +83,14 @@ flowchart TB
     CareerTemplate --> Planner
     DirectoryNode --> Planner
 
+    Planner --> Validator
+    Validator --> Console
     Planner --> Console
     Program --> Console
 
     subgraph Planned["Planned Application Components"]
         AppRunner["ApplicationRunner / Orchestrator<br/>PLANNED"]
         Cli["Command-Line Options / Parser<br/>PLANNED"]
-        Validator["ConfigurationValidationService<br/>PLANNED"]
         ProvisioningPlan["ProvisioningPlan + ProvisioningAction<br/>PLANNED"]
         Provisioner["DirectoryProvisioningService<br/>PLANNED"]
         Results["ProvisioningResult / ExecutionSummary<br/>PLANNED"]
@@ -99,18 +111,20 @@ flowchart TB
     Results -.-> Logging
     AppRunner -.-> Logging
 
-    subgraph Future["Future External / Supporting Components"]
-        Tests["CareerOS.Bootstrap.Tests<br/>Unit + Integration Tests<br/>PLANNED"]
+    subgraph Verification["Verification — CURRENT / PLANNED"]
+        Tests["CareerOS.Bootstrap.Tests<br/>161 passing xUnit tests<br/>CURRENT"]
         GitHubActions["GitHub Actions CI<br/>PLANNED"]
+    end
+
+    Tests --> Services
+    Tests --> Models
+    GitHubActions -.-> Tests
+
+    subgraph Future["Future External / Supporting Components"]
         SqlServer["SQL Server / SSMS<br/>Structured Traceability Store<br/>FUTURE"]
         WebPortal["CareerOS Web / Documentation Portal<br/>FUTURE"]
     end
 
-    Tests -.-> Services
-    Tests -.-> Models
-    Tests -.-> Planned
-    GitHubActions -.-> Tests
-    GitHubActions -.-> Entry
     SqlServer -.-> WebPortal
 ```
 
@@ -130,10 +144,13 @@ Primary responsibilities:
 - Instantiate and coordinate current services.
 - Discover required repository/configuration paths.
 - Load configuration.
+- Validate configuration before normal resolution/planning.
+- Validate the preview destination root.
 - Iterate configured profiles.
 - Resolve templates.
-- request recursive directory plans.
-- Present console output.
+- Request recursive directory plans.
+- Validate planned-path containment.
+- Present dry-run output or structured validation failures.
 - Handle top-level exceptions and exit codes.
 
 `Program.Main` is currently the orchestration boundary. As complexity grows, orchestration may move into a dedicated application runner while `Main()` remains the explicit entry point.
@@ -171,6 +188,26 @@ The service loads structured configuration. It does not decide which template a 
 
 ---
 
+### `ConfigurationValidationService` — CURRENT
+
+Primary responsibilities:
+
+- Validate required configuration values and collections.
+- Reject duplicate profile/template configuration.
+- Reject missing template references.
+- Validate recursive filesystem naming rules.
+- Validate the preview destination root.
+- Validate planned-path containment.
+- Aggregate blocking errors and preserve non-blocking warnings.
+
+Boundary:
+
+The service performs semantic and lexical path validation. It does not load JSON,
+build directory plans, inspect existing filesystem object state for provisioning,
+or create directories.
+
+---
+
 ### `TemplateResolverService` — CURRENT
 
 Primary responsibilities:
@@ -199,6 +236,23 @@ Primary responsibilities:
 Safety boundary:
 
 The service is intentionally read-only and must remain independently executable from filesystem provisioning.
+
+---
+
+## Current Validation Models
+
+### `ValidationResult`
+
+Represents aggregated validation state with `Errors`, `Warnings`, and `IsValid`.
+
+### `ValidationError`
+
+Represents one blocking validation finding with a stable code, message, and
+optional property location.
+
+### `ValidationWarning`
+
+Represents one non-blocking validation finding using the same structured shape.
 
 ---
 
@@ -372,22 +426,6 @@ Potential options include:
 ```
 
 Exact syntax remains subject to requirements and implementation decisions.
-
----
-
-### `ConfigurationValidationService` — PLANNED
-
-Potential responsibilities:
-
-- Validate required configuration fields.
-- Detect duplicate profile/template identifiers.
-- Detect missing template references.
-- Validate destination path input.
-- Detect invalid/reserved names.
-- Produce structured validation results.
-- Block provisioning when errors exist.
-
-Validation must remain separate from filesystem execution.
 
 ---
 

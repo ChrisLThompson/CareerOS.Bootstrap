@@ -27,8 +27,8 @@ Milestone status should reflect repository evidence rather than intention alone.
 | --- | --- | --- |
 | M0 | Bootstrap application foundation | COMPLETE |
 | M1 | Documentation and design baseline | COMPLETE |
-| M2 | Automated testing foundation | IN PROGRESS |
-| M3 | Comprehensive validation | PLANNED |
+| M2 | Automated testing foundation | COMPLETE |
+| M3 | Comprehensive validation | IN PROGRESS |
 | M4 | Rich provisioning plan | PLANNED |
 | M5 | Safe filesystem provisioning | PLANNED |
 | M6 | Verification and structured results | PLANNED |
@@ -177,7 +177,7 @@ M1 is complete when the documentation baseline is version-controlled, reviewable
 
 # M2 — Automated Testing Foundation
 
-**Status:** IN PROGRESS
+**Status:** COMPLETE
 
 ## Goal
 
@@ -345,34 +345,36 @@ b4e5b52  test: add fixture and integration test foundation
 f67b85a  test: improve path service failure-path coverage
 ```
 
-## Remaining M2 Closeout
+## M2 Completion Evidence
 
-The functional testing foundation is implemented. Remaining work is milestone closeout rather than additional test-volume work:
+The M2 implementation, documentation synchronization, final branch review, and merge closeout are complete.
 
 ```text
 [x] Synchronize TRACEABILITY.md with TEST-001 through TEST-014.
 [x] Synchronize TESTING_STRATEGY.md with the implemented architecture.
 [x] Synchronize MILESTONES.md with repository evidence.
-[ ] Review whether ROADMAP.md requires an M2 status synchronization update.
-[ ] Run final documentation and test validation.
-[ ] Commit and push the M2 documentation synchronization.
-[ ] Review the complete feature-branch diff against main.
-[ ] Merge the completed M2 branch when review is clean.
+[x] Synchronize ROADMAP.md with the M2 implementation state.
+[x] Run final documentation and test validation.
+[x] Commit and push the M2 documentation synchronization.
+[x] Review the complete feature-branch diff against main.
+[x] Merge the completed M2 branch.
 ```
 
-CI, provisioning safety/idempotency tests, centralized validation tests, CLI tests, and release automation remain future work because their corresponding production capabilities are not yet implemented.
+M2 was merged into `main` with merge commit `7f536e0`.
+
+CI, provisioning safety/idempotency tests, CLI tests, and release automation remain future work because their corresponding production capabilities are not yet implemented.
 
 ## Exit Condition
 
 Current read-only planning behavior is protected sufficiently to support safe architectural evolution.
 
-The technical exit condition is satisfied by the implemented automated suite. M2 remains `IN PROGRESS` until the documentation synchronization, final branch review, and merge closeout are complete.
+The M2 exit condition is satisfied and the milestone is complete.
 
 ---
 
 # M3 — Comprehensive Validation
 
-**Status:** PLANNED
+**Status:** IN PROGRESS
 
 ## Goal
 
@@ -398,38 +400,145 @@ Unsafe path relationships
 Unsupported schema versions
 ```
 
-## Planned Design Work
+## Implemented Validation Architecture
 
-Determine and document:
+The M3 implementation introduces a centralized validation boundary:
 
-- Validation service boundaries.
-- Validation result model.
-- Error versus warning behavior.
-- Whether validation aggregates failures or fails immediately.
-- Configuration schema-version strategy.
-- Path-safety rules.
-- User-facing validation output.
+```text
+ConfigurationValidationService
+ValidationResult
+ValidationError
+ValidationWarning
+```
+
+Current validation responsibilities include:
+
+```text
+Required profile and template values
+Empty required collections
+Duplicate profile names
+Duplicate profile destination directories
+Duplicate template names
+Unknown template references
+Invalid directory-node names
+Duplicate sibling directory names
+Invalid filesystem characters
+Reserved filesystem names
+Destination-root validation
+Planned-path containment
+Traversal / sibling-prefix escape rejection
+```
+
+`Program` now validates loaded configuration before template resolution/planning,
+validates the current preview destination root, and validates generated planned
+paths before displaying the preview.
+
+### Validation Result Semantics
+
+M3 establishes the following behavior:
+
+- Validation aggregates blocking failures instead of stopping at the first validation issue.
+- `ValidationError` represents blocking validation failures.
+- `ValidationWarning` represents non-blocking validation information.
+- `ValidationResult.IsValid` is false only when one or more errors exist.
+- Validation codes, messages, and property locations are retained for actionable reporting.
+
+### Path-Safety Decisions
+
+Current path safety is lexical and configuration-focused:
+
+- Destination roots must be fully qualified and contain valid, non-reserved directory segments.
+- Planned paths must be fully qualified.
+- Planned paths must remain at or beneath the approved destination root.
+- Parent traversal and sibling-prefix escapes are rejected.
+- Duplicate configured profile destinations represent the current configuration-level destination-conflict case.
+
+Existing-filesystem-object conflicts, reparse/symbolic-link inspection, and
+write-time state validation remain later provisioning-plan/provisioning work.
+
+### Schema Versioning Decision
+
+Unsupported-schema-version validation remains deferred because explicit
+configuration schema versioning does not yet exist. M3 does not introduce a
+schema-version field solely to satisfy a conditional future validation rule.
+
+## Current M3 Evidence
+
+```text
+Branch: feat/comprehensive-validation
+
+Current automated result:
+161 total
+161 passed
+0 failed
+0 skipped
+
+Stable automated verification catalog:
+TEST-001 through TEST-020
+
+M3 validation verification:
+TEST-015  Centralized configuration validation
+TEST-016  Recursive filesystem-name / sibling validation
+TEST-017  Destination-root safety
+TEST-018  Planned-path containment / escape protection
+TEST-019  Structured ValidationResult semantics
+TEST-020  Validation-first workflow integration
+
+Implemented checkpoints:
+eb9b164  feat: add comprehensive configuration validation
+eae67dd  feat: integrate validation into bootstrap workflow
+a921324  test: verify validation result semantics
+```
 
 ## Completion Criteria
 
 ```text
-[ ] Validation architecture is implemented.
-[ ] Configuration is validated before planning proceeds where required.
-[ ] Write-capable execution cannot bypass blocking validation.
-[ ] Duplicate and missing-reference scenarios are tested.
-[ ] Filesystem naming constraints are tested.
-[ ] Destination-root safety is tested.
-[ ] Validation failures produce actionable messages.
-[ ] Requirements are updated if implementation decisions refine behavior.
+[x] Validation architecture is implemented.
+[x] Configuration is validated before planning proceeds where required.
+[x] Current workflow establishes the blocking gate future write-capable execution must preserve.
+[x] Duplicate and missing-reference scenarios are tested.
+[x] Filesystem naming constraints are tested.
+[x] Destination-root safety is tested.
+[x] Planned-path containment and traversal protection are tested.
+[x] Validation failures produce actionable codes/messages/locations.
+[x] Error-versus-warning behavior is defined and tested.
+[x] Validation aggregates blocking failures.
+[x] Requirements are updated if implementation decisions refine behavior.
 [ ] Architecture and diagrams reflect actual validation flow.
-[ ] Automated tests pass.
-[ ] Build passes.
-[ ] Changes are committed and pushed.
+[x] Automated tests pass.
+[x] Build passes.
+[x] Implementation changes are committed and pushed.
+[ ] Complete M3 documentation synchronization.
+[ ] Run final branch validation and review.
+[ ] Merge the completed M3 branch.
+```
+
+## Remaining M3 Closeout
+
+The technical validation implementation is complete. Remaining work is
+documentation and milestone closeout:
+
+```text
+[x] Synchronize functional and non-functional validation requirements.
+[x] Synchronize TRACEABILITY.md through TEST-020.
+[x] Synchronize TESTING_STRATEGY.md with implemented M3 verification.
+[x] Synchronize MILESTONES.md with repository evidence.
+[ ] Synchronize ROADMAP.md with M3 implementation state.
+[ ] Update architecture and validation-flow diagrams/documentation.
+[ ] Run final documentation, build, and test validation.
+[ ] Commit and push the M3 documentation synchronization.
+[ ] Review the complete feature-branch diff against main.
+[ ] Merge M3 when review is clean.
 ```
 
 ## Exit Condition
 
-The application has a dependable safety gate between external configuration and future filesystem writes.
+The application has a dependable safety gate between external configuration and
+future filesystem writes.
+
+The technical exit condition is satisfied by the implemented validation
+boundary and automated suite. M3 remains `IN PROGRESS` until documentation,
+final review, and merge closeout are complete.
 
 ---
 
@@ -885,9 +994,9 @@ Each integration should have its own requirements and architecture review.
 ```mermaid
 flowchart TD
     M0["M0<br/>Foundation<br/>COMPLETE"]
-    M1["M1<br/>Documentation<br/>IN PROGRESS"]
-    M2["M2<br/>Testing"]
-    M3["M3<br/>Validation"]
+    M1["M1<br/>Documentation<br/>COMPLETE"]
+    M2["M2<br/>Testing<br/>COMPLETE"]
+    M3["M3<br/>Validation<br/>IN PROGRESS"]
     M4["M4<br/>Rich Plan"]
     M5["M5<br/>Provisioning"]
     M6["M6<br/>Verification"]
@@ -1016,10 +1125,12 @@ When changing milestone scope:
 
 # Immediate Next Milestone Transition
 
-After the documentation baseline is completed and safely merged, the preferred next implementation milestone is:
+M0, M1, and M2 are complete. M3 is the current implementation milestone.
+
+After M3 documentation synchronization, final branch review, and merge closeout, the preferred next implementation milestone is:
 
 ```text
-M2 — Automated Testing Foundation
+M4 — Rich Provisioning Plan
 ```
 
 This sequencing intentionally places regression protection before the application gains meaningful filesystem write capability.
@@ -1050,9 +1161,9 @@ The milestone sequence is designed to increase application capability without in
 
 ```text
 M0  Foundation                 COMPLETE
-M1  Documentation              IN PROGRESS
-M2  Automated Testing          PLANNED
-M3  Validation                 PLANNED
+M1  Documentation              COMPLETE
+M2  Automated Testing          COMPLETE
+M3  Validation                 IN PROGRESS
 M4  Rich Provisioning Plan     PLANNED
 M5  Filesystem Provisioning    PLANNED
 M6  Verification / Results     PLANNED

@@ -48,7 +48,7 @@ flowchart LR
     P0["Phase 0<br/>Foundation<br/>CURRENT"]
     P1["Phase 1<br/>Documentation Baseline<br/>CURRENT"]
     P2["Phase 2<br/>Automated Testing<br/>CURRENT"]
-    P3["Phase 3<br/>Validation<br/>PLANNED"]
+    P3["Phase 3<br/>Validation<br/>CURRENT"]
     P4["Phase 4<br/>Provisioning Plan<br/>PLANNED"]
     P5["Phase 5<br/>Filesystem Provisioning<br/>PLANNED"]
     P6["Phase 6<br/>Verification + Reporting<br/>PLANNED"]
@@ -346,15 +346,15 @@ Current planning behavior is protected by repeatable automated tests, reducing r
 
 # Phase 3 — Configuration and Request Validation
 
-**Status:** PLANNED
+**Status:** CURRENT
 
 ## Objective
 
 Centralize validation so invalid configuration or unsafe execution requests are rejected before write-capable behavior becomes possible.
 
-## Planned Validation Layer
+## Implemented Validation Layer
 
-Potential components:
+The current M3 implementation introduces:
 
 ```text
 ConfigurationValidationService
@@ -363,51 +363,133 @@ ValidationError
 ValidationWarning
 ```
 
-Final names remain subject to implementation design.
+`ConfigurationValidationService` now provides focused validation boundaries for:
 
-## Planned Configuration Checks
+```text
+Configuration consistency
+Destination-root safety
+Planned-path containment
+```
 
-Potential validation includes:
+## Implemented Configuration Checks
+
+Current automated validation includes:
 
 - Required profile fields.
 - Required template fields.
+- Empty required profile/template collections.
 - Duplicate profile names.
 - Duplicate profile destination directories.
 - Duplicate template names.
 - Missing template references.
 - Empty directory-node names.
 - Invalid filesystem characters.
-- Reserved filesystem names.
+- Reserved Windows filesystem names.
 - Duplicate sibling directory names.
-- Invalid destination roots.
-- Unsupported configuration versions.
+- Recursive nested directory validation.
 
-## Planned Execution Checks
+Validation aggregates blocking failures rather than stopping at the first validation issue.
 
-Before provisioning:
+## Structured Validation Results
 
-- Requested profile exists.
-- Assigned template resolves.
-- Destination root is valid.
-- Resulting paths remain under the approved root.
-- Configuration is internally consistent.
-- Provisioning was explicitly requested.
+M3 establishes structured validation semantics:
+
+- `ValidationError` represents a blocking failure.
+- `ValidationWarning` represents non-blocking validation information.
+- `ValidationResult.IsValid` remains true when only warnings exist.
+- Stable validation codes and human-readable messages are retained.
+- Property/configuration locations are included where practical.
+- Multiple validation errors can be reported together.
+
+## Implemented Path-Safety Checks
+
+The current validation boundary verifies:
+
+- Destination roots are present and fully qualified.
+- Destination path segments are syntactically valid and not reserved.
+- Planned paths are fully qualified.
+- Planned paths remain at or beneath the approved destination root.
+- Parent-traversal escapes are rejected.
+- Sibling-prefix escape paths are rejected.
+- Validation itself performs no filesystem provisioning.
+
+Duplicate configured profile destinations represent the current
+configuration-level conflicting-destination case.
+
+Existing filesystem object conflicts, reparse/symbolic-link inspection, and
+write-time state validation remain later provisioning-plan/provisioning work.
+
+## Current Workflow Integration
+
+The current application workflow now follows:
+
+```text
+Configuration Load
+        |
+        v
+Centralized Configuration Validation
+        |
+        +---- blocking error ----> Reject
+        |
+        v
+Destination-Root Validation
+        |
+        v
+Template Resolution
+        |
+        v
+Directory Planning
+        |
+        v
+Planned-Path Containment Validation
+        |
+        v
+Read-Only Preview
+```
+
+This establishes the validation gate that future write-capable execution must preserve.
+
+## Current Verification Evidence
+
+At the M3 implementation checkpoint:
+
+```text
+161 total tests
+161 passed
+0 failed
+0 skipped
+
+TEST-001 through TEST-020
+```
+
+M3-specific verification categories are `TEST-015` through `TEST-020` and cover centralized configuration validation, recursive filesystem-name validation, destination-root safety, path containment, structured validation-result semantics, and validation-first workflow integration.
+
+## Deferred Execution Checks
+
+The following remain tied to later request/CLI/provisioning capabilities that do not yet exist:
+
+- Explicit requested-profile selection.
+- Explicit provisioning intent.
+- Destination override precedence.
+- Write-time filesystem conflict inspection.
+- Reparse/symbolic-link safety inspection where relevant.
+
+These should not be introduced merely to make M3 appear broader than the implemented application surface.
 
 ## Schema Evolution
 
-Consider introducing explicit configuration schema versioning.
+Explicit configuration schema versioning has not yet been introduced.
 
-Conceptually:
+Unsupported-version validation therefore remains deferred until a real
+`schemaVersion` contract exists. Schema versioning should be introduced only when compatibility or migration requirements justify it.
 
-```json
-{
-  "schemaVersion": 1
-}
-```
+## Remaining Phase 3 Closeout
+
+The technical validation implementation is complete. Remaining work is documentation synchronization, architecture/diagram updates, final branch validation, review, and merge closeout.
 
 ## Expected Outcome
 
-Invalid or ambiguous configuration fails before the application crosses the filesystem-write safety boundary.
+Invalid or ambiguous configuration now fails before the application crosses the future filesystem-write safety boundary, while later provisioning-specific checks remain intentionally deferred.
 
 ---
 
@@ -971,7 +1053,7 @@ Test
 Verified Outcome
 ```
 
-Traceability now includes implemented `TEST-001` through `TEST-014` identifiers and should continue becoming more concrete as additional capabilities, tests, and architectural decisions are introduced.
+Traceability now includes implemented `TEST-001` through `TEST-020` identifiers, including M3 validation categories `TEST-015` through `TEST-020`, and should continue becoming more concrete as additional capabilities, tests, and architectural decisions are introduced.
 
 ---
 
@@ -1009,7 +1091,7 @@ CURRENT
 Profiles + Templates
       |
       v
-PLANNED
+CURRENT
 Comprehensive Validation
       |
       v

@@ -55,23 +55,36 @@ flowchart TD
     F --> H[BootstrapConfiguration]
     G --> I[TemplateConfiguration]
 
+    H --> V[ConfigurationValidationService]
+    I --> V
+    V --> VC{Configuration Valid?}
+    VC -->|No| VE[Structured Validation Errors]
+    VE --> R[Console Validation Output]
+
+    VC -->|Yes| VR[Validate Preview Destination Root]
+
     H --> J[ProfileConfiguration]
-    J --> K[TemplateResolverService]
-    I --> K
+    I --> K[TemplateConfiguration]
 
-    K --> L[CareerTemplate]
-    J --> M[DirectoryPlanService]
-    L --> M
+    VR --> L[TemplateResolverService]
+    J --> L
+    K --> L
 
-    M --> N[DirectoryNode Tree]
-    N --> O[Recursive Path Generation]
-    O --> P[Read-Only Directory Plan]
+    L --> M[CareerTemplate]
+    J --> N[DirectoryPlanService]
+    M --> N
 
-    P --> Q[Console Output]
+    N --> O[DirectoryNode Tree]
+    O --> P[Recursive Path Generation]
+    P --> Q[Read-Only Directory Plan]
+
+    Q --> VP[Validate Planned-Path Containment]
+    VP -->|Invalid| VE
+    VP -->|Valid| R2[Console Dry-Run Output]
 ```
 
-The current flow ends at console output. No generated plan is currently
-passed to a filesystem provisioning component.
+The current flow ends at validated console output. No generated plan is
+currently passed to a filesystem provisioning component.
 
 ------------------------------------------------------------------------
 
@@ -179,7 +192,52 @@ than C# hard-coded directory definitions.
 
 ------------------------------------------------------------------------
 
-## Phase 3 --- Profile-to-Template Resolution
+## Phase 3 --- Centralized Validation
+
+After both configuration files are loaded, the deserialized models pass through
+`ConfigurationValidationService`.
+
+```text
+BootstrapConfiguration
+        +
+TemplateConfiguration
+        |
+        v
+ConfigurationValidationService.Validate(...)
+        |
+        +--> ValidationError(s)
+        |
+        +--> ValidationWarning(s)
+        |
+        v
+ValidationResult.IsValid
+```
+
+Blocking configuration errors stop the normal workflow before template
+resolution/planning.
+
+Current configuration checks include required values, empty collections,
+duplicates, missing template references, recursive directory-name validation,
+reserved filesystem names, and duplicate sibling directories.
+
+The application then validates the logical `_Preview` destination root:
+
+```text
+Repository Root
+      |
+      v
+_Preview
+      |
+      v
+ValidateDestinationRoot(...)
+```
+
+This stage is read-only. The destination does not need to exist and validation
+does not create it.
+
+------------------------------------------------------------------------
+
+## Phase 4 --- Profile-to-Template Resolution
 
 Each profile contains a template name.
 
@@ -219,7 +277,7 @@ silently selecting a different template.
 
 ------------------------------------------------------------------------
 
-## Phase 4 --- Recursive Directory Traversal
+## Phase 5 --- Recursive Directory Traversal
 
 A resolved `CareerTemplate` contains top-level directory nodes.
 
@@ -271,7 +329,7 @@ without a separate implementation for each depth level.
 
 ------------------------------------------------------------------------
 
-## Phase 5 --- Path Construction
+## Phase 6 --- Path Construction
 
 The current planner receives:
 
@@ -310,6 +368,31 @@ look like if provisioning were later performed.
 
 ------------------------------------------------------------------------
 
+## Phase 7 --- Planned-Path Containment Validation
+
+After `DirectoryPlanService` returns the planned path collection, the workflow
+validates every path against the approved destination root.
+
+```text
+Approved Destination Root
+        +
+Planned Paths[]
+        |
+        v
+ValidatePlannedPaths(...)
+        |
+        +--> Valid: continue to preview
+        |
+        +--> Invalid: structured validation failure
+```
+
+Current containment checks require fully qualified paths and reject parent
+traversal, sibling-prefix escapes, and paths outside the approved root.
+
+This stage also performs no filesystem writes.
+
+------------------------------------------------------------------------
+
 ## Current Preview Boundary
 
 The current application uses a logical `_Preview` location for readable
@@ -336,13 +419,19 @@ Configuration
 Models
      |
      v
+Centralized Validation
+     |
+     v
 Resolution
      |
      v
 Planning
      |
      v
-Strings / Paths
+Path Containment Validation
+     |
+     v
+Validated Strings / Paths
      |
      v
 Console
@@ -360,8 +449,8 @@ service.
 
 ## Current Output Flow
 
-The generated directory paths return to the orchestration layer and are
-displayed to the console.
+Validated directory paths return to the orchestration layer and are displayed
+to the console.
 
 ```text
 DirectoryPlanService
@@ -370,54 +459,64 @@ DirectoryPlanService
 Planned Paths
         |
         v
+ConfigurationValidationService.ValidatePlannedPaths(...)
+        |
+        v
+Validated Planned Paths
+        |
+        v
 Program.Main
         |
         v
 Console Output
 ```
 
-The current output identifies the execution as a dry run and reports the
-planned directory structure and count.
+Blocking validation failures are rendered as structured codes/messages rather
+than being presented as successful dry-run output.
 
-The console is currently the terminal consumer of planning data.
+The console remains the terminal consumer of current planning data.
 
 ------------------------------------------------------------------------
 
 ## Current Error Flow
 
-Errors can originate from several stages:
+Failures can originate from:
 
 ```text
 Path Discovery
 Configuration File Access
 JSON Deserialization
+Centralized Configuration Validation
+Destination-Root Validation
 Template Resolution
-Planning Input Validation
+Planning
+Planned-Path Containment Validation
 ```
 
-Exceptions that reach the application boundary are handled by
-`Program.Main()`.
-
-Conceptually:
+Ordinary semantic validation failures use `ValidationResult` rather than
+exceptions:
 
 ```text
-Component Failure
+Validation Failure
       |
       v
-Exception
+ValidationResult.Errors
       |
       v
-Program.Main catch
+Program.Main
       |
-      +--> Display error
+      +--> Display code / property / message
       |
       +--> Return exit code 1
 ```
 
+Unexpected exceptions reaching the application boundary are still handled by
+the top-level `Program.Main()` catch block.
+
 Successful execution returns exit code `0`.
 
-The current architecture does not yet have a structured error-result
-pipeline or persistent error logging.
+Persistent logging and a general structured execution-result pipeline remain
+future work.
 
 ------------------------------------------------------------------------
 
@@ -432,6 +531,9 @@ JSON Text
 Strongly Typed Configuration Models
    |
    v
+Structured Configuration Validation
+   |
+   v
 Profile + Resolved Template
    |
    v
@@ -439,6 +541,9 @@ Recursive Directory Nodes
    |
    v
 Planned Path Collection
+   |
+   v
+Path Containment Validation
    |
    v
 Human-Readable Console Output
@@ -525,38 +630,40 @@ documented and validated before implementation.
 
 ------------------------------------------------------------------------
 
-## Future Validation Flow
+## Current Validation Data Flow
 
-A dedicated validation stage is planned before provisioning.
+A dedicated validation stage now exists before normal resolution/planning and
+before any future provisioning boundary.
 
 ```text
 Configuration Models
-        +
-Execution Request
-        +
-Resolved Environment
         |
         v
 ConfigurationValidationService
         |
-        +--> Valid
+        +--> ValidationError(s)   [blocking]
         |
-        +--> Warning(s)
+        +--> ValidationWarning(s) [non-blocking]
         |
-        +--> Error(s)
+        v
+ValidationResult.IsValid
 ```
 
-Potential validation results may carry:
+Current structured validation data carries:
 
 ```text
-Severity
 Code
 Message
-Location
-Suggested Resolution
+PropertyName
 ```
 
-Invalid configuration should not proceed into filesystem modification.
+Destination-root and planned-path validation reuse the same result contract.
+
+Future reporting may add richer resolution guidance or broader execution-result
+models, but M3 does not require a second validation representation.
+
+Explicit schema-version validation remains deferred until configuration
+versioning exists.
 
 ------------------------------------------------------------------------
 
@@ -763,9 +870,10 @@ The intended ownership model is:
   Profile definitions           `bootstrap.json`
   Template definitions          `templates.json`
   Deserialized profile state    Configuration models
+  Configuration validation     `ConfigurationValidationService`
+  Validation results            Validation models
   Template matching             `TemplateResolverService`
   Directory planning            `DirectoryPlanService`
-  Future validation results     Validation layer
   Future provisioning actions   Provisioning-plan model
   Future filesystem execution   Provisioning service
   Future execution results      Result/summary models
@@ -780,19 +888,18 @@ responsibilities.
 
 The following principles should remain true as the architecture evolves:
 
-1.  Configuration is loaded before dependent behavior executes.
-2.  A profile must resolve to a valid template before its directory
-    structure is planned.
-3.  Directory hierarchy is derived from the recursive template model.
-4.  Planning remains separate from filesystem modification.
-5.  Invalid configuration must not reach destructive execution.
-6.  Dry-run and provisioning should share the same validated intent.
-7.  Existing valid user content should be preserved.
-8.  Filesystem results should be verified rather than assumed.
-9.  Presentation and logging should report application results rather
-    than define business behavior.
-10. Planned behavior must not be documented as implemented until it
-    exists in the codebase.
+1. Configuration is loaded before dependent behavior executes.
+2. Loaded configuration passes centralized semantic validation before normal template resolution/planning.
+3. A profile must resolve to a valid template before its directory structure is planned.
+4. Directory hierarchy is derived from the recursive template model.
+5. Planned paths must remain beneath the approved destination root.
+6. Planning and validation remain separate from filesystem modification.
+7. Invalid configuration or unsafe planned paths must not reach destructive execution.
+8. Dry-run and provisioning should share the same validated intent.
+9. Existing valid user content should be preserved.
+10. Filesystem results should be verified rather than assumed.
+11. Presentation and logging should report application results rather than define business behavior.
+12. Planned behavior must not be documented as implemented until it exists in the codebase.
 
 ------------------------------------------------------------------------
 
@@ -807,10 +914,16 @@ JSON
 Configuration Models
  |
  v
+Centralized Validation
+ |
+ v
 Template Resolution
  |
  v
 Directory Planning
+ |
+ v
+Path Containment Validation
  |
  v
 Console Preview

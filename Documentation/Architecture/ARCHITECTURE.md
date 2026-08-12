@@ -106,6 +106,9 @@ TemplateResolverService
 
 DirectoryPlanService
     -> Read-only directory planning
+
+ConfigurationValidationService
+    -> Centralized configuration, destination-root, and planned-path validation
 ```
 
 Filesystem modification is intentionally not part of the current planning service.
@@ -224,6 +227,7 @@ Future CareerOS destination roots should also be configurable.
 flowchart TD
     A[Program.Main] --> B[PathService]
     A --> C[JsonConfigurationService]
+    A --> V[ConfigurationValidationService]
     A --> D[TemplateResolverService]
     A --> E[DirectoryPlanService]
 
@@ -236,6 +240,16 @@ flowchart TD
     H --> J[BootstrapConfiguration]
     I --> K[TemplateConfiguration]
 
+    J --> V
+    K --> V
+
+    V --> VC{Configuration Valid?}
+    VC -->|No| VE[Structured Validation Errors]
+    VE --> P[Console Validation Output]
+
+    VC -->|Yes| VR[Validate Preview Destination Root]
+    VR --> D
+
     J --> L[ProfileConfiguration]
     K --> M[CareerTemplate]
 
@@ -247,9 +261,11 @@ flowchart TD
     N --> E
     E --> O[Recursive Directory Plan]
 
-    O --> P[Console Dry-Run Output]
+    O --> VP[Validate Planned-Path Containment]
+    VP -->|Invalid| VE
+    VP -->|Valid| P2[Console Dry-Run Output]
 
-    P -. Future .-> Q[Provisioning Service]
+    P2 -. Future .-> Q[Provisioning Service]
     Q -. Future .-> R[Filesystem]
 ```
 
@@ -309,6 +325,7 @@ Responsibilities:
 ```text
 PathService
 JsonConfigurationService
+ConfigurationValidationService
 TemplateResolverService
 DirectoryPlanService
 ```
@@ -317,8 +334,9 @@ Responsibilities:
 
 - Discover required paths
 - Load configuration
+- Validate configuration and path safety
 - Resolve template relationships
-- Build provisioning plans
+- Build read-only directory plans
 
 ---
 
@@ -353,8 +371,13 @@ JSON loading
 Profile deserialization
 Template deserialization
 Template resolution
+Centralized configuration validation
+Destination-root validation
+Planned-path containment validation
+Structured validation errors and warnings
 Recursive directory traversal
 Dry-run plan generation
+Automated unit and integration testing
 Console output
 Top-level error handling
 ```
@@ -362,17 +385,14 @@ Top-level error handling
 ### Planned
 
 ```text
-Configuration validation
 Configurable installation root
 Command-line parsing
 True --dry-run CLI mode
 Filesystem provisioning
 Existing-directory detection
-Provisioning result models
+Rich provisioning result models
 Structured logging
 Execution summaries
-Unit tests
-Integration tests
 CI validation
 Release packaging
 Optional Git initialization

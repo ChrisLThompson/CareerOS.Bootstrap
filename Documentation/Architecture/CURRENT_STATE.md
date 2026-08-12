@@ -23,7 +23,7 @@ This distinction prevents future plans from being mistaken for working features.
 **Language:** C#
 **Configuration Format:** JSON
 **Primary Branch:** `main`
-**Current Development Branch:** `docs/documentation-v1`
+**Current Development Branch:** `feat/comprehensive-validation`
 
 The application currently operates as a **read-only directory planning utility**.
 
@@ -33,11 +33,15 @@ It can:
 - Locate repository-level configuration
 - Load CareerOS profile configuration
 - Load reusable directory templates
+- Validate loaded profile/template configuration centrally
+- Reject duplicate, missing-reference, invalid-name, and reserved-name configuration
+- Validate the current preview destination root
 - Resolve profiles to templates
 - Recursively traverse nested directory structures
-- Generate complete directory provisioning plans
-- Display those plans to the console
-- Exit successfully or report top-level failures
+- Generate complete read-only directory plans
+- Validate planned paths remain beneath the approved preview root
+- Display validated plans to the console
+- Return actionable validation failures or top-level failures
 
 It does **not currently create or modify CareerOS directories**.
 
@@ -63,23 +67,34 @@ flowchart TD
     H --> J[BootstrapConfiguration]
     I --> K[TemplateConfiguration]
 
-    J --> L[Enumerate Profiles]
-    L --> M[TemplateResolverService]
+    J --> L[ConfigurationValidationService]
+    K --> L
+    L --> M{Configuration Valid?}
 
-    K --> M
-    M --> N[Resolved CareerTemplate]
+    M -->|No| N[Display Structured Validation Errors]
+    N --> Z[Return Exit Code 1]
 
-    N --> O[DirectoryPlanService]
-    O --> P[Recursively Traverse DirectoryNode Tree]
+    M -->|Yes| O[Validate Preview Destination Root]
+    O --> P[Enumerate Profiles]
 
-    P --> Q[Generate Read-Only Directory Paths]
-    Q --> R[Display Dry-Run Plan]
+    P --> Q[TemplateResolverService]
+    K --> Q
+    Q --> R[Resolved CareerTemplate]
 
-    R --> S[Return Exit Code 0]
+    R --> S[DirectoryPlanService]
+    S --> T[Recursively Traverse DirectoryNode Tree]
 
-    B -. Exception .-> T[Catch Top-Level Exception]
-    T --> U[Display Error]
-    U --> V[Return Exit Code 1]
+    T --> U[Generate Read-Only Directory Paths]
+    U --> V[Validate Planned-Path Containment]
+
+    V -->|Invalid| N
+    V -->|Valid| W[Display Dry-Run Plan]
+
+    W --> X[Return Exit Code 0]
+
+    B -. Exception .-> Y[Catch Top-Level Exception]
+    Y --> AA[Display Error]
+    AA --> Z
 ```
 
 No filesystem provisioning occurs after the directory plan is generated.
@@ -101,9 +116,13 @@ CareerOS.Bootstrap/
 │   │   ├── BootstrapConfiguration.cs
 │   │   ├── DirectoryNode.cs
 │   │   ├── ProfileConfiguration.cs
-│   │   └── TemplateConfiguration.cs
+│   │   ├── TemplateConfiguration.cs
+│   │   ├── ValidationError.cs
+│   │   ├── ValidationResult.cs
+│   │   └── ValidationWarning.cs
 │   │
 │   ├── Services/
+│   │   ├── ConfigurationValidationService.cs
 │   │   ├── DirectoryPlanService.cs
 │   │   ├── JsonConfigurationService.cs
 │   │   ├── PathService.cs
@@ -131,7 +150,7 @@ CareerOS.Bootstrap/
 └── README.md
 ```
 
-The documentation hierarchy is currently being established on the `docs/documentation-v1` branch.
+The documentation baseline and automated-testing foundation are merged into `main`; M3 validation documentation is being synchronized on `feat/comprehensive-validation`.
 
 ---
 
@@ -150,10 +169,13 @@ Top-level statements are intentionally not used.
 1. Instantiates application services.
 2. Locates repository and configuration paths.
 3. Loads JSON configuration.
-4. Resolves each profile's assigned template.
-5. Builds a recursive directory plan.
-6. Displays the plan.
-7. Returns an exit code.
+4. Validates configuration and rejects blocking errors.
+5. Validates the current preview destination root.
+6. Resolves each profile's assigned template.
+7. Builds a recursive directory plan.
+8. Validates planned-path containment.
+9. Displays the validated plan.
+10. Returns an exit code.
 
 ### Exit Codes
 
@@ -250,6 +272,43 @@ System.Text.Json
 ```
 
 No external JSON library is currently required.
+
+---
+
+### `ConfigurationValidationService`
+
+**Implemented**
+
+Purpose:
+
+> Provide the centralized safety boundary for configuration consistency,
+> filesystem naming rules, destination-root validation, and planned-path
+> containment.
+
+Current responsibilities include:
+
+- Validate required profile and template values
+- Reject empty required profile/template collections
+- Reject duplicate profile names and destination directories
+- Reject duplicate template names
+- Reject missing template references
+- Validate recursive `DirectoryNode` names
+- Reject invalid/reserved Windows filesystem names
+- Reject duplicate sibling directory names
+- Validate fully qualified destination roots
+- Validate planned paths are fully qualified and remain beneath the approved root
+- Reject parent-traversal and sibling-prefix escape paths
+- Aggregate blocking validation errors
+
+Current public methods:
+
+```text
+Validate(bootstrapConfiguration, templateConfiguration)
+ValidateDestinationRoot(destinationRoot)
+ValidatePlannedPaths(destinationRoot, plannedPaths)
+```
+
+Validation itself performs no provisioning writes.
 
 ---
 
@@ -516,56 +575,71 @@ currently exists in the planning workflow.
 
 ## Current Validation
 
-Validation currently occurs at several points.
+Validation now has a centralized implementation boundary.
 
-### File validation
+### Configuration validation
 
-`JsonConfigurationService` confirms configuration files exist before attempting deserialization.
+`ConfigurationValidationService.Validate(...)` checks the loaded
+`BootstrapConfiguration` and `TemplateConfiguration` before template
+resolution/planning proceeds.
 
-### Null validation
+Implemented rules include:
 
-Selected service inputs use:
+- Required profile name, directory, and template values
+- Required template names
+- Empty profile/template collections
+- Duplicate profile names
+- Duplicate profile destination directories
+- Duplicate template names
+- Missing template references
+- Invalid/reserved Windows filesystem names
+- Empty directory-node names
+- Duplicate sibling directory names
+- Recursive nested directory validation
+
+### Destination-root validation
+
+`ValidateDestinationRoot(...)` requires a fully qualified path and rejects
+invalid or reserved path segments. The target does not need to exist, and
+validation does not create it.
+
+### Planned-path containment
+
+`ValidatePlannedPaths(...)` verifies that every planned path is fully
+qualified and remains at or beneath the approved destination root.
+
+Current containment checks reject:
+
+- Relative planned paths
+- Parent-traversal escapes
+- Sibling-prefix escapes
+- Paths outside the approved root
+
+### Structured validation result
+
+Validation produces:
 
 ```text
-ArgumentNullException.ThrowIfNull(...)
+ValidationResult
+├── Errors[]
+└── Warnings[]
 ```
 
-where appropriate.
+`ValidationError` is blocking. `ValidationWarning` is non-blocking.
+`ValidationResult.IsValid` becomes false only when one or more errors exist.
 
-### Empty-value validation
+Validation errors retain stable codes, human-readable messages, and property
+locations where practical.
 
-Current code rejects selected empty values including:
+### Deliberately deferred validation
 
-- Empty template names
-- Empty base paths
-- Empty profile directory names
-- Empty directory-node names
+The following remain future concerns rather than current M3 behavior:
 
-### Template validation
-
-A profile referencing a nonexistent template causes template resolution to fail before planning continues.
-
----
-
-## Validation Not Yet Implemented
-
-There is currently **no dedicated configuration-validation service**.
-
-The application does not yet perform comprehensive validation for issues such as:
-
-- Duplicate profile names
-- Duplicate profile directory names
-- Duplicate template names
-- Illegal filesystem characters
-- Reserved Windows directory names
-- Circular semantic configuration
-- Empty template collections
-- Empty profile collections
-- Conflicting destination paths
-- Unsupported schema versions
-- Duplicate sibling directory nodes
-
-These are future requirements.
+- Unsupported schema-version rejection, because explicit schema versioning does not yet exist
+- Existing-filesystem-object conflict inspection
+- Reparse/symbolic-link safety inspection for write-capable provisioning
+- Explicit profile-selection/request validation
+- Explicit provisioning-intent validation
 
 ---
 
@@ -595,13 +669,45 @@ When an exception reaches the application boundary:
 1
 ```
 
-There is currently:
+Current validation failures use structured validation models and stable
+validation codes before being rendered to the console.
 
-- No structured error model
-- No log file
-- No error code taxonomy
+There is still currently:
+
+- No persistent log file
+- No general application-wide error-code taxonomy beyond validation codes
 - No retry behavior
 - No centralized logging abstraction
+- No structured provisioning/execution result model
+
+---
+
+## Current Automated Verification
+
+The solution includes `CareerOS.Bootstrap.Tests`, using xUnit on .NET 8.
+
+At the current M3 implementation checkpoint:
+
+```text
+161 total
+161 passed
+0 failed
+0 skipped
+
+TEST-001 through TEST-020
+```
+
+M3 validation behavior is covered primarily by:
+
+```text
+ConfigurationValidationServiceTests
+ValidationResultTests
+BootstrapPlanningWorkflowTests
+```
+
+The automated suite verifies centralized configuration validation, recursive
+filesystem-name validation, destination-root safety, planned-path containment,
+structured error/warning semantics, and validation-first workflow behavior.
 
 ---
 

@@ -280,7 +280,7 @@ The current application behaves as a read-only preview, but a formal execution m
 
 ## US-009 — Validate Configuration Before Provisioning
 
-**Status:** Planned
+**Status:** Implemented for Current Validation Scope
 **Priority:** High
 
 **As a CareerOS user,**
@@ -298,11 +298,25 @@ Filesystem modification should occur only after the application's intent has bee
 - Missing template references are rejected.
 - Invalid path information is rejected before filesystem writes.
 
+### Current Implementation
+
+M3 introduces `ConfigurationValidationService` as the centralized validation
+boundary used before normal resolution/planning proceeds.
+
+Current coverage includes configuration consistency, missing template
+references, recursive filesystem-name validation, destination-root safety, and
+planned-path containment. Blocking errors produce structured validation results
+and stop the current workflow.
+
+Future write-capable provisioning must preserve this validation gate.
+
 ### Related Areas
 
-- Future `ConfigurationValidationService`
-- Validation result model
-- Path validation
+- `ConfigurationValidationService`
+- `ValidationResult`, `ValidationError`, `ValidationWarning`
+- Destination-root validation
+- Planned-path containment
+- Future provisioning safety
 
 ---
 
