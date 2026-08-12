@@ -48,8 +48,8 @@ flowchart LR
     P0["Phase 0<br/>Foundation<br/>CURRENT"]
     P1["Phase 1<br/>Documentation Baseline<br/>CURRENT"]
     P2["Phase 2<br/>Automated Testing<br/>CURRENT"]
-    P3["Phase 3<br/>Validation<br/>CURRENT"]
-    P4["Phase 4<br/>Provisioning Plan<br/>PLANNED"]
+    P3["Phase 3<br/>Validation<br/>COMPLETE"]
+    P4["Phase 4<br/>Provisioning Plan<br/>CURRENT"]
     P5["Phase 5<br/>Filesystem Provisioning<br/>PLANNED"]
     P6["Phase 6<br/>Verification + Reporting<br/>PLANNED"]
     P7["Phase 7<br/>CLI + Operational Maturity<br/>PLANNED"]
@@ -346,7 +346,7 @@ Current planning behavior is protected by repeatable automated tests, reducing r
 
 # Phase 3 — Configuration and Request Validation
 
-**Status:** CURRENT
+**Status:** COMPLETE
 
 ## Objective
 
@@ -483,19 +483,32 @@ Explicit configuration schema versioning has not yet been introduced.
 Unsupported-version validation therefore remains deferred until a real
 `schemaVersion` contract exists. Schema versioning should be introduced only when compatibility or migration requirements justify it.
 
-## Remaining Phase 3 Closeout
+## Phase 3 Completion Evidence
 
-The technical validation implementation is complete. Remaining work is documentation synchronization, architecture/diagram updates, final branch validation, review, and merge closeout.
+Phase 3 implementation, verification, documentation synchronization, final
+branch review, and merge closeout are complete.
+
+```text
+Merge commit: 6724008
+Build: succeeded
+Tests: 161 total, 161 passed, 0 failed, 0 skipped
+Stable verification catalog: TEST-001 through TEST-020
+```
 
 ## Expected Outcome
 
-Invalid or ambiguous configuration now fails before the application crosses the future filesystem-write safety boundary, while later provisioning-specific checks remain intentionally deferred.
+Invalid or ambiguous configuration now fails before the application crosses the
+future filesystem-write safety boundary, while later provisioning-specific
+checks remain intentionally deferred.
+
+Phase 3 is complete. The roadmap now advances to Phase 4 — Rich Provisioning
+Plan.
 
 ---
 
 # Phase 4 — Rich Provisioning Plan
 
-**Status:** PLANNED
+**Status:** CURRENT
 
 ## Objective
 
@@ -1091,8 +1104,12 @@ CURRENT
 Profiles + Templates
       |
       v
-CURRENT
+COMPLETE
 Comprehensive Validation
+      |
+      v
+CURRENT
+Rich Provisioning Plan
       |
       v
 PLANNED

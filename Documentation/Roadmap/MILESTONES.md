@@ -28,7 +28,7 @@ Milestone status should reflect repository evidence rather than intention alone.
 | M0 | Bootstrap application foundation | COMPLETE |
 | M1 | Documentation and design baseline | COMPLETE |
 | M2 | Automated testing foundation | COMPLETE |
-| M3 | Comprehensive validation | IN PROGRESS |
+| M3 | Comprehensive validation | COMPLETE |
 | M4 | Rich provisioning plan | PLANNED |
 | M5 | Safe filesystem provisioning | PLANNED |
 | M6 | Verification and structured results | PLANNED |
@@ -374,7 +374,7 @@ The M2 exit condition is satisfied and the milestone is complete.
 
 # M3 — Comprehensive Validation
 
-**Status:** IN PROGRESS
+**Status:** COMPLETE
 
 ## Goal
 
@@ -504,31 +504,42 @@ a921324  test: verify validation result semantics
 [x] Error-versus-warning behavior is defined and tested.
 [x] Validation aggregates blocking failures.
 [x] Requirements are updated if implementation decisions refine behavior.
-[ ] Architecture and diagrams reflect actual validation flow.
+[x] Architecture and diagrams reflect actual validation flow.
 [x] Automated tests pass.
 [x] Build passes.
 [x] Implementation changes are committed and pushed.
-[ ] Complete M3 documentation synchronization.
-[ ] Run final branch validation and review.
-[ ] Merge the completed M3 branch.
+[x] Complete M3 documentation synchronization.
+[x] Run final branch validation and review.
+[x] Merge the completed M3 branch.
 ```
 
-## Remaining M3 Closeout
+## M3 Completion Evidence
 
-The technical validation implementation is complete. Remaining work is
-documentation and milestone closeout:
+The technical validation implementation, documentation synchronization, final
+branch review, and merge closeout are complete.
 
 ```text
 [x] Synchronize functional and non-functional validation requirements.
 [x] Synchronize TRACEABILITY.md through TEST-020.
 [x] Synchronize TESTING_STRATEGY.md with implemented M3 verification.
 [x] Synchronize MILESTONES.md with repository evidence.
-[ ] Synchronize ROADMAP.md with M3 implementation state.
-[ ] Update architecture and validation-flow diagrams/documentation.
-[ ] Run final documentation, build, and test validation.
-[ ] Commit and push the M3 documentation synchronization.
-[ ] Review the complete feature-branch diff against main.
-[ ] Merge M3 when review is clean.
+[x] Synchronize ROADMAP.md with M3 implementation state.
+[x] Update architecture and validation-flow diagrams/documentation.
+[x] Run final documentation, build, and test validation.
+[x] Commit and push the M3 documentation synchronization.
+[x] Review the complete feature-branch diff against main.
+[x] Merge M3 when review is clean.
+```
+
+M3 was merged into `main` with merge commit `6724008`.
+
+Post-merge verification:
+
+```text
+dotnet build  -> succeeded
+dotnet test   -> 161 total, 161 passed, 0 failed, 0 skipped
+working tree  -> clean
+origin/main   -> 6724008
 ```
 
 ## Exit Condition
@@ -536,9 +547,7 @@ documentation and milestone closeout:
 The application has a dependable safety gate between external configuration and
 future filesystem writes.
 
-The technical exit condition is satisfied by the implemented validation
-boundary and automated suite. M3 remains `IN PROGRESS` until documentation,
-final review, and merge closeout are complete.
+The M3 exit condition is satisfied and the milestone is complete.
 
 ---
 
@@ -996,7 +1005,7 @@ flowchart TD
     M0["M0<br/>Foundation<br/>COMPLETE"]
     M1["M1<br/>Documentation<br/>COMPLETE"]
     M2["M2<br/>Testing<br/>COMPLETE"]
-    M3["M3<br/>Validation<br/>IN PROGRESS"]
+    M3["M3<br/>Validation<br/>COMPLETE"]
     M4["M4<br/>Rich Plan"]
     M5["M5<br/>Provisioning"]
     M6["M6<br/>Verification"]
@@ -1125,9 +1134,9 @@ When changing milestone scope:
 
 # Immediate Next Milestone Transition
 
-M0, M1, and M2 are complete. M3 is the current implementation milestone.
+M0 through M3 are complete. M4 is the next implementation milestone.
 
-After M3 documentation synchronization, final branch review, and merge closeout, the preferred next implementation milestone is:
+The preferred next implementation milestone is:
 
 ```text
 M4 — Rich Provisioning Plan
@@ -1163,7 +1172,7 @@ The milestone sequence is designed to increase application capability without in
 M0  Foundation                 COMPLETE
 M1  Documentation              COMPLETE
 M2  Automated Testing          COMPLETE
-M3  Validation                 IN PROGRESS
+M3  Validation                 COMPLETE
 M4  Rich Provisioning Plan     PLANNED
 M5  Filesystem Provisioning    PLANNED
 M6  Verification / Results     PLANNED
