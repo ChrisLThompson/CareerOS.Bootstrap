@@ -26,8 +26,8 @@ Milestone status should reflect repository evidence rather than intention alone.
 | Milestone | Capability | Status |
 | --- | --- | --- |
 | M0 | Bootstrap application foundation | COMPLETE |
-| M1 | Documentation and design baseline | IN PROGRESS |
-| M2 | Automated testing foundation | PLANNED |
+| M1 | Documentation and design baseline | COMPLETE |
+| M2 | Automated testing foundation | IN PROGRESS |
 | M3 | Comprehensive validation | PLANNED |
 | M4 | Rich provisioning plan | PLANNED |
 | M5 | Safe filesystem provisioning | PLANNED |
@@ -82,7 +82,7 @@ The repository has a safe planning foundation on which later validation and prov
 
 # M1 — Documentation and Design Baseline
 
-**Status:** IN PROGRESS
+**Status:** COMPLETE
 
 ## Goal
 
@@ -151,23 +151,23 @@ MILESTONES.md
 - Documentation changes reviewed through a feature branch.
 - Git checkpoints used throughout documentation development.
 
-## Remaining Completion Actions
-
-Before M1 is marked `COMPLETE`:
+## Completion Evidence
 
 ```text
-[ ] Confirm ROADMAP.md is in place.
-[ ] Confirm MILESTONES.md is in place.
-[ ] Run git diff --check.
-[ ] Run dotnet build.
-[ ] Review staged file inventory.
-[ ] Commit References and Roadmap documentation coherently.
-[ ] Push the documentation branch.
-[ ] Verify Markdown and Mermaid rendering on GitHub.
-[ ] Review documentation navigation and cross-links.
-[ ] Confirm the working tree is clean.
-[ ] Complete the documentation branch review / merge process when ready.
+[x] ROADMAP.md is in place.
+[x] MILESTONES.md is in place.
+[x] git diff --check passed.
+[x] dotnet build passed.
+[x] Staged documentation inventory was reviewed.
+[x] References and Roadmap documentation were committed coherently.
+[x] Documentation feature branch was pushed.
+[x] Markdown and Mermaid rendering were verified on GitHub.
+[x] Documentation navigation and cross-links were recursively audited.
+[x] Documentation working tree was clean before merge.
+[x] Documentation v1 baseline was merged into main.
 ```
+
+The documentation baseline was merged into `main` with merge commit `f994440`.
 
 ## Exit Criteria
 
@@ -177,34 +177,41 @@ M1 is complete when the documentation baseline is version-controlled, reviewable
 
 # M2 — Automated Testing Foundation
 
-**Status:** PLANNED
+**Status:** IN PROGRESS
 
 ## Goal
 
 Protect current behavior with automated tests before introducing significant filesystem write capability.
 
-## Required Work
+## Implemented Test Architecture
 
-### Test Project
+A dedicated .NET 8 xUnit test project is now included in the solution.
 
-Create a dedicated .NET test project.
-
-Conceptual structure:
+Current structure:
 
 ```text
 CareerOS.Bootstrap.Tests/
-├── Services/
-├── Models/
 ├── Fixtures/
+│   ├── TemporaryDirectoryFixture.cs
+│   └── TemporaryDirectoryFixtureTests.cs
+│
 ├── Integration/
+│   └── BootstrapPlanningWorkflowTests.cs
+│
+├── Services/
+│   ├── DirectoryPlanServiceTests.cs
+│   ├── JsonConfigurationServiceTests.cs
+│   ├── PathServiceTests.cs
+│   └── TemplateResolverServiceTests.cs
+│
 └── CareerOS.Bootstrap.Tests.csproj
 ```
 
-The final structure may evolve during implementation.
+A `Models/` test directory was intentionally not created because the current models are simple DTOs without independent business behavior that warrants dedicated tests.
 
 ### `PathService` Coverage
 
-Test:
+Implemented coverage:
 
 ```text
 Repository-root discovery
@@ -214,7 +221,7 @@ Expected failure behavior
 
 ### `JsonConfigurationService` Coverage
 
-Test:
+Implemented coverage:
 
 ```text
 Valid configuration
@@ -226,7 +233,7 @@ Supported JSON options
 
 ### `TemplateResolverService` Coverage
 
-Test:
+Implemented coverage:
 
 ```text
 Exact template match
@@ -238,7 +245,7 @@ Null or invalid input where applicable
 
 ### `DirectoryPlanService` Coverage
 
-Test:
+Implemented coverage:
 
 ```text
 Single directory
@@ -252,29 +259,114 @@ Path construction
 
 ### Integration Fixtures
 
-Establish isolated temporary directories for tests that interact with filesystem state.
+`TemporaryDirectoryFixture` now provides isolated temporary directories and files for filesystem-dependent tests.
 
-Tests must not use a real CareerOS workspace as a test target.
+The fixture itself is tested for:
+
+```text
+Unique temporary roots
+Nested directory creation
+UTF-8 file creation
+Path-boundary protection
+Recursive cleanup
+Idempotent disposal
+Disposed-object protection
+```
+
+Current integration tests use isolated temporary locations and do not target a real CareerOS workspace.
+
+### Workflow Integration Coverage
+
+`BootstrapPlanningWorkflowTests` currently verifies:
+
+```text
+Configuration load
+Template resolution
+Recursive planning
+Multiple profiles using assigned templates
+Unknown-template failure
+Dry-run/no-write behavior
+```
+
+The workflow intentionally stops at planning because filesystem provisioning has not yet been implemented.
+
+### PathService Testability Seam
+
+`PathService` retains its default `AppContext.BaseDirectory` runtime behavior and now also accepts an injected starting directory.
+
+This small production seam enables isolated tests for:
+
+```text
+Repository-root discovery
+Missing repository root
+Configuration-directory discovery
+Missing Configuration directory
+Nested starting directories
+```
+
+without renaming or manipulating the real repository.
 
 ## Completion Criteria
 
 ```text
-[ ] Test project exists and is included in the solution.
-[ ] Current core services have meaningful automated coverage.
-[ ] Recursive planning has regression tests.
-[ ] Configuration failure cases are tested.
-[ ] Tests are repeatable.
-[ ] Filesystem-related tests use isolated temporary locations.
-[ ] dotnet test succeeds.
-[ ] dotnet build succeeds.
-[ ] Testing documentation reflects the implemented test architecture.
-[ ] Traceability is updated with implemented test mappings.
-[ ] Changes are committed and pushed through a reviewable branch.
+[x] Test project exists and is included in the solution.
+[x] Current core services have meaningful automated coverage.
+[x] Recursive planning has regression tests.
+[x] Configuration failure cases are tested.
+[x] Tests are repeatable.
+[x] Filesystem-related tests use isolated temporary locations.
+[x] dotnet test succeeds.
+[x] dotnet build succeeds.
+[x] Testing documentation reflects the implemented test architecture.
+[x] Traceability is updated with implemented test mappings.
+[x] Changes are committed and pushed through a reviewable branch.
 ```
+
+## Current M2 Evidence
+
+```text
+Branch: test/automated-testing-foundation
+
+Automated test framework: xUnit
+Target framework: .NET 8
+
+Current automated result:
+75 total
+75 passed
+0 failed
+0 skipped
+
+Stable automated verification catalog:
+TEST-001 through TEST-014
+
+Implemented checkpoints:
+bf21208  test: add service unit test foundation
+b4e5b52  test: add fixture and integration test foundation
+f67b85a  test: improve path service failure-path coverage
+```
+
+## Remaining M2 Closeout
+
+The functional testing foundation is implemented. Remaining work is milestone closeout rather than additional test-volume work:
+
+```text
+[x] Synchronize TRACEABILITY.md with TEST-001 through TEST-014.
+[x] Synchronize TESTING_STRATEGY.md with the implemented architecture.
+[x] Synchronize MILESTONES.md with repository evidence.
+[ ] Review whether ROADMAP.md requires an M2 status synchronization update.
+[ ] Run final documentation and test validation.
+[ ] Commit and push the M2 documentation synchronization.
+[ ] Review the complete feature-branch diff against main.
+[ ] Merge the completed M2 branch when review is clean.
+```
+
+CI, provisioning safety/idempotency tests, centralized validation tests, CLI tests, and release automation remain future work because their corresponding production capabilities are not yet implemented.
 
 ## Exit Condition
 
 Current read-only planning behavior is protected sufficiently to support safe architectural evolution.
+
+The technical exit condition is satisfied by the implemented automated suite. M2 remains `IN PROGRESS` until the documentation synchronization, final branch review, and merge closeout are complete.
 
 ---
 

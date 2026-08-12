@@ -47,7 +47,7 @@ Project evolution should continue to follow these principles:
 flowchart LR
     P0["Phase 0<br/>Foundation<br/>CURRENT"]
     P1["Phase 1<br/>Documentation Baseline<br/>CURRENT"]
-    P2["Phase 2<br/>Automated Testing<br/>PLANNED"]
+    P2["Phase 2<br/>Automated Testing<br/>CURRENT"]
     P3["Phase 3<br/>Validation<br/>PLANNED"]
     P4["Phase 4<br/>Provisioning Plan<br/>PLANNED"]
     P5["Phase 5<br/>Filesystem Provisioning<br/>PLANNED"]
@@ -180,90 +180,167 @@ References:
 
 Repository safeguards include `.editorconfig` to help maintain consistent Markdown and source-file formatting.
 
-## Remaining Phase 1 Work
+## Phase 1 Completion Evidence
 
-- Complete roadmap documentation.
-- Perform a documentation checkpoint.
-- Review repository navigation and cross-links.
-- Merge the documentation baseline when review is complete.
+The documentation and design baseline is established and merged into `main`.
+
+Completed evidence includes:
+
+- Roadmap and milestone documentation established.
+- Documentation checkpoint completed.
+- Repository navigation and cross-links recursively audited.
+- Markdown and Mermaid rendering reviewed.
+- Documentation baseline merged through the documentation feature branch.
+- Repository build validated at the merge checkpoint.
 
 ## Exit Direction
 
-Once the documentation baseline is stable, implementation should move toward automated testing before adding meaningful filesystem write behavior.
+With the documentation baseline established, implementation has moved into automated regression protection before adding meaningful filesystem write behavior.
 
 ---
 
 # Phase 2 — Automated Testing Foundation
 
-**Status:** PLANNED
+**Status:** CURRENT
 
 ## Objective
 
 Establish automated regression protection around current behavior before significantly expanding application responsibilities.
 
-## Planned Work
+## Implemented Test Architecture
 
-Create a dedicated test project.
-
-Conceptually:
+A dedicated .NET 8 xUnit test project is included in the solution:
 
 ```text
 CareerOS.Bootstrap.Tests/
-├── Services/
-├── Models/
 ├── Fixtures/
-└── Integration/
+│   ├── TemporaryDirectoryFixture.cs
+│   └── TemporaryDirectoryFixtureTests.cs
+│
+├── Integration/
+│   └── BootstrapPlanningWorkflowTests.cs
+│
+├── Services/
+│   ├── DirectoryPlanServiceTests.cs
+│   ├── JsonConfigurationServiceTests.cs
+│   ├── PathServiceTests.cs
+│   └── TemplateResolverServiceTests.cs
+│
+└── CareerOS.Bootstrap.Tests.csproj
 ```
 
-## Initial Unit-Test Targets
+A separate `Models/` test directory is not currently required because the existing models are simple data-transfer/configuration types without independent business behavior.
+
+## Implemented Service Coverage
 
 ### `PathService`
 
-Validate:
+Automated coverage includes:
 
 - Repository-root discovery.
 - Configuration-directory discovery.
-- Failure behavior when the expected repository structure cannot be found.
+- Nested starting-directory behavior.
+- Missing repository-root failure behavior.
+- Missing configuration-directory failure behavior.
+- Isolated execution through an injectable starting-directory seam.
+
+The default runtime behavior remains based on `AppContext.BaseDirectory`.
 
 ### `JsonConfigurationService`
 
-Validate:
+Automated coverage includes:
 
 - Valid JSON loading.
 - Missing files.
-- Invalid JSON.
-- Deserialization failures.
-- Supported JSON options.
+- Malformed JSON.
+- Deserialization behavior.
+- Supported JSON options and property casing.
+- Configuration collection behavior.
 
 ### `TemplateResolverService`
 
-Validate:
+Automated coverage includes:
 
 - Successful template resolution.
 - Case-insensitive matching.
-- Missing template behavior.
-- Invalid input behavior.
+- Missing-template behavior.
+- Empty and invalid input behavior where applicable.
 
 ### `DirectoryPlanService`
 
-Validate:
+Automated coverage includes:
 
 - Top-level directory planning.
+- Multiple directories.
 - Nested directory planning.
 - Deep recursive structures.
-- Empty collections.
+- Empty child collections.
 - Invalid directory-node names.
 - Path construction.
 
-## Integration-Test Direction
+## Filesystem Fixture Foundation
 
-Introduce isolated temporary filesystem fixtures for behavior that crosses service boundaries.
+`TemporaryDirectoryFixture` provides isolated temporary filesystem locations for tests that require real directory or file behavior.
+
+Fixture verification covers:
+
+- Unique temporary roots.
+- Nested directory creation.
+- UTF-8 file creation.
+- Path-boundary protection.
+- Recursive cleanup.
+- Idempotent disposal.
+- Protection against use after disposal.
 
 No test should depend on or modify a real CareerOS workspace.
 
+## Workflow Integration Coverage
+
+`BootstrapPlanningWorkflowTests` exercises the current planning workflow across service boundaries, including:
+
+- Configuration loading.
+- Template resolution.
+- Recursive planning.
+- Multiple profiles using assigned templates.
+- Unknown-template failure.
+- Dry-run/no-write behavior.
+
+The integration boundary intentionally stops at planning because filesystem provisioning has not yet been implemented.
+
+## Current Verification Baseline
+
+At the current M2 checkpoint:
+
+```text
+Framework: xUnit
+Target framework: .NET 8
+
+75 total tests
+75 passed
+0 failed
+0 skipped
+
+Automated verification catalog:
+TEST-001 through TEST-014
+```
+
+The implemented test mappings are maintained in `TRACEABILITY.md`, while testing conventions and future test layers are maintained in `TESTING_STRATEGY.md`.
+
+## Remaining Phase 2 Closeout
+
+The technical automated-testing foundation is implemented. Remaining work is repository/milestone closeout:
+
+- Synchronize M2 documentation with repository evidence.
+- Run final build, test, and documentation validation.
+- Review the complete feature-branch diff against `main`.
+- Commit and push the documentation synchronization.
+- Merge the M2 feature branch when review is clean.
+
+CI execution, provisioning safety/idempotency tests, centralized validation tests, CLI/result tests, and release-validation automation remain later-phase work because their corresponding production capabilities do not yet exist.
+
 ## Expected Outcome
 
-Current planning behavior becomes protected by repeatable automated tests, reducing regression risk before provisioning is introduced.
+Current planning behavior is protected by repeatable automated tests, reducing regression risk before validation and provisioning are introduced.
 
 ---
 
@@ -894,7 +971,7 @@ Test
 Verified Outcome
 ```
 
-Traceability should become more concrete as test identifiers and architectural decisions are introduced.
+Traceability now includes implemented `TEST-001` through `TEST-014` identifiers and should continue becoming more concrete as additional capabilities, tests, and architectural decisions are introduced.
 
 ---
 

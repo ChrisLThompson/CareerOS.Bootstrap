@@ -22,9 +22,9 @@ Testing is intended to provide evidence that requirements are satisfied. A featu
 
 ## Current Testing State
 
-Automated tests are not yet implemented.
+The automated testing foundation is now implemented.
 
-Current verification consists primarily of:
+The current verification model is:
 
 ```text
 Code Change
@@ -33,24 +33,36 @@ Code Change
 dotnet build
    |
    v
-dotnet run
+dotnet test
    |
    v
-Manual Output Review
+Targeted Manual Review where needed
    |
    v
 Git Diff / Review
 ```
 
-This manual process has been useful for establishing the current foundation, but it is not the target long-term testing model.
-
-The planned automated test project is:
+The test project is:
 
 ```text
 CareerOS.Bootstrap.Tests
 ```
 
-The initial test foundation is associated primarily with:
+At the current M2 checkpoint:
+
+```text
+Test framework: xUnit
+Target framework: .NET 8
+Automated tests: 75 passing
+Failed tests: 0
+Skipped tests: 0
+Service test suites: 4
+Shared temporary-filesystem fixture: Implemented and tested
+Workflow/integration tests: Implemented for current planning behavior
+CI execution: Planned
+```
+
+The implemented foundation primarily supports:
 
 ```text
 US-021
@@ -60,7 +72,6 @@ US-023
 FR-041
 FR-042
 FR-043
-FR-044
 
 NFR-018
 NFR-019
@@ -68,6 +79,8 @@ NFR-020
 NFR-034
 NFR-036
 ```
+
+`FR-044` remains planned because GitHub Actions has not yet been implemented.
 
 ---
 
@@ -137,7 +150,7 @@ The test suite must not imply that planned functionality is already available.
 
 Unit tests verify focused application behavior in isolation.
 
-Expected initial test targets include:
+Implemented unit-test targets include:
 
 ```text
 TemplateResolverServiceTests
@@ -174,16 +187,27 @@ Integration tests verify collaboration between components or behavior requiring 
 
 For CareerOS.Bootstrap, the most important integration boundary is the filesystem.
 
-Expected future integration coverage includes:
+Current integration coverage includes:
+
+```text
+Configuration load
+Template resolution
+Recursive planning
+Multiple-profile/template planning
+Dry-run/no-write planning behavior
+Isolated temporary filesystem use
+Temporary repository/path scenarios
+```
+
+Future integration coverage includes:
 
 ```text
 DirectoryProvisioningService
 Existing-state inspection
 Directory creation
 Repeat-run idempotency
-Dry-run no-write behavior
-Failure handling
-Temporary repository / path scenarios where appropriate
+Preservation of existing files/directories
+Provisioning failure handling
 ```
 
 Integration tests may use real filesystem operations, but only inside isolated temporary roots owned by the test.
@@ -237,45 +261,76 @@ Manual testing supplements automated tests; it should not be the only protection
 
 ---
 
-# Initial Unit-Test Plan
+# Implemented Automated Test Catalog
+
+Stable `TEST-###` identifiers represent behavioral verification categories rather than individual xUnit methods. One identifier may therefore be implemented by multiple `[Fact]` or `[Theory]` cases.
+
+The canonical mapping is maintained in `Documentation/Requirements/TRACEABILITY.md`.
+
+| Test ID | Verification Intent | Primary Test Artifact(s) |
+|---|---|---|
+| TEST-001 | Load valid bootstrap/profile configuration, including supported JSON options and collection behavior | `JsonConfigurationServiceTests.cs` |
+| TEST-002 | Load valid recursive template configuration, including supported JSON options | `JsonConfigurationServiceTests.cs` |
+| TEST-003 | Resolve configured template names, including case-insensitive matching and correct selection | `TemplateResolverServiceTests.cs` |
+| TEST-004 | Reject missing, invalid, or unknown template resolution requests | `TemplateResolverServiceTests.cs`, `BootstrapPlanningWorkflowTests.cs` |
+| TEST-005 | Build top-level and recursive directory plans in deterministic traversal order | `DirectoryPlanServiceTests.cs` |
+| TEST-006 | Reject invalid planning inputs, including missing base paths/profile directories and unnamed directory nodes | `DirectoryPlanServiceTests.cs` |
+| TEST-007 | Verify planning remains read-only and does not create planned workspace directories | `DirectoryPlanServiceTests.cs`, `BootstrapPlanningWorkflowTests.cs` |
+| TEST-008 | Discover the repository root from the default or injected starting directory | `PathServiceTests.cs` |
+| TEST-009 | Reject repository discovery when the expected solution root cannot be found | `PathServiceTests.cs` |
+| TEST-010 | Resolve the repository `Configuration` directory from default or injected roots | `PathServiceTests.cs` |
+| TEST-011 | Reject configuration-directory discovery when the directory is missing | `PathServiceTests.cs` |
+| TEST-012 | Execute configuration-load → template-resolution → recursive-planning workflow against isolated files | `BootstrapPlanningWorkflowTests.cs` |
+| TEST-013 | Execute multi-profile planning with each profile's assigned template | `BootstrapPlanningWorkflowTests.cs` |
+| TEST-014 | Provide and verify isolated temporary filesystem fixtures, including cleanup and path-boundary protection | `TemporaryDirectoryFixture.cs`, `TemporaryDirectoryFixtureTests.cs` |
+
+The current automated suite contains 75 passing xUnit cases at the M2 checkpoint.
+
+---
+
+# Implemented Service Test Coverage
 
 ## TemplateResolverService
 
-Initial behaviors to verify:
+Implemented coverage includes:
 
 ```text
-TEST-001  Resolves a valid template name
-TEST-002  Resolves template names case-insensitively
-TEST-003  Rejects an unknown template
-TEST-004  Does not silently choose another template
+Exact-name resolution
+Case-insensitive resolution
+Correct selection from multiple templates
+Null configuration handling
+Missing template-name handling
+Unknown-template failure
+Empty-template collection failure
 ```
 
-Primary requirement relationships:
+Primary requirement relationships include:
 
 ```text
 FR-004
 FR-005
 FR-018
 NFR-008
+NFR-016
 ```
-
----
 
 ## DirectoryPlanService
 
-Initial behaviors to verify:
+Implemented coverage includes:
 
 ```text
-TEST-005  Generates the expected profile root
-TEST-006  Includes every top-level directory
-TEST-007  Includes nested child directories
-TEST-008  Supports deeper recursive nesting
-TEST-009  Builds child paths beneath the correct parent
-TEST-010  Rejects invalid required planning inputs
-TEST-011  Planning performs no filesystem writes
+Profile-root generation
+Top-level directory planning
+Recursive nested planning
+Multiple recursive branches
+Missing base-path rejection
+Null profile/template rejection
+Missing profile-directory rejection
+Unnamed directory-node rejection
+No filesystem writes during planning
 ```
 
-Primary requirement relationships:
+Primary requirement relationships include:
 
 ```text
 FR-006
@@ -285,23 +340,26 @@ FR-014
 FR-017
 NFR-001
 NFR-015
+NFR-018
 ```
-
----
 
 ## JsonConfigurationService
 
-Initial behaviors to verify:
+Implemented coverage includes:
 
 ```text
-TEST-012  Loads valid bootstrap configuration
-TEST-013  Loads valid template configuration
-TEST-014  Rejects a missing configuration file
-TEST-015  Reports invalid JSON as failure
-TEST-016  Supports documented JSON parsing options
+Valid bootstrap configuration
+Valid recursive template configuration
+Case-insensitive JSON property names
+JSON comments
+Trailing commas
+Missing-file failure
+Malformed-JSON failure
+JSON null/deserialization failure
+Empty profile/template collections
 ```
 
-Primary requirement relationships:
+Primary requirement relationships include:
 
 ```text
 FR-001
@@ -311,29 +369,84 @@ NFR-008
 NFR-009
 ```
 
----
-
 ## PathService
 
-Initial behaviors to verify where practical:
+Implemented coverage includes:
 
 ```text
-TEST-017  Finds the repository root from a nested runtime location
-TEST-018  Resolves Configuration from the repository root
-TEST-019  Reports repository discovery failure clearly
-TEST-020  Reports a missing Configuration directory clearly
+Repository-root discovery from the normal runtime location
+Repository-root discovery from an injected nested start directory
+Absolute-path behavior
+Configuration-directory resolution
+Repository discovery failure
+Missing Configuration directory failure
+Injected repository-root scenarios
+Constructor validation for missing start directories
 ```
 
-Primary requirement relationships:
+The production service retains its default `AppContext.BaseDirectory` behavior while exposing an injected starting-directory constructor for isolated tests.
+
+Primary requirement relationships include:
 
 ```text
 FR-007
 FR-008
 NFR-011
 NFR-022
+NFR-034
 ```
 
-Some path-discovery behavior may require controlled temporary-directory fixtures rather than pure unit tests.
+---
+
+# Implemented Fixture and Integration Foundation
+
+## TemporaryDirectoryFixture
+
+The shared fixture provides:
+
+```text
+Unique temporary root per fixture instance
+Nested directory creation
+UTF-8 file creation
+Path composition beneath the fixture root
+Path-boundary protection
+Deterministic recursive cleanup
+Idempotent disposal
+Disposed-object protection
+```
+
+The fixture itself is covered by automated tests before being relied upon as shared infrastructure.
+
+## BootstrapPlanningWorkflowTests
+
+Current workflow tests exercise:
+
+```text
+Temporary configuration files
+        |
+        v
+JsonConfigurationService
+        |
+        v
+TemplateResolverService
+        |
+        v
+DirectoryPlanService
+        |
+        v
+Planned Paths
+```
+
+Implemented scenarios include:
+
+```text
+Valid recursive planning workflow
+Multiple profiles using different templates
+No planned workspace directories created
+Unknown assigned template failure
+```
+
+These tests intentionally stop at planning because filesystem provisioning has not yet been implemented.
 
 ---
 
@@ -530,21 +643,21 @@ Operation / Scenario / Expected Outcome
 
 # Test Identifier Strategy
 
-`TRACEABILITY.md` currently reserves the concept of `TEST-###` identifiers.
+Stable `TEST-###` identifiers are now implemented and maintained in `TRACEABILITY.md`.
 
-When the automated test project is established, important traceable tests should receive stable identifiers.
+A test identifier represents a durable verification intent, not necessarily one individual xUnit method. This allows methods to be split, renamed, or parameterized without unnecessarily renumbering traceability.
 
 Example:
 
 ```text
-TEST-008
-Requirement: FR-012
-Test: BuildPlan_DeepNestedStructure_IncludesEveryNode
+TEST-005
+Intent: Build top-level and recursive directory plans in deterministic traversal order
+Implementation: DirectoryPlanServiceTests.cs
 ```
 
-Not every micro-test must necessarily receive a formal requirement ID relationship, but safety-critical and acceptance-driving tests should be traceable.
+Not every micro-test requires a separate identifier. Safety-critical, requirement-driving, and acceptance-level behaviors should remain traceable.
 
-Identifiers should not replace descriptive test method names.
+Identifiers do not replace descriptive test method names.
 
 ---
 
@@ -582,46 +695,55 @@ When tests are added:
 
 # Test Project Structure
 
-A future test project may begin with a structure similar to:
+The current implemented structure is:
 
 ```text
 CareerOS.Bootstrap.Tests/
+├── Fixtures/
+│   ├── TemporaryDirectoryFixture.cs
+│   └── TemporaryDirectoryFixtureTests.cs
+│
+├── Integration/
+│   └── BootstrapPlanningWorkflowTests.cs
+│
 ├── Services/
 │   ├── DirectoryPlanServiceTests.cs
 │   ├── JsonConfigurationServiceTests.cs
 │   ├── PathServiceTests.cs
 │   └── TemplateResolverServiceTests.cs
 │
-├── Models/
-├── Fixtures/
-├── Integration/
-│   └── Filesystem/
 └── CareerOS.Bootstrap.Tests.csproj
 ```
 
+A `Models/` directory has intentionally not been created because the current model types are simple DTOs without meaningful independent behavior to verify.
+
 As functionality evolves, additional areas may be introduced for validation, CLI, orchestration, provisioning, logging, and release-related behavior.
 
-The structure should evolve with real testing needs rather than creating empty abstraction layers prematurely.
+The structure should continue evolving with real testing needs rather than creating empty abstraction layers prematurely.
 
 ---
 
 # Test Framework Selection
 
-A specific .NET test framework has not yet been formally selected in the project documentation.
+xUnit is the adopted test framework for `CareerOS.Bootstrap.Tests`.
 
-The framework decision should be made when the test project is created and recorded where appropriate.
+The current project uses the standard .NET test tooling and executes through:
 
-Selection criteria should include:
+```powershell
+dotnet test
+```
+
+The selected framework satisfies the project criteria for:
 
 - .NET 8 compatibility
 - Visual Studio integration
 - `dotnet test` support
 - Clear assertion behavior
 - Maintainability
-- CI support
+- Future CI support
 - Minimal unnecessary dependency overhead
 
-A framework should not be documented as adopted until it is actually added to the solution.
+Framework adoption is now an implemented project decision rather than a planned selection.
 
 ---
 
@@ -717,7 +839,7 @@ CI should report failures visibly and block merge only when branch-protection po
 
 # Local Developer Validation
 
-Before a pull request or merge, developers should eventually run:
+Before a pull request or merge, developers should run:
 
 ```powershell
 dotnet restore
@@ -725,14 +847,17 @@ dotnet build
 dotnet test
 ```
 
-Until the test project exists, the current minimum remains:
+For checkpoint validation, the current working practice also includes:
 
 ```powershell
-dotnet build
-dotnet run --project .\CareerOS.Bootstrap\CareerOS.Bootstrap.csproj
+git status
+git diff --check
+git diff --stat
 ```
 
-plus review of relevant Git changes.
+or the staged equivalents before commit.
+
+Manual `dotnet run` verification remains useful when console behavior or user-facing output changes, but it is no longer the only verification layer.
 
 ---
 
@@ -789,30 +914,40 @@ Not every change requires every test level, but filesystem-modifying behavior re
 
 # Near-Term Testing Roadmap
 
-Recommended sequence:
+Completed M2 foundation:
 
 ```text
-1. Establish CareerOS.Bootstrap.Tests
-2. Select .NET test framework
-3. Add TemplateResolverService tests
-4. Add DirectoryPlanService tests
-5. Add JsonConfigurationService tests
-6. Add practical PathService tests
-7. Assign initial TEST-### identifiers
-8. Update TRACEABILITY.md
-9. Add validation-service tests when validation is implemented
-10. Add isolated filesystem integration fixture
-11. Implement provisioning safety/idempotency tests
-12. Add dotnet test to GitHub CI
+[x] Establish CareerOS.Bootstrap.Tests
+[x] Adopt xUnit
+[x] Add TemplateResolverService tests
+[x] Add DirectoryPlanService tests
+[x] Add JsonConfigurationService tests
+[x] Add practical and isolated PathService tests
+[x] Add TemporaryDirectoryFixture
+[x] Test the shared fixture
+[x] Add current-state workflow/integration tests
+[x] Assign TEST-001 through TEST-014
+[x] Update TRACEABILITY.md
+[x] Establish repeatable local dotnet build / dotnet test checkpoints
 ```
 
-This order protects existing behavior before introducing filesystem provisioning.
+Remaining future testing work:
+
+```text
+[ ] Add centralized validation-service tests when validation exists
+[ ] Add filesystem provisioning safety/idempotency tests when provisioning exists
+[ ] Add CLI/result/exit-code tests when those capabilities exist
+[ ] Add dotnet test to GitHub CI
+[ ] Add release-validation automation when packaged releases exist
+```
+
+This sequence continues to protect implemented behavior without creating tests for functionality that does not yet exist.
 
 ---
 
 # Summary
 
-The testing strategy evolves CareerOS.Bootstrap from manual validation toward requirements-driven automated verification.
+The testing strategy has moved CareerOS.Bootstrap from primarily manual validation into a requirements-driven automated verification foundation.
 
 The target model is:
 
