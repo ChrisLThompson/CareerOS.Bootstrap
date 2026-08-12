@@ -568,4 +568,248 @@ public class BootstrapPlanningWorkflowTests
             error.Code);
     }
 
+
+    [Fact]
+    public void PlanningWorkflow_WithValidatedMissingPaths_BuildsStructuredCreatePlanWithoutWrites()
+    {
+        using TemporaryDirectoryFixture fixture =
+            new();
+
+        string bootstrapPath =
+            fixture.CreateFile(
+                "bootstrap.json",
+                """
+                {
+                  "profiles": [
+                    {
+                      "name": "Chris",
+                      "directory": "CareerOS_Chris",
+                      "template": "CareerProfessional"
+                    }
+                  ]
+                }
+                """);
+
+        string templatesPath =
+            fixture.CreateFile(
+                "templates.json",
+                """
+                {
+                  "templates": [
+                    {
+                      "name": "CareerProfessional",
+                      "directories": [
+                        {
+                          "name": "Resume",
+                          "children": [
+                            {
+                              "name": "Master",
+                              "children": []
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+                """);
+
+        JsonConfigurationService configurationService =
+            new();
+
+        ConfigurationValidationService validationService =
+            new();
+
+        TemplateResolverService templateResolverService =
+            new();
+
+        DirectoryPlanService directoryPlanService =
+            new();
+
+        ProvisioningPlanService provisioningPlanService =
+            new();
+
+        BootstrapConfiguration bootstrapConfiguration =
+            configurationService.LoadBootstrapConfiguration(
+                bootstrapPath);
+
+        TemplateConfiguration templateConfiguration =
+            configurationService.LoadTemplateConfiguration(
+                templatesPath);
+
+        ValidationResult configurationValidation =
+            validationService.Validate(
+                bootstrapConfiguration,
+                templateConfiguration);
+
+        Assert.True(configurationValidation.IsValid);
+
+        ProfileConfiguration profile =
+            Assert.Single(
+                bootstrapConfiguration.Profiles);
+
+        CareerTemplate template =
+            templateResolverService.ResolveTemplate(
+                templateConfiguration,
+                profile.Template);
+
+        string destinationRoot =
+            fixture.GetPath(
+                "Workspace");
+
+        ValidationResult destinationValidation =
+            validationService.ValidateDestinationRoot(
+                destinationRoot);
+
+        Assert.True(destinationValidation.IsValid);
+
+        IReadOnlyList<string> directoryPlan =
+            directoryPlanService.BuildPlan(
+                destinationRoot,
+                profile,
+                template);
+
+        ValidationResult pathValidation =
+            validationService.ValidatePlannedPaths(
+                destinationRoot,
+                directoryPlan);
+
+        Assert.True(pathValidation.IsValid);
+
+        ProvisioningPlan provisioningPlan =
+            provisioningPlanService.BuildPlan(
+                directoryPlan);
+
+        Assert.Equal(
+            directoryPlan.Count,
+            provisioningPlan.Actions.Count);
+
+        Assert.All(
+            provisioningPlan.Actions,
+            action =>
+            {
+                Assert.Equal(
+                    ProvisioningActionType.Create,
+                    action.ActionType);
+
+                Assert.Equal(
+                    ProvisioningCurrentState.Missing,
+                    action.CurrentState);
+
+                Assert.Equal(
+                    ProvisioningDesiredState.Directory,
+                    action.DesiredState);
+
+                Assert.False(
+                    Directory.Exists(action.TargetPath));
+            });
+
+        Assert.False(
+            Directory.Exists(destinationRoot));
+    }
+
+    [Fact]
+    public void PlanningWorkflow_WithExistingExpectedDirectory_ClassifiesPreserveAfterValidation()
+    {
+        using TemporaryDirectoryFixture fixture =
+            new();
+
+        string destinationRoot =
+            fixture.GetPath(
+                "Workspace");
+
+        string existingDirectory =
+            fixture.CreateDirectory(
+                "Workspace",
+                "CareerOS_Chris");
+
+        ConfigurationValidationService validationService =
+            new();
+
+        ProvisioningPlanService provisioningPlanService =
+            new();
+
+        ValidationResult pathValidation =
+            validationService.ValidatePlannedPaths(
+                destinationRoot,
+                [existingDirectory]);
+
+        Assert.True(pathValidation.IsValid);
+
+        ProvisioningPlan provisioningPlan =
+            provisioningPlanService.BuildPlan(
+                [existingDirectory]);
+
+        ProvisioningAction action =
+            Assert.Single(
+                provisioningPlan.Actions);
+
+        Assert.Equal(
+            ProvisioningActionType.Preserve,
+            action.ActionType);
+
+        Assert.Equal(
+            ProvisioningCurrentState.Directory,
+            action.CurrentState);
+
+        Assert.True(
+            Directory.Exists(existingDirectory));
+    }
+
+    [Fact]
+    public void PlanningWorkflow_WithFileAtExpectedDirectory_ClassifiesConflictAfterValidationWithoutMutation()
+    {
+        using TemporaryDirectoryFixture fixture =
+            new();
+
+        const string originalContent =
+            "existing user content";
+
+        string destinationRoot =
+            fixture.GetPath(
+                "Workspace");
+
+        string conflictingPath =
+            fixture.CreateFile(
+                Path.Combine(
+                    "Workspace",
+                    "CareerOS_Chris"),
+                originalContent);
+
+        ConfigurationValidationService validationService =
+            new();
+
+        ProvisioningPlanService provisioningPlanService =
+            new();
+
+        ValidationResult pathValidation =
+            validationService.ValidatePlannedPaths(
+                destinationRoot,
+                [conflictingPath]);
+
+        Assert.True(pathValidation.IsValid);
+
+        ProvisioningPlan provisioningPlan =
+            provisioningPlanService.BuildPlan(
+                [conflictingPath]);
+
+        ProvisioningAction action =
+            Assert.Single(
+                provisioningPlan.Actions);
+
+        Assert.Equal(
+            ProvisioningActionType.Conflict,
+            action.ActionType);
+
+        Assert.Equal(
+            ProvisioningCurrentState.File,
+            action.CurrentState);
+
+        Assert.True(
+            File.Exists(conflictingPath));
+
+        Assert.Equal(
+            originalContent,
+            File.ReadAllText(conflictingPath));
+    }
 }

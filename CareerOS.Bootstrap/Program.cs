@@ -1,3 +1,4 @@
+using CareerOS.Bootstrap.Models;
 using CareerOS.Bootstrap.Services;
 
 namespace CareerOS.Bootstrap;
@@ -11,6 +12,7 @@ internal class Program
         TemplateResolverService templateResolver = new();
         DirectoryPlanService directoryPlanService = new();
         ConfigurationValidationService validationService = new();
+        ProvisioningPlanService provisioningPlanService = new();
 
         try
         {
@@ -119,18 +121,22 @@ internal class Program
                         planValidation);
                 }
 
+                ProvisioningPlan provisioningPlan =
+                    provisioningPlanService.BuildPlan(
+                        directoryPlan);
+
                 Console.WriteLine($"Profile: {profile.Name}");
                 Console.WriteLine($"Template: {template.Name}");
                 Console.WriteLine();
 
-                foreach (string directory in directoryPlan)
+                foreach (ProvisioningAction action in provisioningPlan.Actions)
                 {
-                    Console.WriteLine($"  [PLAN] {directory}");
+                    WriteProvisioningAction(action);
                 }
 
                 Console.WriteLine();
                 Console.WriteLine(
-                    $"Directories planned: {directoryPlan.Count}");
+                    $"Actions planned: {provisioningPlan.Actions.Count}");
 
                 Console.WriteLine();
                 Console.WriteLine(
@@ -160,6 +166,28 @@ internal class Program
             Console.ResetColor();
 
             return 1;
+        }
+    }
+
+    private static void WriteProvisioningAction(
+        ProvisioningAction action)
+    {
+        Console.WriteLine(
+            $"  [{action.ActionType.ToString().ToUpperInvariant()}] {action.TargetPath}");
+
+        Console.WriteLine(
+            $"    Current: {action.CurrentState}");
+
+        Console.WriteLine(
+            $"    Desired: {action.DesiredState}");
+
+        Console.WriteLine(
+            $"    Reason: {action.Reason}");
+
+        foreach (string warning in action.Warnings)
+        {
+            Console.WriteLine(
+                $"    Warning: {warning}");
         }
     }
 
