@@ -1,4 +1,4 @@
-﻿using CareerOS.Bootstrap.Services;
+using CareerOS.Bootstrap.Services;
 
 namespace CareerOS.Bootstrap;
 
@@ -10,6 +10,7 @@ internal class Program
         JsonConfigurationService jsonService = new();
         TemplateResolverService templateResolver = new();
         DirectoryPlanService directoryPlanService = new();
+        ConfigurationValidationService validationService = new();
 
         try
         {
@@ -36,6 +37,18 @@ internal class Program
             var templateConfiguration =
                 jsonService.LoadTemplateConfiguration(
                     templatesPath);
+
+            var configurationValidation =
+                validationService.Validate(
+                    bootstrapConfiguration,
+                    templateConfiguration);
+
+            if (!configurationValidation.IsValid)
+            {
+                return WriteValidationFailure(
+                    "Configuration validation failed.",
+                    configurationValidation);
+            }
 
             Console.WriteLine();
             Console.WriteLine("CareerOS Bootstrap");
@@ -70,6 +83,17 @@ internal class Program
                     repositoryRoot,
                     "_Preview");
 
+            var destinationValidation =
+                validationService.ValidateDestinationRoot(
+                    previewRoot);
+
+            if (!destinationValidation.IsValid)
+            {
+                return WriteValidationFailure(
+                    "Destination validation failed.",
+                    destinationValidation);
+            }
+
             foreach (var profile in bootstrapConfiguration.Profiles)
             {
                 var template =
@@ -82,6 +106,18 @@ internal class Program
                         previewRoot,
                         profile,
                         template);
+
+                var planValidation =
+                    validationService.ValidatePlannedPaths(
+                        previewRoot,
+                        directoryPlan);
+
+                if (!planValidation.IsValid)
+                {
+                    return WriteValidationFailure(
+                        $"Planned-path validation failed for profile '{profile.Name}'.",
+                        planValidation);
+                }
 
                 Console.WriteLine($"Profile: {profile.Name}");
                 Console.WriteLine($"Template: {template.Name}");
@@ -125,5 +161,33 @@ internal class Program
 
             return 1;
         }
+    }
+
+    private static int WriteValidationFailure(
+        string heading,
+        Models.ValidationResult result)
+    {
+        Console.ForegroundColor =
+            ConsoleColor.Red;
+
+        Console.WriteLine();
+        Console.WriteLine(heading);
+        Console.WriteLine();
+
+        foreach (var error in result.Errors)
+        {
+            string location =
+                string.IsNullOrWhiteSpace(error.PropertyName)
+                    ? string.Empty
+                    : $" [{error.PropertyName}]";
+
+            Console.WriteLine(
+                $"  {error.Code}{location}: {error.Message}");
+        }
+
+        Console.WriteLine();
+        Console.ResetColor();
+
+        return 1;
     }
 }
