@@ -4,7 +4,7 @@
 
 This document visualizes how data moves through `CareerOS.Bootstrap`, from repository configuration through model deserialization, profile/template resolution, recursive directory planning, and current dry-run output.
 
-It also documents the planned extension of that data flow into validation, provisioning, verification, and structured execution results.
+It also documents the current M3 validation stages and the planned extension into provisioning, verification, and richer execution results.
 
 ## Status Legend
 
@@ -26,6 +26,9 @@ flowchart LR
     BootstrapModel["BootstrapConfiguration<br/>Profiles[]<br/>CURRENT"]
     TemplateModel["TemplateConfiguration<br/>Templates[]<br/>CURRENT"]
 
+    Validator["ConfigurationValidationService<br/>CURRENT"]
+    Validation["ValidationResult<br/>CURRENT"]
+
     Resolver["TemplateResolverService<br/>CURRENT"]
     Resolved["Resolved Profile + Template<br/>CURRENT"]
 
@@ -33,7 +36,8 @@ flowchart LR
     Tree["Recursive DirectoryNode Tree<br/>CURRENT"]
     Paths["Planned Directory Paths<br/>CURRENT"]
 
-    Console["Console Dry-Run Output<br/>CURRENT"]
+    Containment["Planned-Path Containment<br/>CURRENT"]
+    Console["Console Dry-Run / Validation Output<br/>CURRENT"]
 
     BootstrapJson -->|"JSON text"| JsonService
     TemplatesJson -->|"JSON text"| JsonService
@@ -41,6 +45,11 @@ flowchart LR
     JsonService -->|"deserialize"| BootstrapModel
     JsonService -->|"deserialize"| TemplateModel
 
+    BootstrapModel --> Validator
+    TemplateModel --> Validator
+    Validator --> Validation
+
+    Validation -->|"valid configuration"| Resolver
     BootstrapModel --> Resolver
     TemplateModel --> Resolver
 
@@ -50,10 +59,13 @@ flowchart LR
     Tree --> Planner
 
     Planner --> Paths
-    Paths --> Console
+    Paths --> Containment
+    Containment -->|"valid"| Console
+    Validation -->|"blocking errors"| Console
 ```
 
-The current application consumes configuration and produces a read-only directory plan. It does not currently write the planned CareerOS workspace to the filesystem.
+The current application validates configuration and path safety before exposing
+a read-only directory plan. It still does not provision the CareerOS workspace.
 
 ---
 
@@ -139,6 +151,33 @@ The planner traverses this hierarchy rather than relying on a fixed number of di
 
 ---
 
+# Current Validation Data Flow
+
+```mermaid
+flowchart TD
+    Bootstrap["BootstrapConfiguration"]
+    Templates["TemplateConfiguration"]
+    Validator["ConfigurationValidationService"]
+
+    Bootstrap --> Validator
+    Templates --> Validator
+
+    Validator --> Result["ValidationResult"]
+    Result --> Errors["ValidationError[]<br/>Blocking"]
+    Result --> Warnings["ValidationWarning[]<br/>Non-Blocking"]
+    Result --> Valid{"IsValid?"}
+
+    Valid -->|"No"| Reject["Return Failure / Console Errors"]
+    Valid -->|"Yes"| Root["Validate Preview Destination Root"]
+    Root --> Continue["Continue to Resolution + Planning"]
+```
+
+Current validation covers required values, duplicates, missing references,
+recursive filesystem names, reserved names, destination-root safety, and later
+planned-path containment.
+
+---
+
 # Current Resolution Flow
 
 ```mermaid
@@ -208,16 +247,20 @@ Child nodes inherit the path produced for their parent.
 ```mermaid
 flowchart LR
     Plan["Directory Plan<br/>CURRENT"]
+    Validator["ValidatePlannedPaths<br/>CURRENT"]
     Program["Program.Main<br/>CURRENT"]
     Console["Console / Terminal<br/>CURRENT"]
     Filesystem["CareerOS Workspace Filesystem<br/>PLANNED"]
 
-    Plan --> Program
+    Plan --> Validator
+    Validator -->|"valid plan"| Program
+    Validator -->|"blocking error"| Console
     Program -->|"display"| Console
     Plan -. "no current write" .-> Filesystem
 ```
 
-The current output is informational. The planned paths are displayed for review but are not provisioned.
+The current output remains informational. Only validated planned paths are
+displayed; no CareerOS workspace directories are provisioned.
 
 ---
 
@@ -233,6 +276,9 @@ Raw Configuration Data
 Strongly Typed Configuration Models
    |
    v
+Centralized Configuration Validation
+   |
+   v
 Profile + Template Relationship
    |
    v
@@ -243,6 +289,9 @@ Resolved Destination Paths
    |
    v
 Read-Only Directory Plan
+   |
+   v
+Planned-Path Containment Validation
    |
    v
 Console Output

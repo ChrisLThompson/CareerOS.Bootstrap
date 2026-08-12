@@ -23,7 +23,7 @@ capable of creating and maintaining standardized CareerOS environments.
 
 The target lifecycle is:
 
-```text
+``` text
 Input
   |
   v
@@ -100,7 +100,7 @@ separated sufficiently to support focused automated testing.
 
 ## Target High-Level Architecture
 
-```mermaid
+``` mermaid
 flowchart TD
     A[User / Automation] --> B[Command-Line Interface]
     B --> C[Application Orchestrator]
@@ -136,7 +136,7 @@ application options.
 
 Potential capabilities include:
 
-```text
+``` text
 --dry-run
 --profile
 --root
@@ -159,7 +159,7 @@ execution mode, provisioning, reporting, and exit-code mapping.
 
 Conceptually:
 
-```text
+``` text
 Program.Main
     |
     v
@@ -195,34 +195,41 @@ appropriate.
 
 ### Validation layer
 
-A dedicated validation service is planned.
+A dedicated validation service now exists in the current architecture:
 
-Potential validation responsibilities include:
-
--   Required profile and template values
--   Duplicate profile names or destination directories
--   Duplicate template names
--   Missing template references
--   Invalid path characters or reserved filesystem names
--   Conflicting paths
--   Duplicate sibling directories
--   Empty required collections
--   Unsupported configuration versions
-
-Validation should produce actionable results before filesystem
-provisioning is permitted.
-
-A future validation result may conceptually contain:
-
-```text
-Severity
-Code
-Message
-Location
-Suggested Resolution
+``` text
+ConfigurationValidationService
 ```
 
-The exact model is not yet finalized.
+The current implementation validates required profile/template values,
+duplicates, missing template references, recursive filesystem naming rules,
+destination-root safety, and planned-path containment.
+
+Current structured validation models are:
+
+``` text
+ValidationResult
+ValidationError
+ValidationWarning
+```
+
+The current result contract already carries stable codes, human-readable
+messages, and property locations where practical. Blocking errors determine
+`ValidationResult.IsValid`; warnings are non-blocking.
+
+Future validation evolution may add capabilities only when corresponding
+application features exist, including:
+
+-   Explicit schema-version compatibility checks
+-   CLI/request validation
+-   Profile-selection validation
+-   Provisioning-intent validation
+-   Existing-filesystem-object conflict checks
+-   Reparse/symbolic-link safety inspection where relevant
+-   Richer suggested-resolution metadata when justified
+
+Future provisioning must consume the existing blocking validation gate rather
+than replacing or bypassing it.
 
 ------------------------------------------------------------------------
 
@@ -233,7 +240,7 @@ directory paths.
 
 Future planning may evolve toward a richer plan model:
 
-```text
+``` text
 ProvisioningPlan
 └── Actions[]
     ├── TargetPath
@@ -245,7 +252,7 @@ ProvisioningPlan
 
 Possible action types could include:
 
-```text
+``` text
 Create
 Exists
 Skip
@@ -266,7 +273,7 @@ changes.
 
 Conceptually:
 
-```text
+``` text
 DirectoryProvisioningService
 ```
 
@@ -290,7 +297,7 @@ uses. It should operate on a plan produced earlier in the workflow.
 Before creating anything, future provisioning should determine what
 already exists.
 
-```text
+``` text
 Desired: CareerOS\User\Resume
 Current: Missing
 Result:  Create
@@ -313,7 +320,7 @@ true command-line execution mode.
 
 Future behavior should support an explicit option such as:
 
-```powershell
+``` powershell
 CareerOS.Bootstrap --dry-run
 ```
 
@@ -336,7 +343,7 @@ a hard-coded machine-specific location.
 
 Potential precedence may eventually be:
 
-```text
+``` text
 Command-line override
         |
         v
@@ -376,7 +383,7 @@ than relying solely on exception messages.
 
 Potential categories include:
 
-```text
+``` text
 Configuration Error
 Validation Error
 Path Error
@@ -391,38 +398,47 @@ CI usage. The taxonomy is not yet finalized.
 
 ------------------------------------------------------------------------
 
-## Planned Testing Architecture
+## Current Testing Foundation and Future Expansion
 
-A dedicated automated test project is planned:
+A dedicated automated test project is implemented:
 
-```text
+``` text
 CareerOS.Bootstrap.Tests
 ```
 
-Expected initial coverage includes:
+Current coverage includes:
 
-```text
+``` text
 TemplateResolverServiceTests
 DirectoryPlanServiceTests
 JsonConfigurationServiceTests
 PathServiceTests
-```
-
-Future provisioning will require additional tests such as:
-
-```text
-DirectoryProvisioningServiceTests
 ConfigurationValidationServiceTests
-ApplicationWorkflowTests
+ValidationResultTests
+BootstrapPlanningWorkflowTests
+TemporaryDirectoryFixtureTests
 ```
 
-Unit tests should verify focused service behavior, while actual
-provisioning should use filesystem integration tests against isolated
-temporary directories rather than real CareerOS environments.
+At the current M3 implementation checkpoint the suite contains 161 passing
+xUnit tests with zero failures.
 
-A typical filesystem test lifecycle should be:
+Future provisioning will require additional focused and integration coverage,
+including:
 
-```text
+``` text
+DirectoryProvisioningServiceTests
+ProvisioningPlanTests
+ExistingStateInspectionTests
+ProvisioningWorkflowTests
+IdempotencyTests
+```
+
+Actual provisioning should continue to use isolated temporary filesystem roots
+rather than real CareerOS environments.
+
+A typical future provisioning-test lifecycle should be:
+
+``` text
 Create isolated temporary test root
         |
         v
@@ -448,7 +464,7 @@ Remove temporary test root
 Future requirements documentation should connect business intent to
 implementation.
 
-```text
+``` text
 Business Need
       |
       v
@@ -472,7 +488,7 @@ Acceptance Result
 
 Stable identifiers should include:
 
-```text
+``` text
 US-###
 FR-###
 NFR-###
@@ -508,7 +524,7 @@ GitHub-based continuous integration is planned.
 
 A future workflow may perform:
 
-```text
+``` text
 Checkout
    |
    v
@@ -543,7 +559,7 @@ users to run from source.
 
 Potential lifecycle:
 
-```text
+``` text
 Source
   |
   v
@@ -578,7 +594,7 @@ tested and supported.
 As configuration evolves, future JSON schemas may require version
 information:
 
-```json
+``` json
 {
   "schemaVersion": 1
 }
@@ -620,7 +636,7 @@ modify an existing repository.
 
 ## Future Application Flow
 
-```mermaid
+``` mermaid
 sequenceDiagram
     actor User
     participant CLI
@@ -666,7 +682,7 @@ implementation decisions are made.
 
 Potential future components include:
 
-```text
+``` text
 ApplicationRunner
 CommandLineOptions
 ConfigurationValidationService
@@ -767,7 +783,7 @@ A mature initial provisioning feature should demonstrate:
 
 Preferred sequence:
 
-```text
+``` text
 Documentation Foundation
         |
         v
@@ -804,7 +820,7 @@ This sequence may change when requirements justify a different priority.
 The future architecture builds directly on existing components rather
 than discarding the current foundation.
 
-```text
+``` text
 CURRENT
 PathService
 JsonConfigurationService
@@ -839,7 +855,7 @@ declared CareerOS structure to verified filesystem state.
 
 The intended future lifecycle is:
 
-```text
+``` text
 Declare
   |
   v

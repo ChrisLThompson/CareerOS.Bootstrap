@@ -114,10 +114,13 @@ It currently coordinates the full dry-run workflow.
 - Instantiate services
 - Discover repository/configuration paths
 - Load configuration
+- Invoke centralized configuration validation
+- Validate the current preview destination root
 - Iterate configured profiles
 - Resolve each profile's template
 - Request a directory plan
-- Display dry-run output
+- Validate planned-path containment
+- Display dry-run output or actionable validation failures
 - Handle exceptions reaching the application boundary
 - Return a process exit code
 
@@ -126,8 +129,8 @@ It currently coordinates the full dry-run workflow.
 - JSON parsing details
 - Template search logic
 - Recursive directory traversal
+- Validation-rule implementation details
 - Filesystem provisioning
-- Comprehensive configuration validation
 - Long-term logging implementation
 - Complex CLI parsing
 
@@ -139,6 +142,7 @@ As these capabilities are introduced, they should remain in focused components.
 Program
 ├── PathService
 ├── JsonConfigurationService
+├── ConfigurationValidationService
 ├── TemplateResolverService
 └── DirectoryPlanService
 ```
@@ -263,7 +267,72 @@ TemplateConfiguration
 
 The service is responsible for **loading/deserialization**, not comprehensive semantic validation.
 
-For example, determining whether two profiles use conflicting destination directories should belong to a future validation component rather than JSON deserialization.
+Semantic checks such as duplicate profile destinations, missing template
+references, recursive filesystem-name validation, destination-root safety, and
+planned-path containment belong to `ConfigurationValidationService`.
+
+---
+
+## `ConfigurationValidationService`
+
+**Status:** Implemented
+
+**Location:**
+
+```text
+CareerOS.Bootstrap/Services/ConfigurationValidationService.cs
+```
+
+### Responsibility
+
+Provide the centralized M3 validation boundary for configuration consistency,
+filesystem naming safety, destination-root validity, and planned-path
+containment.
+
+### Current public methods
+
+```text
+Validate(bootstrapConfiguration, templateConfiguration)
+ValidateDestinationRoot(destinationRoot)
+ValidatePlannedPaths(destinationRoot, plannedPaths)
+```
+
+### Current responsibilities
+
+- Validate required profile and template values
+- Reject empty required profile/template collections
+- Reject duplicate profile names and destination directories
+- Reject duplicate template names
+- Reject missing template references
+- Validate recursive `DirectoryNode` names
+- Reject invalid and reserved Windows filesystem names
+- Reject duplicate sibling directory names
+- Require fully qualified destination roots and planned paths
+- Ensure planned paths remain at or beneath the approved destination root
+- Reject parent-traversal and sibling-prefix escapes
+- Aggregate blocking validation failures
+- Perform validation without creating filesystem entries
+
+### Outputs
+
+```text
+ValidationResult
+├── Errors[]
+└── Warnings[]
+```
+
+### Semantics
+
+`ValidationError` is blocking. `ValidationWarning` is non-blocking.
+`ValidationResult.IsValid` is false only when one or more errors exist.
+Validation codes, messages, and property locations are preserved where practical.
+
+### Boundary
+
+The service does not deserialize JSON, build directory plans, inspect existing
+filesystem object state for provisioning decisions, or provision directories.
+Schema-version rejection remains deferred until an explicit schema-version
+contract exists.
 
 ---
 
@@ -547,6 +616,55 @@ This recursive structure removes the need for fixed-depth directory models such 
 
 ---
 
+## `ValidationResult`
+
+**Status:** Implemented
+
+**Location:**
+
+```text
+CareerOS.Bootstrap/Models/ValidationResult.cs
+```
+
+### Responsibility
+
+Represent aggregated validation state.
+
+`IsValid` remains true when only warnings exist and becomes false when one or
+more blocking errors are added.
+
+---
+
+## `ValidationError`
+
+**Status:** Implemented
+
+**Location:**
+
+```text
+CareerOS.Bootstrap/Models/ValidationError.cs
+```
+
+Represents one blocking validation condition using `Code`, `Message`, and
+optional `PropertyName`.
+
+---
+
+## `ValidationWarning`
+
+**Status:** Implemented
+
+**Location:**
+
+```text
+CareerOS.Bootstrap/Models/ValidationWarning.cs
+```
+
+Represents one non-blocking validation condition using the same structured
+code/message/property-location shape.
+
+---
+
 # Repository Configuration Components
 
 ## `bootstrap.json`
@@ -665,30 +783,6 @@ It should not contain provisioning logic.
 
 ---
 
-## `ConfigurationValidationService`
-
-**Status:** Planned / conceptual
-
-Potential responsibility:
-
-Perform semantic validation after configuration is loaded and before a plan is approved for execution.
-
-Potential checks include duplicate names, invalid paths, missing references, conflicts, and unsupported configuration versions.
-
----
-
-## `ValidationResult`
-
-**Status:** Planned / conceptual
-
-Potential responsibility:
-
-Represent one or more validation findings in a structured form suitable for console output, tests, logs, and automation.
-
-Possible fields include severity, code, message, configuration location, and remediation guidance.
-
----
-
 ## `ProvisioningPlan`
 
 **Status:** Planned / conceptual
@@ -764,27 +858,35 @@ The specific logging abstraction or third-party library has not been selected.
 
 ---
 
-# Planned Testing Components
+# Current Testing Components
 
-A future test project is expected to mirror component responsibilities rather than test the application only through `Program.Main()`.
-
-Conceptually:
+The implemented test project mirrors current component responsibilities.
 
 ```text
 CareerOS.Bootstrap.Tests/
-├── Services/
-│   ├── DirectoryPlanServiceTests
-│   ├── JsonConfigurationServiceTests
-│   ├── PathServiceTests
-│   ├── TemplateResolverServiceTests
-│   ├── ConfigurationValidationServiceTests
-│   └── DirectoryProvisioningServiceTests
+├── Fixtures/
+│   ├── TemporaryDirectoryFixture.cs
+│   └── TemporaryDirectoryFixtureTests.cs
 │
-└── Integration/
-    └── ApplicationWorkflowTests
+├── Integration/
+│   └── BootstrapPlanningWorkflowTests.cs
+│
+├── Models/
+│   └── ValidationResultTests.cs
+│
+└── Services/
+    ├── ConfigurationValidationServiceTests.cs
+    ├── DirectoryPlanServiceTests.cs
+    ├── JsonConfigurationServiceTests.cs
+    ├── PathServiceTests.cs
+    └── TemplateResolverServiceTests.cs
 ```
 
-Exact organization should be chosen when the test project is implemented.
+At the current M3 implementation checkpoint the suite contains 161 passing
+xUnit tests with zero failures.
+
+Future provisioning components should receive focused tests only when those
+production capabilities are implemented.
 
 ---
 

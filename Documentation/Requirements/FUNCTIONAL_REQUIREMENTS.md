@@ -423,7 +423,7 @@ The application shall reject a profile that references a template that cannot be
 
 ## FR-019 — Perform Comprehensive Configuration Validation Before Provisioning
 
-**Status:** Planned
+**Status:** Implemented
 **Priority:** High
 **Source Stories:** US-009
 
@@ -449,17 +449,47 @@ Validation shall be capable of identifying, as applicable:
 
 Provisioning shall not begin when blocking validation errors exist.
 
+### Current State
+
+`ConfigurationValidationService` now provides the centralized M3 validation
+boundary for configuration, destination-root, and planned-path safety.
+
+Implemented validation includes:
+
+- Required profile and template values
+- Empty required profile/template collections
+- Duplicate profile names and destination directories
+- Duplicate template names
+- Missing template references
+- Invalid and reserved Windows filesystem names
+- Empty directory-node names
+- Duplicate sibling directory names
+- Destination-root validity
+- Planned-path containment beneath the approved destination root
+
+Configuration validation is invoked before template resolution/planning in the
+application workflow. Destination-root and planned-path validation are also
+performed before the current preview is presented. Validation aggregates
+blocking errors rather than failing on the first validation issue.
+
+A duplicate configured profile destination is treated as the current
+configuration-level conflicting-destination case. Existing-filesystem-object
+conflicts remain part of the later existing-state/provisioning-plan work.
+
+Schema-version validation remains intentionally deferred because explicit
+configuration schema versioning has not yet been introduced.
+
 ---
 
 ## FR-020 — Return Structured Validation Results
 
-**Status:** Future
+**Status:** Partially Implemented
 **Priority:** Medium
 **Source Stories:** US-009, US-016, US-017, US-020
 
 ### Requirement
 
-A future validation subsystem should return structured results that can be consumed by console reporting, tests, and automation.
+The validation subsystem should return structured results that can be consumed by console reporting, tests, and automation.
 
 ### Acceptance Criteria
 
@@ -470,6 +500,26 @@ Each result should be capable of representing:
 - Human-readable message
 - Configuration location or affected field where practical
 - Suggested resolution where practical
+
+### Current State
+
+M3 introduces `ValidationResult`, `ValidationError`, and `ValidationWarning`.
+
+Current structured results provide:
+
+- Blocking-error versus non-blocking-warning semantics
+- Stable validation codes
+- Human-readable messages
+- Configuration/property locations where practical
+- Aggregated error and warning collections
+
+`ValidationResult.IsValid` is false only when blocking errors are present.
+Warnings do not invalidate a result. Current console integration renders
+blocking validation codes, locations, and messages.
+
+A dedicated suggested-resolution field has not been introduced. Resolution
+guidance may remain in human-readable messages unless a later reporting or
+automation requirement justifies a separate field.
 
 ---
 

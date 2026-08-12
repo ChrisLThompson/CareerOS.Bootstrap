@@ -4,7 +4,7 @@
 
 This document visualizes the end-to-end execution flow for `CareerOS.Bootstrap`.
 
-It distinguishes the **current implemented dry-run workflow** from the **planned validation and provisioning workflow** so future functionality is not confused with present behavior.
+It distinguishes the **current implemented validation-first dry-run workflow** from the **planned provisioning workflow** so future functionality is not confused with present behavior.
 
 ---
 
@@ -34,7 +34,16 @@ flowchart TD
     H --> J["BootstrapConfiguration<br/>CURRENT"]
     I --> K["TemplateConfiguration<br/>CURRENT"]
 
-    J --> L["Enumerate Profiles<br/>CURRENT"]
+    J --> V["ConfigurationValidationService<br/>CURRENT"]
+    K --> V
+    V --> W{"Configuration Valid?<br/>CURRENT"}
+
+    W -->|"No"| X["Display Structured Validation Errors<br/>CURRENT"]
+    X --> Y["Return Exit Code 1<br/>CURRENT"]
+
+    W -->|"Yes"| Z["Validate Preview Destination Root<br/>CURRENT"]
+    Z --> L["Enumerate Profiles<br/>CURRENT"]
+
     L --> M["TemplateResolverService<br/>CURRENT"]
     K --> M
 
@@ -44,15 +53,18 @@ flowchart TD
     O --> P["Traverse DirectoryNode Tree<br/>CURRENT"]
     P --> Q["Build Planned Paths<br/>CURRENT"]
 
-    Q --> R["Display Dry-Run Plan<br/>CURRENT"]
-    R --> S["Return Exit Code 0<br/>CURRENT"]
+    Q --> R["Validate Planned-Path Containment<br/>CURRENT"]
+    R --> S{"Plan Safe?<br/>CURRENT"}
+    S -->|"No"| X
+    S -->|"Yes"| T["Display Dry-Run Plan<br/>CURRENT"]
+    T --> U["Return Exit Code 0<br/>CURRENT"]
 
-    B -. "Unhandled Exception" .-> T["Catch at Application Boundary<br/>CURRENT"]
-    T --> U["Display Error<br/>CURRENT"]
-    U --> V["Return Exit Code 1<br/>CURRENT"]
+    B -. "Unhandled Exception" .-> AA["Catch at Application Boundary<br/>CURRENT"]
+    AA --> AB["Display Error<br/>CURRENT"]
+    AB --> Y
 ```
 
-The current process stops after generating and displaying the plan.
+The current process stops after validating and displaying the read-only plan.
 
 No CareerOS directory provisioning occurs.
 
@@ -62,14 +74,18 @@ No CareerOS directory provisioning occurs.
 
 ```mermaid
 flowchart LR
-    A["Configuration"] --> B["Resolution"]
-    B --> C["Planning"]
-    C --> D["Console Preview"]
+    A["Configuration"] --> B["Centralized Validation"]
+    B --> C["Resolution"]
+    C --> D["Planning"]
+    D --> E["Path Containment Validation"]
+    E --> F["Console Preview"]
 
-    D -. "STOP — current implementation" .-> E["Filesystem Provisioning"]
+    F -. "STOP — current implementation" .-> G["Filesystem Provisioning"]
 ```
 
-The planning workflow is intentionally read-only.
+The current workflow is validation-first and intentionally read-only. Blocking
+configuration or path-safety failures stop before the future provisioning
+boundary.
 
 ---
 
@@ -91,6 +107,12 @@ Load JSON
 Deserialize Models
   |
   v
+Validate Configuration
+  |
+  v
+Validate Preview Destination Root
+  |
+  v
 Resolve Profile Template
   |
   v
@@ -98,6 +120,9 @@ Traverse Recursive Directory Tree
   |
   v
 Build Planned Paths
+  |
+  v
+Validate Planned-Path Containment
   |
   v
 Display Dry-Run Output
@@ -116,11 +141,11 @@ flowchart TD
     B --> C["Resolve Paths and Environment<br/>CURRENT + PLANNED"]
 
     C --> D["Load Configuration<br/>CURRENT"]
-    D --> E["Validate Configuration and Request<br/>PLANNED"]
+    D --> E["Validate Configuration + Path Safety<br/>CURRENT FOUNDATION<br/>Future request validation PLANNED"]
 
     E --> F{"Validation Successful?"}
 
-    F -->|"No"| G["Report Validation Errors<br/>PLANNED"]
+    F -->|"No"| G["Report Validation Errors<br/>CURRENT FOUNDATION"]
     G --> H["Return Failure Exit Code<br/>PLANNED"]
 
     F -->|"Yes"| I["Resolve Profile and Template<br/>CURRENT"]
@@ -317,10 +342,12 @@ Provisioning outcomes should be verified or reliably observed rather than assume
 | Application entry | `Program.Main()` | CURRENT |
 | Repository discovery | `PathService` | CURRENT |
 | Configuration loading | `JsonConfigurationService` | CURRENT |
+| Configuration validation | `ConfigurationValidationService` | CURRENT |
+| Destination-root validation | `ConfigurationValidationService` | CURRENT |
 | Profile/template resolution | `TemplateResolverService` | CURRENT |
 | Recursive directory planning | `DirectoryPlanService` | CURRENT |
+| Planned-path containment validation | `ConfigurationValidationService` | CURRENT |
 | Console preview | `Program.Main()` | CURRENT |
-| Configuration validation | Future validation component | PLANNED |
 | CLI request parsing | Future CLI layer | PLANNED |
 | Existing-state inspection | Future provisioning layer | PLANNED |
 | Filesystem provisioning | Future provisioning service | PLANNED |

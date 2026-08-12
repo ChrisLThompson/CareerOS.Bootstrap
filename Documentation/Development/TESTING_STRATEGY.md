@@ -48,17 +48,20 @@ The test project is:
 CareerOS.Bootstrap.Tests
 ```
 
-At the current M2 checkpoint:
+At the current M3 implementation checkpoint:
 
 ```text
 Test framework: xUnit
 Target framework: .NET 8
-Automated tests: 75 passing
+Automated tests: 161 passing
 Failed tests: 0
 Skipped tests: 0
-Service test suites: 4
+Service test suites: 5
+Model-behavior test suites: 1
 Shared temporary-filesystem fixture: Implemented and tested
-Workflow/integration tests: Implemented for current planning behavior
+Workflow/integration tests: Implemented for validation-first planning behavior
+Centralized configuration validation: Implemented and tested
+Destination-root and planned-path safety validation: Implemented and tested
 CI execution: Planned
 ```
 
@@ -157,12 +160,13 @@ TemplateResolverServiceTests
 DirectoryPlanServiceTests
 JsonConfigurationServiceTests
 PathServiceTests
+ConfigurationValidationServiceTests
+ValidationResultTests
 ```
 
 Future unit-test targets may include:
 
 ```text
-ConfigurationValidationServiceTests
 ProvisioningPlanTests
 CommandLineOptionTests
 ExecutionSummaryTests
@@ -191,6 +195,11 @@ Current integration coverage includes:
 
 ```text
 Configuration load
+Centralized configuration validation
+Validation-before-resolution failure behavior
+Recursive directory-name validation
+Destination-root validation
+Planned-path containment validation
 Template resolution
 Recursive planning
 Multiple-profile/template planning
@@ -283,8 +292,14 @@ The canonical mapping is maintained in `Documentation/Requirements/TRACEABILITY.
 | TEST-012 | Execute configuration-load → template-resolution → recursive-planning workflow against isolated files | `BootstrapPlanningWorkflowTests.cs` |
 | TEST-013 | Execute multi-profile planning with each profile's assigned template | `BootstrapPlanningWorkflowTests.cs` |
 | TEST-014 | Provide and verify isolated temporary filesystem fixtures, including cleanup and path-boundary protection | `TemporaryDirectoryFixture.cs`, `TemporaryDirectoryFixtureTests.cs` |
+| TEST-015 | Validate required configuration values, empty collections, duplicates, and template references through the centralized validation boundary | `ConfigurationValidationServiceTests.cs` |
+| TEST-016 | Validate recursive directory-node filesystem naming, reserved names, and duplicate siblings | `ConfigurationValidationServiceTests.cs` |
+| TEST-017 | Validate destination-root syntax, qualification, reserved segments, and no-write behavior | `ConfigurationValidationServiceTests.cs` |
+| TEST-018 | Enforce planned-path containment beneath the approved destination root, including traversal and sibling-prefix escape rejection | `ConfigurationValidationServiceTests.cs`, `BootstrapPlanningWorkflowTests.cs` |
+| TEST-019 | Verify structured validation-result semantics, including aggregated errors and non-blocking warnings | `ValidationResultTests.cs`, `ConfigurationValidationServiceTests.cs` |
+| TEST-020 | Execute validation-first planning workflows so invalid configuration is rejected before later resolution/planning and valid plans pass containment checks | `BootstrapPlanningWorkflowTests.cs` |
 
-The current automated suite contains 75 passing xUnit cases at the M2 checkpoint.
+The current automated suite contains 161 passing xUnit cases at the M3 implementation checkpoint.
 
 ---
 
@@ -428,13 +443,21 @@ Temporary configuration files
 JsonConfigurationService
         |
         v
+ConfigurationValidationService
+        |
+        +---- invalid configuration ----> Reject
+        |
+        v
 TemplateResolverService
         |
         v
 DirectoryPlanService
         |
         v
-Planned Paths
+Planned-path containment validation
+        |
+        v
+Validated planned paths
 ```
 
 Implemented scenarios include:
@@ -443,44 +466,66 @@ Implemented scenarios include:
 Valid recursive planning workflow
 Multiple profiles using different templates
 No planned workspace directories created
-Unknown assigned template failure
+Unknown assigned template rejected before resolution
+Invalid nested directory rejected before planning
+Escaping planned path rejected by containment validation
 ```
 
-These tests intentionally stop at planning because filesystem provisioning has not yet been implemented.
+These tests intentionally stop at validated planning because filesystem provisioning has not yet been implemented.
 
 ---
 
-# Future Validation Test Plan
+# Implemented Validation Test Coverage
 
-When a centralized validation service is implemented, tests should include at minimum:
+Centralized validation is now implemented and covered by focused unit and
+workflow/integration tests.
+
+Implemented coverage includes:
 
 ```text
-Missing required profile values
+Missing required profile/template values
+Empty required profile/template collections
 Duplicate profile names
 Duplicate profile destination directories
 Duplicate template names
 Missing template references
 Invalid filesystem characters
 Reserved filesystem names
-Empty required collections
-Conflicting destination paths
+Empty directory-node names
 Duplicate sibling directory names
-Unsupported schema versions when versioning exists
+Invalid destination roots
+Relative destination/planned-path rejection
+Parent-traversal and sibling-prefix escape rejection
+Planned-path containment beneath the approved root
+Aggregated blocking errors
+Non-blocking warning semantics
+Validation-first workflow behavior
+No-write validation behavior
 ```
+
+Current configuration-level conflicting destinations are represented by
+duplicate effective profile destinations. Existing-filesystem-object conflicts
+remain part of later provisioning-plan/existing-state work.
+
+Unsupported-schema-version tests remain intentionally deferred until explicit
+configuration schema versioning exists.
 
 These tests primarily support:
 
 ```text
 FR-017
+FR-018
 FR-019
 FR-020
 NFR-004
 NFR-008
 NFR-010
+NFR-018
 NFR-026
 ```
 
-Blocking validation errors must be proven to prevent provisioning.
+Future write-capable provisioning must consume the same blocking validation
+gate; M3 does not introduce filesystem provisioning.
 
 ---
 
@@ -706,7 +751,11 @@ CareerOS.Bootstrap.Tests/
 ├── Integration/
 │   └── BootstrapPlanningWorkflowTests.cs
 │
+├── Models/
+│   └── ValidationResultTests.cs
+│
 ├── Services/
+│   ├── ConfigurationValidationServiceTests.cs
 │   ├── DirectoryPlanServiceTests.cs
 │   ├── JsonConfigurationServiceTests.cs
 │   ├── PathServiceTests.cs
@@ -715,9 +764,12 @@ CareerOS.Bootstrap.Tests/
 └── CareerOS.Bootstrap.Tests.csproj
 ```
 
-A `Models/` directory has intentionally not been created because the current model types are simple DTOs without meaningful independent behavior to verify.
+The `Models/` directory now exists because `ValidationResult` has meaningful
+independent behavior: blocking errors determine validity, warnings remain
+non-blocking, and structured result collections preserve validation details.
 
-As functionality evolves, additional areas may be introduced for validation, CLI, orchestration, provisioning, logging, and release-related behavior.
+Additional areas should continue to be introduced only when real testing needs
+justify them.
 
 The structure should continue evolving with real testing needs rather than creating empty abstraction layers prematurely.
 
@@ -931,12 +983,25 @@ Completed M2 foundation:
 [x] Establish repeatable local dotnet build / dotnet test checkpoints
 ```
 
+Implemented M3 validation verification:
+
+```text
+[x] Add centralized ConfigurationValidationService tests
+[x] Add recursive filesystem-name and duplicate-sibling validation tests
+[x] Add destination-root validation tests
+[x] Add planned-path containment/traversal tests
+[x] Add validation-first workflow integration tests
+[x] Add ValidationResult error/warning behavior tests
+[x] Assign TEST-015 through TEST-020
+[x] Reach 161 passing xUnit cases at the M3 implementation checkpoint
+```
+
 Remaining future testing work:
 
 ```text
-[ ] Add centralized validation-service tests when validation exists
 [ ] Add filesystem provisioning safety/idempotency tests when provisioning exists
 [ ] Add CLI/result/exit-code tests when those capabilities exist
+[ ] Add schema-version tests when explicit configuration versioning exists
 [ ] Add dotnet test to GitHub CI
 [ ] Add release-validation automation when packaged releases exist
 ```
@@ -947,7 +1012,7 @@ This sequence continues to protect implemented behavior without creating tests f
 
 # Summary
 
-The testing strategy has moved CareerOS.Bootstrap from primarily manual validation into a requirements-driven automated verification foundation.
+The testing strategy now protects both the read-only planning foundation and the centralized M3 validation boundary with requirements-driven automated verification.
 
 The target model is:
 

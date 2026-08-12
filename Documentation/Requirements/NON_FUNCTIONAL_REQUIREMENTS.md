@@ -73,16 +73,18 @@ intent.
 ## NFR-004 --- Validate Before Filesystem Modification
 
 **Category:** Safety / Integrity\
-**Status:** Planned\
+**Status:** Implemented Foundation / Future Provisioning Enforcement\
 **Priority:** High\
 **Related FRs:** FR-009, FR-019, FR-021, FR-023
 
 No provisioning operation shall begin while blocking configuration,
 destination, or plan-validation errors exist.
 
-**Verification:** Invalid destinations, template references, and
-blocking configuration errors prevent writes; automated tests prove
-invalid input produces no provisioning changes.
+**Verification:** Centralized configuration validation now rejects
+blocking configuration and template-reference errors before planning.
+Destination-root and planned-path containment validation are automated.
+Current workflow/integration tests remain non-destructive; future
+write-capable provisioning must consume the same blocking validation gate.
 
 ------------------------------------------------------------------------
 
@@ -139,16 +141,19 @@ integration tests compare expected and actual state.
 ## NFR-008 --- Invalid Configuration Must Fail Clearly
 
 **Category:** Configuration Integrity\
-**Status:** Partially Implemented\
+**Status:** Implemented for Current Validation Scope\
 **Priority:** High\
 **Related FRs:** FR-016, FR-017, FR-018, FR-019, FR-020
 
 Invalid or unusable configuration shall produce actionable failure
 rather than unpredictable behavior or silent fallback.
 
-**Verification:** Missing files, unknown templates, and invalid required
-values are rejected; future validation identifies affected fields where
-practical; blocking errors prevent provisioning.
+**Verification:** Missing files, unknown templates, invalid required
+values, duplicate configuration, invalid filesystem names, invalid
+destination roots, and unsafe planned-path relationships are covered by
+automated tests. Structured validation errors identify stable codes,
+messages, and affected fields where practical. Blocking validation errors
+stop the current workflow before later planning/output stages as applicable.
 
 ## NFR-009 --- Supported Configuration Changes Must Not Require Recompilation
 
@@ -364,16 +369,20 @@ sensitive/personal data.
 ## NFR-026 --- Destination Paths Must Be Validated Before Writes
 
 **Category:** Security / Safety\
-**Status:** Planned\
+**Status:** Implemented Foundation / Future Write Enforcement\
 **Priority:** High\
 **Related FRs:** FR-009, FR-019, FR-023
 
 User/configuration-controlled destinations shall be validated before
 write operations.
 
-**Verification:** Invalid syntax, reserved names, and conflicting
-destinations are rejected; future security review considers traversal
-and reparse/symbolic-link behavior where relevant.
+**Verification:** Invalid destination-root syntax, reserved path
+segments, relative planned paths, parent-traversal escapes, and paths
+outside the approved destination root are covered by automated tests.
+Configured duplicate profile destinations are rejected as
+configuration-level destination conflicts. Future security review should
+still consider existing filesystem state and reparse/symbolic-link behavior
+when write-capable provisioning is introduced.
 
 ## NFR-027 --- Git Integration Must Preserve Existing Repository State
 
@@ -519,7 +528,7 @@ quality attributes relevant to the planned bootstrap architecture.
 
 Substantially implemented or established today:
 
-```text
+``` text
 NFR-001
 NFR-009
 NFR-011
@@ -533,7 +542,7 @@ NFR-035
 
 Partially implemented, process-based, or currently being established:
 
-```text
+``` text
 NFR-006
 NFR-008
 NFR-013
@@ -561,7 +570,7 @@ capabilities.
 Non-functional requirements constrain multiple functional capabilities.
 For example:
 
-```text
+``` text
 FR-023 — Create Missing Directories
             |
             +--> NFR-002 Preserve Existing Content
@@ -575,7 +584,7 @@ FR-023 — Create Missing Directories
 
 And:
 
-```text
+``` text
 FR-036 — Record Execution Logs
             |
             +--> NFR-023 Diagnostic Logging
@@ -592,7 +601,7 @@ non-functional requirements, components, and tests belongs in
 
 Verification mechanisms may include:
 
-```text
+``` text
 Documentation Review
 Code Review
 Static Inspection
@@ -634,7 +643,7 @@ boundaries around its functional behavior.
 
 The central quality progression is:
 
-```text
+``` text
 Safety
   |
   v
