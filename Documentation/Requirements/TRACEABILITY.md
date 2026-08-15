@@ -16,7 +16,7 @@ ADR-###  Architecture Decision Record
 TEST-### Automated or Manual Verification Identifier
 ```
 
-The current project has established `US-001` through `US-030`, `FR-001` through `FR-047`, `NFR-001` through `NFR-036`, and an initial implemented automated verification catalog `TEST-001` through `TEST-020`.
+The current project has established `US-001` through `US-030`, `FR-001` through `FR-047`, `NFR-001` through `NFR-036`, and an initial implemented automated verification catalog `TEST-001` through `TEST-023`.
 
 ---
 
@@ -70,12 +70,12 @@ DOC       Documentation/review verification.
 | US-004 Configuration without recompilation | FR-001, FR-002, FR-003, FR-004 | NFR-009, NFR-016 | JSON configuration and model layer | Implemented | MANUAL / DOC |
 | US-005 Dynamic repository discovery | FR-007, FR-008 | NFR-011, NFR-034 | `PathService` | Implemented | AUTO: TEST-008, TEST-009, TEST-010, TEST-011 |
 | US-006 Configurable destination root | FR-009, FR-010 | NFR-004, NFR-012, NFR-026, NFR-031 | Future execution/configuration layer | Planned | PLANNED |
-| US-007 Preview directory plan | FR-011, FR-012, FR-013, FR-014 | NFR-001, NFR-015, NFR-021, NFR-030, NFR-031 | `DirectoryPlanService`, `Program` | Implemented | AUTO: TEST-005, TEST-007, TEST-012; MANUAL console review |
-| US-008 Explicit dry run | FR-014, FR-015, FR-026 | NFR-001, NFR-015, NFR-021, NFR-031 | Current preview; future CLI/plan model | Partially Implemented | AUTO: TEST-007, TEST-012; MANUAL for current console flow |
+| US-007 Preview directory plan | FR-011, FR-012, FR-013, FR-014 | NFR-001, NFR-015, NFR-021, NFR-030, NFR-031 | `DirectoryPlanService`, `ProvisioningPlanService`, structured plan models, `Program` | Implemented | AUTO: TEST-005, TEST-007, TEST-012, TEST-021–TEST-023; MANUAL structured console review |
+| US-008 Explicit dry run | FR-014, FR-015, FR-026 | NFR-001, NFR-015, NFR-021, NFR-031 | Structured `ProvisioningPlan`, `ProvisioningPlanService`, `Program`; future CLI/mode selection | Partially Implemented | AUTO: TEST-007, TEST-012, TEST-021–TEST-023; MANUAL structured console review |
 | US-009 Pre-provision validation | FR-016, FR-017, FR-018, FR-019, FR-020 | NFR-004, NFR-008, NFR-026 | `ConfigurationValidationService`, structured validation models, `Program` | Implemented for current validation scope | AUTO: TEST-004, TEST-006, TEST-009, TEST-011, TEST-015–TEST-020 |
-| US-010 Preserve existing directories | FR-021, FR-022, FR-024 | NFR-002, NFR-005, NFR-007, NFR-031 | Future provisioning service | Planned | PLANNED filesystem integration tests |
-| US-011 Create missing directories | FR-021, FR-023, FR-026 | NFR-002, NFR-004, NFR-005, NFR-006, NFR-007, NFR-026, NFR-031 | Future plan/provisioning services | Planned | PLANNED integration tests |
-| US-012 Safe repeat provisioning | FR-021, FR-022, FR-024, FR-042 | NFR-002, NFR-005, NFR-019 | Future provisioning + test project | Planned | PLANNED repeated-run integration test |
+| US-010 Preserve existing directories | FR-021, FR-022, FR-024 | NFR-002, NFR-005, NFR-007, NFR-031 | `ProvisioningPlanService`, `ProvisioningAction`; future provisioning service | Partially Implemented | AUTO: TEST-022, TEST-023; write-capable preservation planned |
+| US-011 Create missing directories | FR-021, FR-023, FR-026 | NFR-002, NFR-004, NFR-005, NFR-006, NFR-007, NFR-026, NFR-031 | `ProvisioningPlanService`, structured plan models; future provisioning service | Partially Implemented planning | AUTO: TEST-022, TEST-023; directory creation planned |
+| US-012 Safe repeat provisioning | FR-021, FR-022, FR-024, FR-042 | NFR-002, NFR-005, NFR-019 | `ProvisioningPlanService`, isolated filesystem tests; future provisioning | Planned / M4 planning foundation | AUTO deterministic inspection: TEST-022; repeated write-capable execution planned |
 | US-013 Prevent automatic deletion | FR-014, FR-022, FR-025 | NFR-001, NFR-002, NFR-003, NFR-031 | Safety policy; future provisioning | Planned safety constraint | PLANNED integration/review |
 | US-014 Select profile | FR-027 | NFR-016, NFR-021 | Future CLI/orchestration | Planned | PLANNED unit/integration tests |
 | US-015 Template override | FR-028 | NFR-008, NFR-016, NFR-021 | Future CLI/resolution | Future | PLANNED |
@@ -83,9 +83,9 @@ DOC       Documentation/review verification.
 | US-017 Actionable errors | FR-005, FR-016, FR-017, FR-018, FR-020, FR-034, FR-035 | NFR-006, NFR-008, NFR-022 | `ValidationResult`, `ValidationError`, `ValidationWarning`, `Program` | Partially Implemented / structured validation implemented | AUTO: TEST-004, TEST-006, TEST-009, TEST-011, TEST-015, TEST-019, TEST-020; MANUAL console review |
 | US-018 Help/version | FR-029, FR-030 | NFR-030, NFR-032, NFR-033 | Future CLI/release layer | Planned | PLANNED |
 | US-019 Logging | FR-036 | NFR-023, NFR-025 | Future logging abstraction | Planned | PLANNED |
-| US-020 Action statuses | FR-013, FR-020, FR-026, FR-031, FR-032, FR-033 | NFR-006, NFR-007, NFR-021, NFR-030 | Current console; future plan/result models | Partial / Planned | MANUAL + PLANNED tests |
-| US-021 Core automated tests | FR-041 | NFR-018, NFR-020, NFR-036 | `CareerOS.Bootstrap.Tests` | Implemented | AUTO: TEST-001–TEST-020; 161 passing xUnit tests at current M3 checkpoint |
-| US-022 Filesystem isolation tests | FR-042 | NFR-019, NFR-002, NFR-005 | `TemporaryDirectoryFixture`, integration tests | Implemented foundation | AUTO: TEST-007, TEST-012, TEST-014 |
+| US-020 Action statuses | FR-013, FR-020, FR-026, FR-031, FR-032, FR-033 | NFR-006, NFR-007, NFR-021, NFR-030 | `ProvisioningAction`, `ProvisioningPlanService`, structured console output | Partially Implemented | AUTO: TEST-021–TEST-023; MANUAL structured console review |
+| US-021 Core automated tests | FR-041 | NFR-018, NFR-020, NFR-036 | `CareerOS.Bootstrap.Tests` | Implemented | AUTO: TEST-001–TEST-023; 192 passing xUnit tests at current M4 checkpoint |
+| US-022 Filesystem isolation tests | FR-042 | NFR-019, NFR-002, NFR-005 | `TemporaryDirectoryFixture`, provisioning-plan service/integration tests | Implemented foundation | AUTO: TEST-007, TEST-012, TEST-014, TEST-022, TEST-023 |
 | US-023 Validate before merge | FR-043, FR-044 | NFR-020, NFR-034, NFR-036 | Git branches, local build/test checkpoints, future GitHub Actions | Partially Implemented | MANUAL + local AUTO build/test; CI planned |
 | US-024 Current-state documentation | FR-037 | NFR-017, NFR-035, NFR-036 | `README.md`, `CURRENT_STATE.md`, architecture docs | In Progress | DOC |
 | US-025 Future-state documentation | FR-038 | NFR-017, NFR-035, NFR-036 | `FUTURE_STATE.md`, `DATA_FLOW.md`, roadmap | In Progress | DOC |
@@ -99,24 +99,24 @@ DOC       Documentation/review verification.
 
 # Functional Requirement Verification Matrix
 
-The following matrix records the verification mechanism at the current M3 stage. Stable `TEST-###` identifiers now refer to implemented behavioral verification categories; individual xUnit methods may provide multiple cases beneath one identifier.
+The following matrix records the verification mechanism at the current M4 stage. Stable `TEST-###` identifiers now refer to implemented behavioral verification categories; individual xUnit methods may provide multiple cases beneath one identifier.
 
 | FR Range | Area | Current Verification | Target Verification |
 |---|---|---|---|
 | FR-001–FR-006 | Configuration, profiles, templates | AUTO: TEST-001–TEST-006, TEST-012, TEST-013 | Maintain unit/integration regression coverage |
 | FR-007–FR-008 | Repository/configuration discovery | AUTO: TEST-008–TEST-011 | Add CI runtime/build validation |
 | FR-009–FR-010 | Destination root | Not implemented | Unit tests + integration validation when implemented |
-| FR-011–FR-014 | Recursive planning / preview | AUTO: TEST-005, TEST-006, TEST-007, TEST-012, TEST-013 | Maintain dry-run/no-write regression coverage |
-| FR-015 | Explicit dry-run | Partial implementation; AUTO no-write evidence: TEST-007, TEST-012 | CLI/unit/integration coverage when explicit execution mode exists |
+| FR-011–FR-014 | Recursive planning / structured preview | AUTO: TEST-005, TEST-006, TEST-007, TEST-012, TEST-013, TEST-021–TEST-023 | Maintain dry-run/no-write regression coverage |
+| FR-015 | Explicit dry-run | Partial implementation; structured no-write preview: TEST-007, TEST-012, TEST-023 | CLI/mode coverage when explicit execution mode exists |
 | FR-016–FR-018 | Required-input and template-reference validation | AUTO: TEST-004, TEST-006, TEST-009, TEST-011, TEST-015, TEST-020 | Maintain regression coverage as execution options expand |
 | FR-019–FR-020 | Comprehensive structured validation | Implemented for current validation scope / FR-020 partially implemented | AUTO: TEST-015–TEST-020; extend structured reporting when later execution/result requirements justify it |
-| FR-021–FR-026 | Filesystem provisioning | Not implemented | Isolated filesystem integration tests; selected unit tests |
+| FR-021–FR-026 | Provisioning plan / future filesystem provisioning | M4 read-only inspection + structured action classification implemented for FR-021/FR-022/FR-026 planning scope; writes remain future | AUTO: TEST-021–TEST-023; M5 write-capable integration tests planned |
 | FR-027–FR-030 | CLI/profile/help/version | Not implemented | CLI/unit/integration tests |
 | FR-031–FR-035 | Reporting/errors/exit codes | Manual runtime; selected exception behavior automated | Unit/integration tests as result/exit models mature |
 | FR-036 | Logging | Not implemented | Unit/integration tests |
 | FR-037–FR-040 | Documentation/traceability/ADRs | Documentation review | Documentation review + PR review |
-| FR-041 | Unit-test foundation | Implemented | AUTO: TEST-001–TEST-020; CI planned |
-| FR-042 | Filesystem integration-test foundation | Implemented for isolated current-state testing | AUTO: TEST-007, TEST-012, TEST-014; provisioning tests planned |
+| FR-041 | Unit-test foundation | Implemented | AUTO: TEST-001–TEST-023; CI planned |
+| FR-042 | Filesystem integration-test foundation | Implemented for isolated current-state and M4 inspection/classification testing | AUTO: TEST-007, TEST-012, TEST-014, TEST-022, TEST-023; write-capable provisioning tests planned |
 | FR-043 | Pre-merge validation | Local build/test/diff checkpoints on feature branch | PR checks + CI |
 | FR-044 | GitHub CI | Not implemented | GitHub Actions |
 | FR-045 | Versioned releases | Not implemented | Release pipeline validation |
@@ -128,17 +128,17 @@ The following matrix records the verification mechanism at the current M3 stage.
 
 | NFR Range | Quality Area | Current Verification | Target Verification |
 |---|---|---|---|
-| NFR-001–NFR-004 | Safety / data preservation | AUTO no-write planning plus blocking validation: TEST-007, TEST-012, TEST-017, TEST-018, TEST-020; provisioning remains future | Reuse the validation gate when write-capable provisioning is implemented |
-| NFR-005–NFR-007 | Reliability / idempotency | Current planning behavior tested; provisioning idempotency not implemented | Repeated-run provisioning tests + result assertions |
+| NFR-001–NFR-004 | Safety / data preservation | AUTO no-write planning, blocking validation, and read-only filesystem classification: TEST-007, TEST-012, TEST-017, TEST-018, TEST-020, TEST-022, TEST-023 | Reuse validation + structured plan when write-capable provisioning is implemented |
+| NFR-005–NFR-007 | Reliability / idempotency | Deterministic repeated inspection and observed-state classification tested in TEST-022; provisioning idempotency not implemented | Repeated write-capable provisioning tests + execution-result assertions |
 | NFR-008–NFR-010 | Configuration integrity | AUTO configuration/resolution + centralized validation: TEST-001–TEST-004, TEST-015, TEST-016, TEST-019, TEST-020 | Add schema-version tests only when explicit schema versioning exists |
 | NFR-011–NFR-013 | Portability / compatibility | AUTO injectable repository discovery: TEST-008–TEST-011; manual build | Build/runtime matrix where supported |
 | NFR-014–NFR-017 | Maintainability / architecture/docs | Code/documentation review plus focused service tests | PR review + ADR/documentation governance |
-| NFR-018–NFR-020 | Testability / quality lifecycle | AUTO test project, isolated fixture, unit/integration suite; local build/test checkpoints | CI + protected merge workflow |
-| NFR-021–NFR-023 | Observability / diagnostics | Manual console review; selected error behavior automated | Output/result/log tests |
+| NFR-018–NFR-020 | Testability / quality lifecycle | AUTO test project, isolated fixture, M4 model/service/integration coverage; local build/test checkpoints | CI + protected merge workflow |
+| NFR-021–NFR-023 | Observability / diagnostics | Structured M4 action output manually verified; action model/classification automated in TEST-021–TEST-023 | Future structured execution-result/log tests |
 | NFR-024–NFR-027 | Security / privacy / Git safety | Configuration/code review; fixture containment TEST-014; destination/planned-path safety TEST-017–TEST-018 | Future write-path security review including filesystem-state and reparse/symbolic-link behavior where relevant |
-| NFR-028–NFR-031 | Performance / usability / safe defaults | Fast deterministic automated suite plus manual interactive use | Regression checks; targeted automated tests |
+| NFR-028–NFR-031 | Performance / usability / safe defaults | Fast deterministic automated suite plus structured dry-run runtime review | Regression checks; targeted automated tests |
 | NFR-032–NFR-034 | Compatibility / release / build quality | Local restore/build/test checkpoints; TEST-008–TEST-011 support repository portability | CI and release validation |
-| NFR-035–NFR-036 | Traceability / verifiability | Documentation review + assigned TEST-001–TEST-020 catalog | PR/documentation/test traceability review |
+| NFR-035–NFR-036 | Traceability / verifiability | Documentation review + assigned TEST-001–TEST-023 catalog | PR/documentation/test traceability review |
 
 ---
 
@@ -152,8 +152,11 @@ US-002  -> FR-002, FR-004, FR-005 -> CareerTemplate / TemplateResolverService
 US-003  -> FR-006, FR-012 -> DirectoryNode / DirectoryPlanService
 US-004  -> FR-001, FR-002, FR-003, FR-004 -> JSON configuration model
 US-005  -> FR-007, FR-008 -> PathService
-US-007  -> FR-011, FR-012, FR-013, FR-014 -> DirectoryPlanService / Program
+US-007  -> FR-011, FR-012, FR-013, FR-014 -> DirectoryPlanService / ProvisioningPlanService / Program
+US-008  -> FR-014, FR-015, FR-026 -> ProvisioningPlan / ProvisioningAction / Program
 US-009  -> FR-016, FR-017, FR-018, FR-019, FR-020 -> ConfigurationValidationService / validation models / Program
+US-010  -> FR-021, FR-022, FR-024 -> ProvisioningPlanService / ProvisioningAction
+US-011  -> FR-021, FR-023, FR-026 -> ProvisioningPlanService / ProvisioningAction
 US-017  -> FR-034, FR-035 -> Program top-level error handling
 US-021  -> FR-041 -> CareerOS.Bootstrap.Tests
 US-022  -> FR-042 -> TemporaryDirectoryFixture / BootstrapPlanningWorkflowTests
@@ -162,14 +165,17 @@ US-022  -> FR-042 -> TemporaryDirectoryFixture / BootstrapPlanningWorkflowTests
 Important current NFR coverage includes:
 
 ```text
-NFR-001  Non-destructive preview, automated no-write verification
+NFR-001  Non-destructive structured preview, automated no-write verification
+NFR-002  Existing expected directories classified for preservation without modification
 NFR-004  Blocking validation gate before future filesystem modification
+NFR-007  Read-only observed filesystem state used for M4 classification
 NFR-008  Actionable centralized configuration validation
 NFR-009  Configuration without recompilation
 NFR-011  Repository discovery without machine-specific hard-coding
 NFR-016  Generic multi-profile behavior
+NFR-015  Planning/classification remains separate from filesystem modification
 NFR-018  Automated focused testability
-NFR-019  Isolated filesystem test execution
+NFR-019  Isolated filesystem inspection/classification testing
 NFR-020  Repeatable local build/test quality gate
 NFR-024  No core secrets required in JSON
 NFR-026  Destination-root and planned-path safety validation
@@ -179,7 +185,7 @@ NFR-035  Stable requirement identifiers
 NFR-036  Evidence-based requirements/test traceability
 ```
 
-At the current M3 checkpoint the test project contains service tests, model-behavior tests, fixture tests, and integration/workflow tests. The suite has reached 161 passing xUnit cases with zero failures at the documented checkpoint.
+At the current M4 checkpoint the test project contains service tests, model-behavior tests, fixture tests, and integration/workflow tests. The suite has reached 192 passing xUnit cases with zero failures at the documented checkpoint.
 
 This mapping should be revisited whenever implementation status changes.
 
@@ -211,6 +217,9 @@ The automated testing and validation foundation uses stable behavioral verificat
 | TEST-018 | Enforce planned-path containment beneath the approved destination root, including traversal and sibling-prefix escape rejection | `ConfigurationValidationServiceTests.cs`, `BootstrapPlanningWorkflowTests.cs` | FR-019; NFR-004, NFR-026, NFR-031 | AUTO |
 | TEST-019 | Verify structured validation-result semantics, including aggregated errors, non-blocking warnings, stable codes/messages, and optional property locations | `ValidationResultTests.cs`, `ConfigurationValidationServiceTests.cs` | FR-020; NFR-008, NFR-018 | AUTO |
 | TEST-020 | Execute validation-first planning workflows so invalid configuration is rejected before resolution/planning and valid plans pass containment checks | `BootstrapPlanningWorkflowTests.cs` | FR-017, FR-018, FR-019, FR-020; NFR-004, NFR-008, NFR-026 | AUTO |
+| TEST-021 | Verify structured provisioning-plan model semantics, action vocabulary, observed/desired state, reasons, warnings, and action ordering | `ProvisioningPlanTests.cs` | FR-013, FR-026; NFR-015, NFR-018, NFR-021, NFR-030 | AUTO |
+| TEST-022 | Inspect controlled filesystem state and classify missing directories, existing directories, conflicting files, and invalid direct inputs without writes; verify deterministic repeated inspection | `ProvisioningPlanServiceTests.cs` | FR-021, FR-022, FR-023, FR-024, FR-026; NFR-001, NFR-002, NFR-005, NFR-007, NFR-019, NFR-031 | AUTO |
+| TEST-023 | Execute validation-first structured provisioning-plan workflows against controlled filesystem states and verify CREATE/PRESERVE/CONFLICT behavior without mutation | `BootstrapPlanningWorkflowTests.cs` | FR-013, FR-014, FR-021, FR-022, FR-023, FR-026; NFR-001, NFR-004, NFR-007, NFR-015, NFR-019, NFR-021, NFR-030, NFR-031 | AUTO |
 
 ## Test Catalog Governance
 
@@ -223,7 +232,7 @@ When behavior materially changes:
 3. Update this catalog when a test category is retired or superseded.
 4. Keep future provisioning, CLI, CI, and release tests separate until the corresponding implementation exists.
 
-Current automated evidence includes 161 passing xUnit cases at the M3 implementation checkpoint. CI execution remains planned; current automated verification is executed locally through `dotnet test`.
+Current automated evidence includes 192 passing xUnit cases at the M4 implementation checkpoint. CI execution remains planned; current automated verification is executed locally through `dotnet test`.
 
 ---
 
@@ -256,8 +265,16 @@ ValidationResult / ValidationError / ValidationWarning
     -> FR-020
     -> NFR-008, NFR-018
 
+ProvisioningPlan / ProvisioningAction / provisioning enums
+    -> FR-013, FR-021, FR-022, FR-023, FR-026
+    -> NFR-001, NFR-002, NFR-007, NFR-015, NFR-018, NFR-021, NFR-030, NFR-031
+
+ProvisioningPlanService
+    -> FR-021, FR-022, FR-023, FR-024, FR-026
+    -> NFR-001, NFR-002, NFR-005, NFR-007, NFR-015, NFR-018, NFR-019, NFR-031
+
 Program
-    -> FR-003, FR-013, FR-019, FR-020, FR-031, FR-034, FR-035
+    -> FR-003, FR-013, FR-014, FR-019, FR-020, FR-026, FR-031, FR-034, FR-035
     -> NFR-004, NFR-006, NFR-008, NFR-021, NFR-022, NFR-026, NFR-030
 ```
 

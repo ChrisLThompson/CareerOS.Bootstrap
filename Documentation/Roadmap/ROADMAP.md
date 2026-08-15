@@ -508,45 +508,30 @@ Plan.
 
 # Phase 4 — Rich Provisioning Plan
 
-**Status:** CURRENT
+**Status:** CURRENT / IMPLEMENTATION COMPLETE, CLOSEOUT IN PROGRESS
 
 ## Objective
 
-Evolve the current path-only directory plan into a structured representation of desired actions without immediately performing those actions.
+Evolve the path-only directory plan into a structured representation of desired state, observed state, and proposed
+actions without performing filesystem writes.
 
-## Planned Model
+## Implemented Model
 
-Conceptually:
+M4 implements:
 
 ```text
 ProvisioningPlan
 └── Actions[]
-    ├── TargetPath
-    ├── ActionType
-    ├── CurrentState
-    ├── DesiredState
-    └── Reason
+    └── ProvisioningAction
+        ├── TargetPath
+        ├── ActionType
+        ├── CurrentState
+        ├── DesiredState
+        ├── Reason
+        └── Warnings
 ```
 
-Exact types and names will be determined during implementation.
-
-## Existing-State Inspection
-
-Introduce controlled inspection of the target filesystem.
-
-The application should be able to distinguish conditions such as:
-
-```text
-Missing directory
-Existing expected directory
-Conflicting filesystem object
-Invalid target
-Unsafe target
-```
-
-## Action Classification
-
-Potential action categories:
+The action vocabulary is:
 
 ```text
 CREATE
@@ -556,23 +541,80 @@ CONFLICT
 REJECT
 ```
 
-Exact terminology may evolve.
+Current classification emits `CREATE`, `PRESERVE`, `CONFLICT`, and `REJECT`. `SKIP` remains reserved for a future
+condition if one is introduced intentionally.
 
-## Dry-Run Evolution
+## Existing-State Inspection
 
-Dry-run output should eventually render the structured provisioning plan rather than only listing intended directory paths.
-
-Example conceptual output:
+`ProvisioningPlanService` now inspects validated target paths without changing them.
 
 ```text
-CREATE    D:\CareerOS\Example\Resume
-PRESERVE  D:\CareerOS\Example\Resume\Master
-CREATE    D:\CareerOS\Example\Resume\Archived
+Missing directory          -> CREATE
+Existing expected directory -> PRESERVE
+Existing file              -> CONFLICT
+Invalid direct input       -> REJECT
+```
+
+This is an observation/classification boundary only. M4 performs no filesystem provisioning.
+
+## Structured Dry Run
+
+The current dry run renders the same structured plan contract that future provisioning is expected to consume.
+
+For each action it displays:
+
+```text
+Action type
+Target path
+Current state
+Desired state
+Reason
+Warnings
+```
+
+The workflow remains explicitly non-destructive.
+
+## Current Verification
+
+```text
+192 total tests
+192 passed
+0 failed
+0 skipped
+```
+
+Stable verification catalog:
+
+```text
+TEST-001 through TEST-023
+```
+
+M4-specific categories are `TEST-021` through `TEST-023` and cover provisioning-plan model semantics, read-only
+filesystem-state classification, and validation-first structured-plan workflow integration.
+
+Implementation commits:
+
+```text
+a15af77  feat: add structured provisioning plan models
+6fff7c2  feat: add read-only provisioning plan classification
+b5b26d3  feat: integrate structured provisioning plan into dry run
+```
+
+## Remaining Phase 4 Closeout
+
+```text
+Finish M4 documentation synchronization.
+Run final repository scans and build/test verification.
+Commit and push the documentation synchronization.
+Review the complete feature branch against main.
+Merge M4 when clean.
+Update main-line roadmap/milestone closeout state.
 ```
 
 ## Expected Outcome
 
-The application understands both desired state and observed state before any provisioning action occurs.
+The application now understands desired state and observed state and can explain the proposed action before any
+write-capable provisioning occurs.
 
 ---
 

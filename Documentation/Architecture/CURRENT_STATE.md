@@ -23,9 +23,10 @@ This distinction prevents future plans from being mistaken for working features.
 **Language:** C#
 **Configuration Format:** JSON
 **Primary Branch:** `main`
-**Current Development Branch:** `feat/comprehensive-validation`
+**Current Development Branch:** `feat/rich-provisioning-plan`
+**Current Implementation Checkpoint:** `b5b26d3` — `feat: integrate structured provisioning plan into dry run`
 
-The application currently operates as a **read-only directory planning utility**.
+The application currently operates as a **read-only validated planning and filesystem-state classification utility**.
 
 It can:
 
@@ -38,12 +39,15 @@ It can:
 - Validate the current preview destination root
 - Resolve profiles to templates
 - Recursively traverse nested directory structures
-- Generate complete read-only directory plans
+- Generate complete read-only directory path plans
 - Validate planned paths remain beneath the approved preview root
-- Display validated plans to the console
+- Inspect current filesystem state without modifying it
+- Build structured `ProvisioningPlan` / `ProvisioningAction` results
+- Classify validated targets as `CREATE`, `PRESERVE`, `CONFLICT`, or `REJECT`
+- Display structured dry-run actions with current state, desired state, reason, and warnings
 - Return actionable validation failures or top-level failures
 
-It does **not currently create or modify CareerOS directories**.
+It does **not currently create, modify, move, or delete CareerOS directories or files**.
 
 ---
 
@@ -88,16 +92,20 @@ flowchart TD
     U --> V[Validate Planned-Path Containment]
 
     V -->|Invalid| N
-    V -->|Valid| W[Display Dry-Run Plan]
+    V -->|Valid| W[ProvisioningPlanService]
 
-    W --> X[Return Exit Code 0]
+    W --> X[Inspect Existing Filesystem State]
+    X --> Y[Build ProvisioningPlan / ProvisioningAction Collection]
+    Y --> AA[Display Structured Dry-Run Actions]
+    AA --> AB[Return Exit Code 0]
 
-    B -. Exception .-> Y[Catch Top-Level Exception]
-    Y --> AA[Display Error]
-    AA --> Z
+    B -. Exception .-> AC[Catch Top-Level Exception]
+    AC --> AD[Display Error]
+    AD --> Z
 ```
 
-No filesystem provisioning occurs after the directory plan is generated.
+The M4 boundary remains read-only: filesystem APIs are used for observation/classification only. No provisioning write
+occurs after the structured plan is generated.
 
 ---
 
@@ -387,6 +395,36 @@ This is intentional.
 
 ---
 
+### `ProvisioningPlanService`
+
+Current responsibility:
+
+```text
+Validated planned paths
+        |
+        v
+Read-only filesystem observation
+        |
+        v
+ProvisioningAction classification
+        |
+        v
+ProvisioningPlan
+```
+
+Current classifications are:
+
+```text
+Missing target             -> CREATE
+Existing directory         -> PRESERVE
+Existing file              -> CONFLICT
+Invalid direct input       -> REJECT
+```
+
+The service performs no provisioning writes.
+
+---
+
 ## Current Models
 
 ### `BootstrapConfiguration`
@@ -491,6 +529,29 @@ DirectoryNode
 ```
 
 No fixed nesting depth is imposed by the model itself.
+
+---
+
+### `ProvisioningPlan`
+
+Represents the ordered collection of M4 structured provisioning actions.
+
+### `ProvisioningAction`
+
+Represents target path, desired state, observed current state, action classification, reason, and optional warnings.
+
+### Provisioning enums
+
+The current model defines:
+
+```text
+ProvisioningDesiredState
+ProvisioningCurrentState
+ProvisioningActionType
+```
+
+`ProvisioningActionType` currently includes `Create`, `Preserve`, `Skip`, `Conflict`, and `Reject`; the M4 classifier
+currently emits all except `Skip`.
 
 ---
 
@@ -678,7 +739,7 @@ There is still currently:
 - No general application-wide error-code taxonomy beyond validation codes
 - No retry behavior
 - No centralized logging abstraction
-- No structured provisioning/execution result model
+- No write-capable provisioning execution result model
 
 ---
 
@@ -686,18 +747,18 @@ There is still currently:
 
 The solution includes `CareerOS.Bootstrap.Tests`, using xUnit on .NET 8.
 
-At the current M3 implementation checkpoint:
+At the current M4 implementation checkpoint:
 
 ```text
-161 total
-161 passed
+192 total
+192 passed
 0 failed
 0 skipped
 
-TEST-001 through TEST-020
+TEST-001 through TEST-023
 ```
 
-M3 validation behavior is covered primarily by:
+M3 validation behavior remains covered, and M4 adds provisioning-plan model, read-only classification, and workflow-integration coverage through:
 
 ```text
 ConfigurationValidationServiceTests
@@ -1000,27 +1061,20 @@ Delete
 Overwrite
 ```
 
-That separation establishes the safe foundation required for future provisioning functionality.
+That separation now includes the M4 structured provisioning-plan boundary and establishes the safe foundation required for future write-capable provisioning.
 
 ---
 
 ## Next Architectural Step
 
-The next major development stages are expected to include:
+The next architectural step is **M4 documentation synchronization and closeout**, followed by M5 write-capable
+filesystem provisioning.
 
-1. Documentation foundation completion.
-2. Requirements and user-story definition.
-3. Automated testing foundation.
-4. Configuration validation.
-5. Safe filesystem provisioning.
+M5 should consume the validated `ProvisioningPlan` rather than reinterpret profile/template configuration. Before any
+write, it should revalidate relevant filesystem state, preserve existing valid directories, reject conflicts safely,
+and produce explicit execution outcomes.
 
-Those stages are future work and are described in greater detail in:
-
-```text
-FUTURE_STATE.md
-```
-
-and the project roadmap.
+The current M4 plan/classification layer must remain independently testable and read-only.
 
 ---
 

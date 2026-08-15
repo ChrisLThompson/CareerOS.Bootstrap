@@ -305,16 +305,21 @@ The directory planning process shall recursively traverse all child directory no
 
 ### Requirement
 
-The application shall display planned directory paths to the user during the current preview workflow.
+The application shall display the planned directory actions and their target paths to the user during the current preview workflow.
 
 ### Acceptance Criteria
 
-- Planned directories are visible in console output.
+- Planned directory targets are visible in console output.
 - Output identifies the profile being processed.
 - Output identifies the template being used.
-- A planned-directory count is displayed for each current profile run.
+- Each structured action displays its action type and target path.
+- Current state, desired state, and the action reason are visible.
+- Warnings are displayed when an action carries warning information.
+- An action count is displayed for each current profile run.
 
----
+### Current State
+
+M4 upgrades the preview from path-only `[PLAN]` output to structured provisioning-plan actions. `Program` renders the `ProvisioningActionType`, `TargetPath`, `CurrentState`, `DesiredState`, `Reason`, and any warnings produced by `ProvisioningPlanService`.
 
 ## FR-014 — Perform No Filesystem Writes During Current Preview
 
@@ -337,7 +342,7 @@ The current preview workflow shall not create, modify, rename, or delete CareerO
 
 ## FR-015 — Support Explicit Dry-Run Execution Mode
 
-**Status:** Planned / Partially Implemented
+**Status:** Partially Implemented
 **Priority:** High
 **Source Stories:** US-008
 
@@ -353,7 +358,11 @@ Once provisioning exists, the application shall provide an explicit dry-run mode
 - No provisioning write occurs in dry-run mode.
 - The final summary identifies the run as a dry run.
 
----
+### Current State
+
+The application currently operates only as a non-destructive dry-run/preview and now renders a structured `ProvisioningPlan`. The preview is generated from validated directory intent and the resulting structured plan is designed to become the shared input for later write-capable provisioning.
+
+Explicit execution-mode selection remains future work because provision mode and command-line execution options do not yet exist.
 
 # Validation Requirements
 
@@ -527,7 +536,7 @@ automation requirement justifies a separate field.
 
 ## FR-021 — Inspect Existing Directory State Before Creation
 
-**Status:** Planned
+**Status:** Partially Implemented
 **Priority:** High
 **Source Stories:** US-010, US-011, US-012, US-020
 
@@ -541,11 +550,20 @@ Before creating a planned directory, provision mode shall determine whether that
 - Inspection occurs before attempting creation.
 - Inspection results can be represented in the provisioning result or summary.
 
----
+### Current State
+
+M4 implements the read-only inspection capability in `ProvisioningPlanService`. For a validated fully qualified planned path, the service distinguishes:
+
+- Missing target → `ProvisioningCurrentState.Missing`
+- Existing directory → `ProvisioningCurrentState.Directory`
+- Existing file → `ProvisioningCurrentState.File`
+- Invalid direct service input → `ProvisioningCurrentState.Invalid`
+
+The inspection layer performs no filesystem writes. Write-time revalidation remains required when M5 introduces actual provisioning.
 
 ## FR-022 — Preserve Existing Valid Directories
 
-**Status:** Planned
+**Status:** Partially Implemented
 **Priority:** High
 **Source Stories:** US-010, US-012, US-013
 
@@ -560,11 +578,15 @@ Provision mode shall preserve expected directories that already exist.
 - Files contained within the existing directory remain untouched by normal directory provisioning.
 - The result reports the directory as existing/preserved rather than newly created.
 
----
+### Current State
+
+M4 implements the planning semantics for preservation. An expected path that already exists as a directory is classified as `PRESERVE`, with current state `Directory`, desired state `Directory`, and a warning that the existing directory will not be modified.
+
+The current preview remains read-only, so existing directory contents are not changed. Actual provision-mode preservation remains an M5 execution responsibility.
 
 ## FR-023 — Create Missing Planned Directories
 
-**Status:** Planned
+**Status:** Planned / M4 Planning Classification Implemented
 **Priority:** High
 **Source Stories:** US-011
 
@@ -579,11 +601,15 @@ Provision mode shall create expected directories that are missing from the targe
 - Successful creation is reported distinctly from existing-directory detection.
 - A failed creation is reported rather than silently treated as success.
 
----
+### Current State
+
+M4 identifies missing expected directory targets and classifies them as `CREATE` without creating them. The current dry run therefore explains future creation intent while preserving the no-write boundary.
+
+Filesystem creation, creation ordering at execution time, and write-failure reporting remain M5 work.
 
 ## FR-024 — Support Idempotent Repeat Provisioning
 
-**Status:** Planned
+**Status:** Planned / M4 Planning Foundation Implemented
 **Priority:** High
 **Source Stories:** US-010, US-011, US-012
 
@@ -599,7 +625,11 @@ Provisioning shall be safe to execute repeatedly against the same valid configur
 - Repeat execution completes successfully when the desired structure already exists.
 - Idempotency is validated through automated filesystem integration testing.
 
----
+### Current State
+
+M4 establishes deterministic, read-only state classification: repeated inspection of unchanged filesystem state produces the same action classifications and does not create missing targets or modify existing content.
+
+True provisioning idempotency cannot be completed until M5 introduces filesystem writes and repeated execution tests.
 
 ## FR-025 — Do Not Automatically Delete Removed Configuration Directories
 
@@ -621,7 +651,7 @@ Normal provisioning shall not automatically delete a physical directory merely b
 
 ## FR-026 — Use a Shared Validated Plan for Preview and Provisioning
 
-**Status:** Future
+**Status:** Partially Implemented
 **Priority:** High
 **Source Stories:** US-008, US-011, US-020
 
@@ -633,9 +663,25 @@ Dry-run and real provisioning should consume the same validated provisioning-pla
 
 - The plan used for preview represents the same intended actions supplied to provision mode.
 - Provision mode does not independently reinterpret profile/template structure in a way that can diverge from dry-run output.
-- Plan actions can distinguish intended operation types such as create, exists, skip, invalid, or conflict.
+- Plan actions can distinguish intended operation types such as create, preserve, skip, reject, or conflict.
 
----
+### Current State
+
+M4 introduces `ProvisioningPlan` and `ProvisioningAction` as the structured plan contract consumed by the current dry-run workflow.
+
+The implemented action vocabulary is:
+
+```text
+Create
+Preserve
+Skip
+Conflict
+Reject
+```
+
+Current classification emits `Create`, `Preserve`, `Conflict`, and `Reject` for supported states. `Skip` is reserved in the model but no current M4 condition requires it.
+
+The plan records target path, desired state, observed current state, proposed action, reason, and warnings. Future M5 provisioning should consume this validated structured intent rather than rebuilding profile/template logic independently.
 
 # Profile and Execution Selection Requirements
 

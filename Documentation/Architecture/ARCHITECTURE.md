@@ -376,11 +376,19 @@ Destination-root validation
 Planned-path containment validation
 Structured validation errors and warnings
 Recursive directory traversal
-Dry-run plan generation
+Read-only directory-path planning
+Read-only filesystem-state inspection
+Structured ProvisioningPlan / ProvisioningAction modeling
+CREATE / PRESERVE / CONFLICT / REJECT action classification
+Structured dry-run provisioning-plan output
 Automated unit and integration testing
 Console output
 Top-level error handling
 ```
+
+M4 extends the existing read-only planning pipeline without crossing the filesystem-write boundary. `DirectoryPlanService`
+still determines the desired path set; `ProvisioningPlanService` observes current filesystem state and classifies each
+validated target into a structured `ProvisioningAction`.
 
 ### Planned
 
@@ -388,9 +396,9 @@ Top-level error handling
 Configurable installation root
 Command-line parsing
 True --dry-run CLI mode
-Filesystem provisioning
-Existing-directory detection
-Rich provisioning result models
+Write-capable filesystem provisioning
+Write-time revalidation
+Execution/provisioning result models
 Structured logging
 Execution summaries
 CI validation
@@ -399,9 +407,10 @@ Optional Git initialization
 Backup / rollback capabilities where appropriate
 ```
 
-Planned features should not be represented as currently available.
+`ProvisioningPlan` and `ProvisioningAction` are no longer future concepts. They are current M4 contracts intended to
+become the shared input to later write-capable provisioning.
 
----
+Planned features should not be represented as currently available.
 
 ## Architecture Documentation Map
 
@@ -636,7 +645,7 @@ Changes should reach `main` only after:
 
 ## Summary
 
-`CareerOS.Bootstrap` currently implements the safe, read-only foundation of a configuration-driven provisioning system.
+`CareerOS.Bootstrap` currently implements the safe, read-only foundation of a configuration-driven provisioning system, including M4 structured provisioning-plan classification.
 
 Its present architecture establishes:
 

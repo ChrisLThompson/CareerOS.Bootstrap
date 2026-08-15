@@ -294,6 +294,9 @@ uses. It should operate on a plan produced earlier in the workflow.
 
 ## Existing-State Inspection and Idempotency
 
+M4 now implements **read-only existing-state inspection and action classification** through `ProvisioningPlanService`. The future-state concern in this section is the write-capable execution and revalidation behavior that will consume that structured plan.
+
+
 Before creating anything, future provisioning should determine what
 already exists.
 
@@ -415,21 +418,26 @@ JsonConfigurationServiceTests
 PathServiceTests
 ConfigurationValidationServiceTests
 ValidationResultTests
+ProvisioningPlanTests
+ProvisioningPlanServiceTests
 BootstrapPlanningWorkflowTests
 TemporaryDirectoryFixtureTests
 ```
 
-At the current M3 implementation checkpoint the suite contains 161 passing
+At the current M4 implementation checkpoint the suite contains 192 passing
 xUnit tests with zero failures.
 
-Future provisioning will require additional focused and integration coverage,
-including:
+M4 already covers structured provisioning-plan models, read-only existing-state
+inspection/classification, and validation-first workflow integration.
+
+Future write-capable provisioning will require additional focused and integration
+coverage, including:
 
 ``` text
 DirectoryProvisioningServiceTests
-ProvisioningPlanTests
-ExistingStateInspectionTests
 ProvisioningWorkflowTests
+ProvisioningFailureTests
+WriteTimeRevalidationTests
 IdempotencyTests
 ```
 
@@ -687,9 +695,10 @@ ApplicationRunner
 CommandLineOptions
 ConfigurationValidationService
 ValidationResult
-ProvisioningPlan
-ProvisioningAction
-DirectoryProvisioningService
+ProvisioningPlan              CURRENT M4 CONTRACT
+ProvisioningAction              CURRENT M4 CONTRACT
+ProvisioningPlanService         CURRENT M4 CLASSIFICATION
+DirectoryProvisioningService    FUTURE WRITE-CAPABLE SERVICE
 ProvisioningResult
 ExecutionSummary
 Logging / Reporting abstraction

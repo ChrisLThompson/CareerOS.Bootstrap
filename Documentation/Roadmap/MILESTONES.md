@@ -29,7 +29,7 @@ Milestone status should reflect repository evidence rather than intention alone.
 | M1 | Documentation and design baseline | COMPLETE |
 | M2 | Automated testing foundation | COMPLETE |
 | M3 | Comprehensive validation | COMPLETE |
-| M4 | Rich provisioning plan | PLANNED |
+| M4 | Rich provisioning plan | IN PROGRESS |
 | M5 | Safe filesystem provisioning | PLANNED |
 | M6 | Verification and structured results | PLANNED |
 | M7 | CLI and operational maturity | PLANNED |
@@ -553,26 +553,30 @@ The M3 exit condition is satisfied and the milestone is complete.
 
 # M4 — Rich Provisioning Plan
 
-**Status:** PLANNED
+**Status:** IN PROGRESS
 
 ## Goal
 
-Replace or extend the current path-only plan with a structured desired-state plan that can safely drive both preview and future execution.
+Replace or extend the path-only directory plan with a structured desired/observed-state plan that can safely drive
+preview today and future execution without allowing M4 to perform filesystem writes.
 
-## Required Capabilities
+## Implemented M4 Model
 
-Introduce a model capable of representing:
+The current implementation introduces:
 
 ```text
-Target path
-Desired state
-Observed current state
-Proposed action
-Reason
-Warnings or conflicts
+ProvisioningPlan
+└── Actions[]
+    └── ProvisioningAction
+        ├── TargetPath
+        ├── DesiredState
+        ├── CurrentState
+        ├── ActionType
+        ├── Reason
+        └── Warnings
 ```
 
-Potential action classifications include:
+The current action vocabulary is:
 
 ```text
 CREATE
@@ -582,46 +586,107 @@ CONFLICT
 REJECT
 ```
 
-Final terminology must be defined by implementation.
+`SKIP` is reserved in the model; current M4 classification emits `CREATE`, `PRESERVE`, `CONFLICT`, and `REJECT`.
 
 ## Existing-State Inspection
 
-The application should inspect target paths without changing them.
+`ProvisioningPlanService` performs controlled, read-only inspection of validated planned paths.
 
-It should distinguish:
+Current classification behavior:
 
-- Missing directory.
-- Existing expected directory.
-- Conflicting file or object.
-- Invalid target.
-- Unsafe target.
+```text
+Missing target                 -> CREATE
+Existing expected directory    -> PRESERVE
+Existing file                  -> CONFLICT
+Invalid direct service input   -> REJECT
+```
+
+The service does not create, modify, move, or delete filesystem objects.
 
 ## Dry-Run Upgrade
 
-Dry-run should render the same structured intent that would later be consumed by provisioning.
+The current dry-run workflow consumes the structured `ProvisioningPlan` and renders:
 
-This reduces the risk of preview logic diverging from execution logic.
+```text
+Action type
+Target path
+Observed current state
+Desired state
+Reason
+Warnings when present
+Per-profile action count
+```
+
+Runtime verification confirms the preview remains non-destructive and `_Preview` is not physically created.
+
+## Current M4 Evidence
+
+Implementation commits:
+
+```text
+a15af77  feat: add structured provisioning plan models
+6fff7c2  feat: add read-only provisioning plan classification
+b5b26d3  feat: integrate structured provisioning plan into dry run
+```
+
+Verification checkpoint:
+
+```text
+dotnet build  -> succeeded
+dotnet test   -> 192 total, 192 passed, 0 failed, 0 skipped
+```
+
+Stable verification catalog:
+
+```text
+TEST-001 through TEST-023
+```
+
+M4-specific verification:
+
+```text
+TEST-021  Structured provisioning-plan model semantics
+TEST-022  Read-only existing-state inspection and action classification
+TEST-023  Validation-first structured provisioning-plan workflow integration
+```
 
 ## Completion Criteria
 
 ```text
-[ ] Structured provisioning-plan model exists.
-[ ] Existing filesystem state can be inspected safely.
-[ ] Desired and current state can be compared.
-[ ] Actions are classified consistently.
-[ ] Dry-run renders structured actions.
-[ ] Conflicts are represented without performing writes.
-[ ] Existing valid directories are recognized as preserved.
-[ ] Unit tests cover action classification.
-[ ] Integration tests cover controlled filesystem states.
-[ ] Requirements, architecture, data flow, and diagrams are updated.
-[ ] Build and tests pass.
-[ ] Changes are committed and pushed.
+[x] Structured provisioning-plan model exists.
+[x] Existing filesystem state can be inspected safely.
+[x] Desired and current state can be compared.
+[x] Actions are classified consistently.
+[x] Dry-run renders structured actions.
+[x] Conflicts are represented without performing writes.
+[x] Existing valid directories are recognized as preserved.
+[x] Unit tests cover action classification.
+[x] Integration tests cover controlled filesystem states.
+[ ] Requirements, architecture, data flow, and diagrams are fully synchronized.
+[x] Build and tests pass at the current implementation checkpoint.
+[x] Implementation changes are committed and pushed.
+[ ] Commit and push M4 documentation synchronization.
+[ ] Review the complete M4 feature-branch diff against `main`.
+[ ] Merge the completed M4 branch.
+```
+
+## Remaining M4 Closeout
+
+The implementation portion of M4 is complete. Remaining work is documentation and Git closeout:
+
+```text
+[ ] Finish architecture/diagram/roadmap synchronization.
+[ ] Run final stale-reference and whitespace scans.
+[ ] Run dotnet build and dotnet test.
+[ ] Commit and push synchronized M4 documentation.
+[ ] Review main...HEAD.
+[ ] Merge M4 when review is clean.
 ```
 
 ## Exit Condition
 
-The application can explain exactly what it intends to do before it is allowed to do it.
+The technical exit behavior is present: the application can explain exactly what it intends to do before it is allowed
+to do it. M4 remains `IN PROGRESS` until documentation synchronization, final review, and merge closeout are complete.
 
 ---
 
@@ -1134,15 +1199,15 @@ When changing milestone scope:
 
 # Immediate Next Milestone Transition
 
-M0 through M3 are complete. M4 is the next implementation milestone.
+M0 through M3 are complete. M4 implementation is complete and the milestone is currently in documentation, review, and Git closeout.
 
-The preferred next implementation milestone is:
+After M4 is reviewed and merged, the next implementation milestone is:
 
 ```text
-M4 — Rich Provisioning Plan
+M5 — Safe Filesystem Provisioning
 ```
 
-This sequencing intentionally places regression protection before the application gains meaningful filesystem write capability.
+This sequencing preserves the project's safety boundary: structured desired-state planning, current-state inspection, and action classification are established and tested before the application gains meaningful filesystem write capability.
 
 The expected progression is:
 
@@ -1159,7 +1224,7 @@ Validation
 Structured Planning
         |
         v
-Provisioning
+Safe Filesystem Provisioning
 ```
 
 ---
@@ -1173,7 +1238,7 @@ M0  Foundation                 COMPLETE
 M1  Documentation              COMPLETE
 M2  Automated Testing          COMPLETE
 M3  Validation                 COMPLETE
-M4  Rich Provisioning Plan     PLANNED
+M4  Rich Provisioning Plan     IN PROGRESS
 M5  Filesystem Provisioning    PLANNED
 M6  Verification / Results     PLANNED
 M7  CLI Maturity               PLANNED
