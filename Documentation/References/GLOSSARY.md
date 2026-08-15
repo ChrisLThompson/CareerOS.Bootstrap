@@ -216,25 +216,27 @@ The filesystem structure defined by validated configuration and planning logic.
 
 ### Current State
 
-The observed state of the target filesystem at execution time.
+The observed state of a target filesystem path during read-only planning or future execution.
 
-Existing-state inspection is planned functionality.
+M4 implements read-only existing-state inspection through `ProvisioningPlanService`. Current state is observed without creating, modifying, moving, or deleting filesystem objects.
 
 ### State Comparison
 
-The planned process of comparing desired state with observed current state to determine what action, if any, is required.
+The process of comparing desired state with observed current state to determine the appropriate provisioning action.
+
+M4 performs this comparison during read-only planning and classifies validated targets without executing the proposed action.
 
 ### Provisioning Plan
 
-A planned richer representation of intended filesystem operations.
+A structured representation of intended filesystem operations produced from validated planned paths and observed filesystem state.
 
-Unlike the current path-only directory plan, a future provisioning plan may contain explicit actions, current state, desired state, and reasons.
+The current M4 `ProvisioningPlan` contains ordered `ProvisioningAction` entries describing target path, desired state, current state, proposed action, reason, and warnings. The plan is consumed by the dry-run workflow and performs no filesystem writes.
 
 ### Provisioning Action
 
-A planned unit of work describing what should happen to a target path.
+A structured unit of planned work describing the desired and observed state of a target path and the action implied by that comparison.
 
-Potential classifications include `CREATE`, `PRESERVE`, `SKIP`, `CONFLICT`, and `REJECT`. Exact names remain subject to implementation design.
+The current action vocabulary is `CREATE`, `PRESERVE`, `SKIP`, `CONFLICT`, and `REJECT`. M4 currently emits `CREATE`, `PRESERVE`, `CONFLICT`, and `REJECT`; `SKIP` is defined by the model but is not currently emitted by the classifier.
 
 ---
 
@@ -258,23 +260,33 @@ A planned safety requirement that actual filesystem changes occur only when exec
 
 ### Existing-State Inspection
 
-The planned process of observing target paths before determining provisioning actions.
+The read-only process of observing target paths before determining provisioning actions.
+
+M4 implements existing-state inspection in `ProvisioningPlanService`. Write-time revalidation remains future provisioning work.
 
 ### Preserve
 
-A planned action in which an existing valid filesystem object is left unchanged.
+A provisioning-plan classification indicating that an expected directory already exists and should remain unchanged.
+
+M4 classifies this state as `PRESERVE`; future write-capable provisioning must honor that classification without modifying existing valid content.
 
 ### Create
 
-A planned action in which a missing required directory is created.
+A provisioning-plan classification indicating that a required directory is missing and would need to be created during future write-capable provisioning.
+
+M4 classifies this state as `CREATE` but does not create the directory.
 
 ### Conflict
 
-A planned classification indicating that observed filesystem state cannot safely satisfy the desired state without additional handling or user intervention.
+A provisioning-plan classification indicating that observed filesystem state cannot safely satisfy the desired state without additional handling or user intervention.
+
+M4 currently uses `CONFLICT` when a file exists where a directory is required.
 
 ### Reject
 
-A planned classification indicating that an invalid or unsafe requested action should not proceed.
+A provisioning-plan classification indicating that an invalid or unsafe requested action should not proceed.
+
+M4 can emit `REJECT` for invalid direct planning-service input; write-capable execution remains future work.
 
 ### Idempotency
 
@@ -294,7 +306,7 @@ A planned structured representation of validation, planning, provisioning, verif
 
 ### Validation
 
-The planned process of checking configuration, execution requests, resolved relationships, and other required conditions before write-capable behavior is allowed.
+The process of checking configuration, execution requests, resolved relationships, and other required conditions before later processing or write-capable behavior is allowed.
 
 ### Validation Error
 
@@ -306,7 +318,7 @@ A validation failure severe enough to prevent provisioning.
 
 ### Validation Result
 
-A planned structured representation of validation success, warnings, or errors.
+A structured representation of validation success, warnings, and errors used by the current validation workflow.
 
 ### Fail Fast
 

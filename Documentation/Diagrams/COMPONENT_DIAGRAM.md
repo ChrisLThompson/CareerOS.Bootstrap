@@ -27,10 +27,11 @@ flowchart TB
         JsonService["JsonConfigurationService<br/>JSON Loading + Deserialization"]
         Validator["ConfigurationValidationService<br/>Configuration + Path Safety Validation"]
         Resolver["TemplateResolverService<br/>Profile-to-Template Resolution"]
-        Planner["DirectoryPlanService<br/>Recursive Read-Only Planning"]
+        Planner["DirectoryPlanService<br/>Recursive Desired-Path Planning"]
+        PlanService["ProvisioningPlanService<br/>Read-Only State Inspection + Classification"]
     end
 
-    subgraph Models["Configuration + Validation Models — CURRENT"]
+    subgraph Models["Configuration + Validation + Provisioning Models — CURRENT"]
         BootstrapConfig["BootstrapConfiguration"]
         ProfileConfig["ProfileConfiguration"]
         TemplateConfig["TemplateConfiguration"]
@@ -39,6 +40,8 @@ flowchart TB
         ValidationResult["ValidationResult"]
         ValidationError["ValidationError"]
         ValidationWarning["ValidationWarning"]
+        ProvisioningPlan["ProvisioningPlan"]
+        ProvisioningAction["ProvisioningAction"]
     end
 
     subgraph Config["Repository Configuration — CURRENT"]
@@ -55,6 +58,7 @@ flowchart TB
     Program --> Validator
     Program --> Resolver
     Program --> Planner
+    Program --> PlanService
 
     PathService --> BootstrapJson
     PathService --> TemplatesJson
@@ -84,14 +88,17 @@ flowchart TB
     DirectoryNode --> Planner
 
     Planner --> Validator
+    Validator --> PlanService
+    Planner --> PlanService
+    PlanService --> ProvisioningPlan
+    ProvisioningPlan --> ProvisioningAction
+    PlanService --> Console
     Validator --> Console
-    Planner --> Console
     Program --> Console
 
     subgraph Planned["Planned Application Components"]
         AppRunner["ApplicationRunner / Orchestrator<br/>PLANNED"]
         Cli["Command-Line Options / Parser<br/>PLANNED"]
-        ProvisioningPlan["ProvisioningPlan + ProvisioningAction<br/>PLANNED"]
         Provisioner["DirectoryProvisioningService<br/>PLANNED"]
         Results["ProvisioningResult / ExecutionSummary<br/>PLANNED"]
         Logging["Logging / Reporting Abstraction<br/>PLANNED"]
@@ -104,15 +111,13 @@ flowchart TB
     AppRunner -.-> Validator
     AppRunner -.-> Resolver
     AppRunner -.-> Planner
-    Validator -.-> ProvisioningPlan
-    Planner -.-> ProvisioningPlan
     ProvisioningPlan -.-> Provisioner
     Provisioner -.-> Results
     Results -.-> Logging
     AppRunner -.-> Logging
 
     subgraph Verification["Verification — CURRENT / PLANNED"]
-        Tests["CareerOS.Bootstrap.Tests<br/>161 passing xUnit tests<br/>CURRENT"]
+        Tests["CareerOS.Bootstrap.Tests<br/>192 passing xUnit tests<br/>CURRENT"]
         GitHubActions["GitHub Actions CI<br/>PLANNED"]
     end
 
@@ -205,6 +210,26 @@ Boundary:
 The service performs semantic and lexical path validation. It does not load JSON,
 build directory plans, inspect existing filesystem object state for provisioning,
 or create directories.
+
+---
+
+### `ProvisioningPlanService` — CURRENT
+
+Primary responsibilities:
+
+- Accept validated planned directory paths.
+- Normalize fully qualified targets.
+- Inspect current filesystem state without modifying it.
+- Classify missing targets as `CREATE`.
+- Classify existing expected directories as `PRESERVE`.
+- Classify existing files as `CONFLICT`.
+- Classify invalid direct service inputs as `REJECT`.
+- Produce ordered `ProvisioningAction` entries inside a `ProvisioningPlan`.
+
+Boundary:
+
+`ProvisioningPlanService` is a **read-only classification service**. It does not create, modify, move, or delete
+filesystem objects. Write-capable provisioning remains planned for M5.
 
 ---
 
@@ -429,33 +454,31 @@ Exact syntax remains subject to requirements and implementation decisions.
 
 ---
 
-### `ProvisioningPlan` / `ProvisioningAction` — PLANNED
+### `ProvisioningPlan` / `ProvisioningAction` — CURRENT
 
-The current `DirectoryPlanService` returns path strings.
+M4 implements the structured desired/observed-state plan contract.
 
-A richer target model may represent intended actions:
-
-```text
-ProvisioningPlan
-└── Actions[]
-    ├── TargetPath
-    ├── ActionType
-    ├── CurrentState
-    ├── DesiredState
-    └── Reason
-```
-
-Potential action classifications:
+Current action data includes:
 
 ```text
-Create
-Exists
-Skip
-Invalid
-Conflict
+TargetPath
+DesiredState
+CurrentState
+ActionType
+Reason
+Warnings
 ```
 
-The same plan should ideally drive both dry-run presentation and actual execution.
+Current classification can emit:
+
+```text
+CREATE
+PRESERVE
+CONFLICT
+REJECT
+```
+
+`SKIP` remains a defined model value but is not currently emitted by M4 classification.
 
 ---
 

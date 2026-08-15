@@ -56,7 +56,10 @@ flowchart TD
     Q --> R["Validate Planned-Path Containment<br/>CURRENT"]
     R --> S{"Plan Safe?<br/>CURRENT"}
     S -->|"No"| X
-    S -->|"Yes"| T["Display Dry-Run Plan<br/>CURRENT"]
+    S -->|"Yes"| PS["ProvisioningPlanService<br/>CURRENT"]
+    PS --> PI["Inspect Existing Filesystem State<br/>CURRENT"]
+    PI --> PC["Classify Provisioning Actions<br/>CURRENT"]
+    PC --> T["Display Structured Dry-Run Plan<br/>CURRENT"]
     T --> U["Return Exit Code 0<br/>CURRENT"]
 
     B -. "Unhandled Exception" .-> AA["Catch at Application Boundary<br/>CURRENT"]
@@ -64,7 +67,7 @@ flowchart TD
     AB --> Y
 ```
 
-The current process stops after validating and displaying the read-only plan.
+The current process stops after validating, observing filesystem state, classifying structured actions, and displaying the read-only plan.
 
 No CareerOS directory provisioning occurs.
 
@@ -76,11 +79,12 @@ No CareerOS directory provisioning occurs.
 flowchart LR
     A["Configuration"] --> B["Centralized Validation"]
     B --> C["Resolution"]
-    C --> D["Planning"]
+    C --> D["Desired-Path Planning"]
     D --> E["Path Containment Validation"]
-    E --> F["Console Preview"]
+    E --> F["Read-Only State Inspection + Action Classification"]
+    F --> G["Structured Console Preview"]
 
-    F -. "STOP — current implementation" .-> G["Filesystem Provisioning"]
+    G -. "STOP — current implementation" .-> H["Filesystem Provisioning"]
 ```
 
 The current workflow is validation-first and intentionally read-only. Blocking
@@ -125,7 +129,13 @@ Build Planned Paths
 Validate Planned-Path Containment
   |
   v
-Display Dry-Run Output
+Inspect Existing Filesystem State
+  |
+  v
+Build Structured Provisioning Plan
+  |
+  v
+Display Structured Dry-Run Output
   |
   v
 Exit
@@ -149,16 +159,15 @@ flowchart TD
     G --> H["Return Failure Exit Code<br/>PLANNED"]
 
     F -->|"Yes"| I["Resolve Profile and Template<br/>CURRENT"]
-    I --> J["Build Provisioning Plan<br/>CURRENT FOUNDATION / PLANNED EVOLUTION"]
+    I --> J["Build Structured Provisioning Plan<br/>CURRENT"]
 
     J --> K{"Execution Mode<br/>PLANNED"}
 
-    K -->|"Dry Run"| L["Render Planned Actions<br/>PLANNED"]
+    K -->|"Dry Run"| L["Render Structured Planned Actions<br/>CURRENT FOUNDATION"]
     L --> M["Report Summary<br/>PLANNED"]
 
-    K -->|"Provision"| N["Inspect Existing Filesystem State<br/>PLANNED"]
-    N --> O["Classify Actions<br/>PLANNED"]
-    O --> P["Create Missing Directories<br/>PLANNED"]
+    J --> N["Existing-State Inspection + Classification<br/>CURRENT"]
+    K -->|"Provision"| P["Create Missing Directories<br/>PLANNED"]
     P --> Q["Verify Result<br/>PLANNED"]
     Q --> M
 
@@ -217,11 +226,11 @@ Report
 
 ---
 
-# Planned Existing-State Evaluation
+# Current Existing-State Evaluation
 
 ```mermaid
 flowchart TD
-    A["Desired Directory"] --> B["Inspect Target Path<br/>PLANNED"]
+    A["Validated Desired Directory"] --> B["Inspect Target Path<br/>CURRENT"]
     B --> C{"Current State?"}
 
     C -->|"Missing"| D["Action = CREATE"]
@@ -235,7 +244,7 @@ flowchart TD
     G --> H
 ```
 
-This classification is central to future idempotent provisioning.
+This classification is implemented in M4 and becomes the decision input to future idempotent write-capable provisioning.
 
 ---
 
@@ -347,9 +356,10 @@ Provisioning outcomes should be verified or reliably observed rather than assume
 | Profile/template resolution | `TemplateResolverService` | CURRENT |
 | Recursive directory planning | `DirectoryPlanService` | CURRENT |
 | Planned-path containment validation | `ConfigurationValidationService` | CURRENT |
+| Structured provisioning-plan classification | `ProvisioningPlanService` | CURRENT |
 | Console preview | `Program.Main()` | CURRENT |
 | CLI request parsing | Future CLI layer | PLANNED |
-| Existing-state inspection | Future provisioning layer | PLANNED |
+| Existing-state inspection | `ProvisioningPlanService` | CURRENT |
 | Filesystem provisioning | Future provisioning service | PLANNED |
 | Verification | Future provisioning workflow | PLANNED |
 | Structured logging/reporting | Future reporting layer | PLANNED |

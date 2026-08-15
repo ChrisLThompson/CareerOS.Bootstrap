@@ -393,6 +393,54 @@ This stage also performs no filesystem writes.
 
 ------------------------------------------------------------------------
 
+## Phase 8 --- Structured Provisioning-Plan Classification
+
+After planned-path containment succeeds, the validated path collection flows into `ProvisioningPlanService`.
+
+```text
+Validated planned paths
+        |
+        v
+ProvisioningPlanService
+        |
+        +--> Directory.Exists(...)
+        |
+        +--> File.Exists(...)
+        |
+        v
+ProvisioningAction[]
+        |
+        v
+ProvisioningPlan
+```
+
+For each validated path the current observed-state mapping is:
+
+```text
+Missing target
+    -> CurrentState.Missing
+    -> ActionType.Create
+
+Existing directory
+    -> CurrentState.Directory
+    -> ActionType.Preserve
+
+Existing file
+    -> CurrentState.File
+    -> ActionType.Conflict
+
+Invalid direct service input
+    -> CurrentState.Invalid
+    -> ActionType.Reject
+```
+
+This phase is **read-only**. Filesystem state is observed for planning/classification; no target is created, modified,
+moved, or deleted.
+
+The structured plan preserves the desired-path traversal order produced by `DirectoryPlanService`.
+
+---
+
 ## Current Preview Boundary
 
 The current application uses a logical `_Preview` location for readable
@@ -442,7 +490,7 @@ Filesystem Modification
      X
 ```
 
-No current planning data crosses that boundary into a provisioning
+Current planning data now crosses into the read-only M4 provisioning-plan classification boundary, but not into a write-capable provisioning
 service.
 
 ------------------------------------------------------------------------
@@ -667,39 +715,38 @@ versioning exists.
 
 ------------------------------------------------------------------------
 
-## Future Rich Provisioning Plan
+## Current Structured Provisioning Plan Flow
 
-The current planner returns paths.
-
-A future design may represent each intended action explicitly:
+M4 implements the richer plan representation previously described as future architecture.
 
 ```text
+DirectoryPlanService
+        |
+        v
+Validated planned paths
+        |
+        v
+ProvisioningPlanService
+        |
+        v
 ProvisioningPlan
-└── Actions[]
-    ├── TargetPath
-    ├── ActionType
-    ├── CurrentState
-    ├── DesiredState
-    └── Reason
+        |
+        +--> ProvisioningAction
+        |       +--> TargetPath
+        |       +--> DesiredState
+        |       +--> CurrentState
+        |       +--> ActionType
+        |       +--> Reason
+        |       +--> Warnings
+        |
+        v
+Structured dry-run console output
 ```
 
-This creates an important future relationship:
+`ProvisioningPlanService` observes filesystem state and classifies intent. It does not perform write-capable
+provisioning. The plan is the current M4 contract that future execution should consume.
 
-```text
-                    +--> Dry-Run Renderer
-                    |
-Validated Plan -----+
-                    |
-                    +--> Provisioning Service
-```
-
-Both preview and execution should consume the same validated plan
-wherever practical.
-
-This helps ensure that the action shown to the user is the action the
-application intends to perform.
-
-------------------------------------------------------------------------
+---
 
 ## Future Filesystem State Flow
 
@@ -874,7 +921,7 @@ The intended ownership model is:
   Validation results            Validation models
   Template matching             `TemplateResolverService`
   Directory planning            `DirectoryPlanService`
-  Future provisioning actions   Provisioning-plan model
+  Current provisioning actions  `ProvisioningPlanService` / `ProvisioningPlan`
   Future filesystem execution   Provisioning service
   Future execution results      Result/summary models
   Presentation                  Console/reporting layer
@@ -943,7 +990,7 @@ Validation
 Profile / Template Resolution
           |
           v
-Rich Provisioning Plan
+Structured Provisioning Plan
           |
           +---------> Dry-Run Preview
           |

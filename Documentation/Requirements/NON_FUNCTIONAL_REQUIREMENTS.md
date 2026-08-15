@@ -37,23 +37,26 @@ Implemented, Planned, or Future.
 Preview/dry-run execution shall not create, modify, rename, move,
 overwrite, or delete CareerOS filesystem content.
 
-**Verification:** Current preview performs no directory creation;
-`_Preview` is not physically created; existing content remains
-unchanged; future explicit dry-run receives automated no-write tests.
+**Verification:** Current structured preview performs no directory creation;
+`_Preview` is not physically created; existing content remains unchanged.
+M4 unit/integration tests verify that state inspection and action
+classification do not create missing targets or modify existing files and
+directories.
 
 ## NFR-002 --- Existing User Content Must Be Preserved
 
 **Category:** Safety / Data Integrity\
-**Status:** Planned\
+**Status:** Partially Implemented / Future Provisioning Enforcement\
 **Priority:** High\
 **Related FRs:** FR-021, FR-022, FR-023, FR-024, FR-025
 
 Normal provisioning shall preserve valid existing directories and their
 contents.
 
-**Verification:** Existing expected directories are not destructively
-recreated; contained files remain untouched; repeat execution preserves
-content; isolated integration tests verify preservation.
+**Verification:** M4 inspection recognizes expected existing directories as
+`PRESERVE` and does not modify them or their contents during preview.
+Write-capable provisioning must retain this behavior; repeated provision-mode
+execution remains future M5 verification.
 
 ## NFR-003 --- Destructive Behavior Requires Explicit Design
 
@@ -93,7 +96,7 @@ write-capable provisioning must consume the same blocking validation gate.
 ## NFR-005 --- Provisioning Must Be Idempotent
 
 **Category:** Reliability\
-**Status:** Planned\
+**Status:** Planned / M4 Planning Foundation Implemented\
 **Priority:** High\
 **Related FRs:** FR-021, FR-022, FR-023, FR-024
 
@@ -101,9 +104,9 @@ Repeated provisioning using the same valid effective configuration and
 target shall converge on the desired structure without duplicate or
 destructive side effects.
 
-**Verification:** First run may create missing directories; a second
-identical run creates none; compliant existing structures succeed;
-integration tests execute provisioning repeatedly.
+**Verification:** M4 verifies deterministic repeated read-only inspection and
+classification against unchanged filesystem state. First-run creation and
+second-run no-op behavior require M5 write-capable provisioning tests.
 
 ## NFR-006 --- Failures Must Not Be Reported as Success
 
@@ -123,16 +126,17 @@ failure.
 ## NFR-007 --- Filesystem Outcomes Must Be Observed
 
 **Category:** Reliability\
-**Status:** Future\
+**Status:** Partially Implemented\
 **Priority:** High\
 **Related FRs:** FR-021, FR-023, FR-024, FR-032, FR-033
 
 Provisioning results shall be based on observable filesystem outcomes
 rather than assumptions.
 
-**Verification:** Creation failures surface; state inspection occurs;
-summaries distinguish created/existing/skipped/failed actions;
-integration tests compare expected and actual state.
+**Verification:** M4 observes current filesystem state before classifying
+planned directory actions and distinguishes missing directories, existing
+directories, and conflicting files. Actual post-write outcome verification,
+creation failures, and execution summaries remain future provisioning work.
 
 ------------------------------------------------------------------------
 
@@ -249,9 +253,11 @@ provisioning, and presentation responsibilities.
 Desired-state planning shall remain separable from filesystem
 modification.
 
-**Verification:** Planning runs without provisioning; dry-run consumes
-plans without writes; future provisioning consumes validated intent
-rather than independently rebuilding template logic.
+**Verification:** `DirectoryPlanService` remains responsible for recursive
+desired-path generation, while `ProvisioningPlanService` performs read-only
+state inspection/classification. `Program` consumes the resulting structured
+plan for dry-run output without writes. Future provisioning must consume the
+same validated intent rather than independently rebuilding template logic.
 
 ## NFR-016 --- Core Behavior Must Avoid Person-Specific Logic
 
@@ -279,7 +285,7 @@ clearly distinguished in documentation.
 ## NFR-018 --- Core Logic Must Be Automatable in Tests
 
 **Category:** Testability\
-**Status:** Planned / Architecture Supports\
+**Status:** Implemented Foundation\
 **Priority:** High\
 **Related FRs:** FR-041, FR-043
 
@@ -287,16 +293,25 @@ Configuration, resolution, validation, and planning behavior shall be
 testable without requiring manual console interaction or a real CareerOS
 environment.
 
+**Verification:** The automated suite covers configuration, resolution,
+validation, recursive path planning, structured provisioning-plan models,
+read-only action classification, and integration workflows.
+
 ## NFR-019 --- Filesystem Tests Must Be Isolated
 
 **Category:** Testability / Safety\
-**Status:** Planned\
+**Status:** Implemented Foundation / Future Provisioning Expansion\
 **Priority:** High\
 **Related FRs:** FR-042
 
-Provisioning tests shall use temporary isolated filesystem roots, verify
-outcomes and idempotency, and never use a real CareerOS user environment
-as an automated fixture.
+Provisioning-related tests shall use temporary isolated filesystem roots,
+verify outcomes, and never use a real CareerOS user environment as an
+automated fixture.
+
+**Verification:** M4 existing-state classification and workflow tests use
+`TemporaryDirectoryFixture` to exercise missing directories, existing
+directories, and conflicting files without touching a real CareerOS
+environment. Write-capable idempotency testing remains future work.
 
 ## NFR-020 --- Merge Validation Must Protect Stable Main
 
@@ -322,6 +337,10 @@ review, and documentation validation before merge.
 Output shall make the execution mode, profile, template, effective
 destination, relevant action status, and final outcome understandable as
 applicable.
+
+**Current State:** M4 dry-run output identifies profile/template context and
+renders each structured action with action type, target path, observed current
+state, desired state, reason, and warnings when present.
 
 ## NFR-022 --- Errors Must Be Actionable
 
@@ -432,6 +451,10 @@ justifies maintenance, security, licensing, and deployment cost.
 
 Technical users shall be able to understand execution information
 without reading source code.
+
+**Current State:** M4 structured dry-run output renders `CREATE`, `PRESERVE`,
+`CONFLICT`, or other applicable action classifications together with current
+state, desired state, reason, and warning information.
 
 ## NFR-031 --- Safe Behavior Must Be the Default
 

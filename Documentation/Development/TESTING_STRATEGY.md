@@ -48,12 +48,12 @@ The test project is:
 CareerOS.Bootstrap.Tests
 ```
 
-At the current M3 implementation checkpoint:
+At the current M4 implementation checkpoint:
 
 ```text
 Test framework: xUnit
 Target framework: .NET 8
-Automated tests: 161 passing
+Automated tests: 192 passing
 Failed tests: 0
 Skipped tests: 0
 Service test suites: 5
@@ -62,6 +62,7 @@ Shared temporary-filesystem fixture: Implemented and tested
 Workflow/integration tests: Implemented for validation-first planning behavior
 Centralized configuration validation: Implemented and tested
 Destination-root and planned-path safety validation: Implemented and tested
+Structured provisioning-plan models and read-only state classification: Implemented and tested
 CI execution: Planned
 ```
 
@@ -298,8 +299,11 @@ The canonical mapping is maintained in `Documentation/Requirements/TRACEABILITY.
 | TEST-018 | Enforce planned-path containment beneath the approved destination root, including traversal and sibling-prefix escape rejection | `ConfigurationValidationServiceTests.cs`, `BootstrapPlanningWorkflowTests.cs` |
 | TEST-019 | Verify structured validation-result semantics, including aggregated errors and non-blocking warnings | `ValidationResultTests.cs`, `ConfigurationValidationServiceTests.cs` |
 | TEST-020 | Execute validation-first planning workflows so invalid configuration is rejected before later resolution/planning and valid plans pass containment checks | `BootstrapPlanningWorkflowTests.cs` |
+| TEST-021 | Verify structured provisioning-plan model semantics, action vocabulary, observed/desired state, reasons, warnings, and traversal order | `ProvisioningPlanTests.cs` |
+| TEST-022 | Inspect controlled filesystem state and classify missing directories, existing directories, conflicting files, and invalid direct inputs without writes | `ProvisioningPlanServiceTests.cs` |
+| TEST-023 | Execute validation-first structured provisioning-plan workflows and verify CREATE/PRESERVE/CONFLICT behavior without filesystem mutation | `BootstrapPlanningWorkflowTests.cs` |
 
-The current automated suite contains 161 passing xUnit cases at the M3 implementation checkpoint.
+The current automated suite contains 192 passing xUnit cases at the M4 implementation checkpoint.
 
 ---
 
@@ -457,7 +461,10 @@ DirectoryPlanService
 Planned-path containment validation
         |
         v
-Validated planned paths
+ProvisioningPlanService
+        |
+        v
+Structured ProvisioningPlan
 ```
 
 Implemented scenarios include:
@@ -469,9 +476,12 @@ No planned workspace directories created
 Unknown assigned template rejected before resolution
 Invalid nested directory rejected before planning
 Escaping planned path rejected by containment validation
+Validated missing paths classified as CREATE without writes
+Existing expected directory classified as PRESERVE
+Existing file at expected directory classified as CONFLICT without mutation
 ```
 
-These tests intentionally stop at validated planning because filesystem provisioning has not yet been implemented.
+These tests intentionally stop at structured read-only planning/classification because write-capable filesystem provisioning has not yet been implemented.
 
 ---
 
@@ -526,6 +536,52 @@ NFR-026
 
 Future write-capable provisioning must consume the same blocking validation
 gate; M3 does not introduce filesystem provisioning.
+
+---
+
+# Implemented M4 Provisioning-Plan Test Coverage
+
+M4 introduces structured provisioning-plan models, read-only filesystem-state inspection, and workflow integration
+without crossing the write boundary.
+
+Implemented model coverage includes:
+
+```text
+ProvisioningPlan default behavior
+ProvisioningAction safe defaults
+All defined action classifications preserve assigned values
+All defined current-state values preserve assigned values
+Structured action data and warnings
+Provisioning-plan traversal order
+Conflict reason/state representation
+```
+
+Implemented `ProvisioningPlanService` coverage includes:
+
+```text
+Missing fully qualified target -> CREATE
+Existing expected directory -> PRESERVE
+Existing file at expected directory -> CONFLICT
+Blank / invalid / relative direct target -> REJECT
+Normalized target paths
+Existing-directory warning behavior
+Read-only observation / no filesystem mutation
+Deterministic classification against controlled temporary filesystem state
+```
+
+Implemented workflow coverage includes:
+
+```text
+Validation occurs before structured plan classification
+Missing validated paths produce CREATE actions without creating directories
+Existing expected directories produce PRESERVE actions
+Existing conflicting files produce CONFLICT actions without modifying file content
+```
+
+These tests are represented in the stable traceability catalog as `TEST-021` through `TEST-023`.
+
+M4 intentionally does **not** test directory creation, write failures, or true repeated-execution idempotency because
+those behaviors belong to M5 write-capable provisioning.
 
 ---
 
@@ -983,7 +1039,7 @@ Completed M2 foundation:
 [x] Establish repeatable local dotnet build / dotnet test checkpoints
 ```
 
-Implemented M3 validation verification:
+Implemented M3/M4 verification:
 
 ```text
 [x] Add centralized ConfigurationValidationService tests
@@ -993,7 +1049,7 @@ Implemented M3 validation verification:
 [x] Add validation-first workflow integration tests
 [x] Add ValidationResult error/warning behavior tests
 [x] Assign TEST-015 through TEST-020
-[x] Reach 161 passing xUnit cases at the M3 implementation checkpoint
+[x] Reach 192 passing xUnit cases at the M4 implementation checkpoint
 ```
 
 Remaining future testing work:
@@ -1012,7 +1068,7 @@ This sequence continues to protect implemented behavior without creating tests f
 
 # Summary
 
-The testing strategy now protects both the read-only planning foundation and the centralized M3 validation boundary with requirements-driven automated verification.
+The testing strategy now protects the read-only planning foundation, centralized M3 validation boundary, and M4 structured provisioning-plan classification with requirements-driven automated verification.
 
 The target model is:
 

@@ -228,7 +228,7 @@ The final destination should not be tied to the application repository or a deve
 **Priority:** High
 
 **As a CareerOS user,**
-I want to see the complete directory structure the application intends to use,
+I want to see the complete directory structure and proposed action for each target,
 **so that** I can verify the plan before any filesystem changes are made.
 
 ### Rationale
@@ -239,16 +239,22 @@ Visibility into intended changes reduces risk and supports user trust.
 
 - The application generates a complete plan for each configured profile.
 - Nested directories are included in the plan.
+- Each target path is represented as a structured provisioning action.
+- The plan shows desired state, observed current state, proposed action, and reason.
 - The plan is visible to the user.
 - Current planning behavior does not create directories.
+
+### Current Implementation
+
+M4 extends the recursive path plan with `ProvisioningPlan` / `ProvisioningAction` and renders structured actions in the console dry run.
 
 ### Related Areas
 
 - `DirectoryPlanService`
+- `ProvisioningPlanService`
+- `ProvisioningPlan`, `ProvisioningAction`
 - Console dry-run output
 - Recursive traversal
-
----
 
 ## US-008 — Run an Explicit Dry-Run Mode
 
@@ -266,17 +272,23 @@ The current application behaves as a read-only preview, but a formal execution m
 ### Acceptance Intent
 
 - A user can explicitly select dry-run behavior.
-- Dry-run uses the same validated plan intended for real execution.
+- Dry-run uses the same validated structured plan intended for future real execution.
 - Dry-run performs no provisioning writes.
 - Output clearly identifies the run as non-destructive.
+- Structured actions distinguish create, preserve, conflict, and rejection semantics where applicable.
+
+### Current Implementation
+
+M4 upgrades the current always-on dry-run to consume `ProvisioningPlan` and render structured actions. Automated tests verify the planning/classification workflow remains read-only, and runtime verification confirms `_Preview` is not created.
+
+Explicit mode selection remains future work until a provision mode and CLI/execution-request model exist.
 
 ### Related Areas
 
-- Current dry-run planning
+- Current structured dry-run planning
+- `ProvisioningPlanService`
 - Future command-line handling
-- Future provisioning-plan model
-
----
+- Future provision mode
 
 ## US-009 — Validate Configuration Before Provisioning
 
@@ -322,7 +334,7 @@ Future write-capable provisioning must preserve this validation gate.
 
 ## US-010 — Preserve Existing Valid Directories
 
-**Status:** Planned
+**Status:** Partially Implemented
 **Priority:** High
 
 **As a CareerOS user,**
@@ -340,17 +352,23 @@ CareerOS contains long-lived user data. Existing structures should be treated as
 - Existing user contents are preserved.
 - The result reports that the directory already existed.
 
+### Current Implementation
+
+M4 read-only inspection recognizes an existing expected directory and classifies it as `PRESERVE`. The current dry run never modifies the directory or its contents.
+
+Actual write-capable provisioning remains future work and must honor the same preservation classification.
+
 ### Related Areas
 
-- Future filesystem inspection
+- `ProvisioningPlanService`
+- `ProvisioningActionType.Preserve`
+- Existing-state inspection
 - Future provisioning service
 - Idempotency
 
----
-
 ## US-011 — Create Only Missing Directories
 
-**Status:** Planned
+**Status:** Partially Implemented
 **Priority:** High
 
 **As a CareerOS user,**
@@ -368,17 +386,22 @@ The system should converge toward the configured desired state instead of rebuil
 - Existing expected directories remain unchanged.
 - Created and preserved directories are distinguishable in the result.
 
+### Current Implementation
+
+M4 implements the planning half of this story. Missing expected directories are classified as `CREATE`; existing expected directories are classified as `PRESERVE`; and an existing file where a directory is required is classified as `CONFLICT`.
+
+No creation occurs in the current dry run. Actual directory creation remains M5 work.
+
 ### Related Areas
 
-- Future `DirectoryProvisioningService`
+- `ProvisioningPlanService`
+- `ProvisioningAction`
 - Existing-state inspection
-- Provisioning action model
-
----
+- Future `DirectoryProvisioningService`
 
 ## US-012 — Rerun Provisioning Safely
 
-**Status:** Planned
+**Status:** Planned / M4 Planning Foundation Implemented
 **Priority:** High
 
 **As a CareerOS user,**
@@ -396,13 +419,16 @@ Idempotency is central to reliable provisioning and recovery.
 - Existing user files remain intact.
 - Repeat behavior is verified by automated integration tests.
 
+### Current Implementation
+
+M4 verifies deterministic repeated inspection and classification without filesystem mutation. Full repeated provisioning behavior remains deferred until write-capable provisioning exists.
+
 ### Related Areas
 
 - Idempotency
+- `ProvisioningPlanService`
 - Filesystem inspection
 - Provisioning integration tests
-
----
 
 ## US-013 — Prevent Automatic Destructive Deletion
 

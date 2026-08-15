@@ -4,7 +4,7 @@
 
 This document visualizes how data moves through `CareerOS.Bootstrap`, from repository configuration through model deserialization, profile/template resolution, recursive directory planning, and current dry-run output.
 
-It also documents the current M3 validation stages and the planned extension into provisioning, verification, and richer execution results.
+It also documents the current M3 validation boundary, the implemented M4 structured provisioning-plan stages, and the planned extension into write-capable provisioning, verification, and richer execution results.
 
 ## Status Legend
 
@@ -37,7 +37,9 @@ flowchart LR
     Paths["Planned Directory Paths<br/>CURRENT"]
 
     Containment["Planned-Path Containment<br/>CURRENT"]
-    Console["Console Dry-Run / Validation Output<br/>CURRENT"]
+    PlanService["ProvisioningPlanService<br/>CURRENT"]
+    Plan["ProvisioningPlan + Actions<br/>CURRENT"]
+    Console["Structured Dry-Run / Validation Output<br/>CURRENT"]
 
     BootstrapJson -->|"JSON text"| JsonService
     TemplatesJson -->|"JSON text"| JsonService
@@ -60,12 +62,14 @@ flowchart LR
 
     Planner --> Paths
     Paths --> Containment
-    Containment -->|"valid"| Console
+    Containment -->|"valid"| PlanService
+    PlanService -->|"inspect + classify"| Plan
+    Plan --> Console
     Validation -->|"blocking errors"| Console
 ```
 
-The current application validates configuration and path safety before exposing
-a read-only directory plan. It still does not provision the CareerOS workspace.
+The current application validates configuration and path safety, then performs read-only filesystem observation and
+structured action classification before rendering the dry-run plan. It still does not provision the CareerOS workspace.
 
 ---
 
@@ -309,10 +313,10 @@ flowchart LR
     Load["Configuration Loading<br/>CURRENT"]
     Validate["Validation<br/>PLANNED"]
     Resolve["Profile + Template Resolution<br/>CURRENT"]
-    Plan["Provisioning Plan<br/>CURRENT FOUNDATION / PLANNED EVOLUTION"]
+    Plan["Structured Provisioning Plan<br/>CURRENT"]
 
-    Inspect["Existing-State Inspection<br/>PLANNED"]
-    Classify["Action Classification<br/>PLANNED"]
+    Inspect["Existing-State Inspection<br/>CURRENT"]
+    Classify["Action Classification<br/>CURRENT"]
     Execute["Filesystem Provisioning<br/>PLANNED"]
     Verify["Outcome Verification<br/>PLANNED"]
     Result["Structured Execution Result<br/>PLANNED"]
@@ -508,8 +512,8 @@ This is a future extension and is not part of the current bootstrap implementati
 | Deserialized configuration | Configuration models | CURRENT |
 | Template resolution | `TemplateResolverService` | CURRENT |
 | Planned directory paths | `DirectoryPlanService` | CURRENT |
-| Existing filesystem state | Future inspection component | PLANNED |
-| Provisioning actions | Future plan/action model | PLANNED |
+| Existing filesystem state | `ProvisioningPlanService` | CURRENT |
+| Provisioning actions | `ProvisioningPlan` / `ProvisioningAction` | CURRENT |
 | Execution outcomes | Future result model | PLANNED |
 | Persisted searchable metadata | SQL Server or later persistence layer | FUTURE |
 

@@ -452,9 +452,62 @@ This service does not provision the filesystem.
 
 It must remain possible to generate and inspect a plan without causing filesystem changes.
 
-### Future direction
+### M4 integration
 
-The service may eventually return a richer `ProvisioningPlan` instead of raw path strings. If that occurs, recursive planning behavior should remain independently testable.
+`DirectoryPlanService` continues to return the ordered desired-path collection and remains independently testable.
+
+M4 deliberately does **not** move filesystem-state inspection into this service. The validated path collection is passed
+to `ProvisioningPlanService`, which observes current state and produces the richer `ProvisioningPlan`.
+
+---
+
+## `ProvisioningPlanService`
+
+**Status:** Implemented — M4
+
+### Responsibility
+
+Convert validated planned directory paths into a structured, read-only `ProvisioningPlan` by observing current
+filesystem state and classifying each target.
+
+### Current public method
+
+```text
+BuildPlan(plannedPaths)
+```
+
+### Current behavior
+
+For each supplied planned path the service:
+
+```text
+Blank / invalid / relative target
+    -> REJECT
+    -> CurrentState.Invalid
+
+Missing target
+    -> CREATE
+    -> CurrentState.Missing
+
+Existing expected directory
+    -> PRESERVE
+    -> CurrentState.Directory
+
+Existing file where a directory is required
+    -> CONFLICT
+    -> CurrentState.File
+```
+
+The service normalizes fully qualified paths before classification. `PRESERVE` actions carry a warning that an existing
+directory will not be modified.
+
+### Boundary
+
+`ProvisioningPlanService` **does not create, modify, move, or delete filesystem objects**. It does not replace
+`ConfigurationValidationService` path-safety checks and does not independently reinterpret profile/template structure.
+
+`DirectoryPlanService` answers *what paths should exist*. `ProvisioningPlanService` answers *what currently exists and
+what action that implies*. A future write-capable provisioning service must remain a separate responsibility.
 
 ---
 
@@ -785,35 +838,54 @@ It should not contain provisioning logic.
 
 ## `ProvisioningPlan`
 
-**Status:** Planned / conceptual
+**Status:** Implemented — M4
 
-Potential responsibility:
+### Responsibility
 
-Represent the complete validated set of intended filesystem actions.
+Represent the ordered collection of structured provisioning actions produced for validated planned paths.
 
-This may eventually replace a simple list of path strings as the primary output of planning.
-
-A richer plan could distinguish actions such as:
+### Current property
 
 ```text
-Create
-Exists
-Skip
-Invalid
-Conflict
+Actions : IReadOnlyList<ProvisioningAction>
 ```
+
+The plan preserves traversal order from the underlying directory plan. It is currently consumed by the dry-run console
+workflow and performs no filesystem writes.
 
 ---
 
 ## `ProvisioningAction`
 
-**Status:** Planned / conceptual
+**Status:** Implemented — M4
 
-Potential responsibility:
+### Responsibility
 
-Represent one intended change or observation within a `ProvisioningPlan`.
+Represent one desired directory target together with observed filesystem state, proposed action, reason, and optional warnings.
 
-Potential data includes target path, desired state, current state, action type, and reason.
+### Current properties
+
+```text
+TargetPath
+DesiredState
+CurrentState
+ActionType
+Reason
+Warnings
+```
+
+### Current action vocabulary
+
+```text
+Create
+Preserve
+Skip
+Conflict
+Reject
+```
+
+Current M4 classification emits `Create`, `Preserve`, `Conflict`, and `Reject`. `Skip` remains reserved in the model but
+no current M4 filesystem state requires it.
 
 ---
 
@@ -872,21 +944,23 @@ CareerOS.Bootstrap.Tests/
 │   └── BootstrapPlanningWorkflowTests.cs
 │
 ├── Models/
+│   ├── ProvisioningPlanTests.cs
 │   └── ValidationResultTests.cs
 │
 └── Services/
     ├── ConfigurationValidationServiceTests.cs
+    ├── ProvisioningPlanServiceTests.cs
     ├── DirectoryPlanServiceTests.cs
     ├── JsonConfigurationServiceTests.cs
     ├── PathServiceTests.cs
     └── TemplateResolverServiceTests.cs
 ```
 
-At the current M3 implementation checkpoint the suite contains 161 passing
+At the current M4 implementation checkpoint the suite contains 192 passing
 xUnit tests with zero failures.
 
-Future provisioning components should receive focused tests only when those
-production capabilities are implemented.
+M4 provisioning-plan models and read-only classification have focused unit and integration coverage. Future
+write-capable provisioning components should receive additional focused tests only when those production capabilities are implemented.
 
 ---
 
