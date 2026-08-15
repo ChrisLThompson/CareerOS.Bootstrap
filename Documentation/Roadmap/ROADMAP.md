@@ -49,8 +49,8 @@ flowchart LR
     P1["Phase 1<br/>Documentation Baseline<br/>CURRENT"]
     P2["Phase 2<br/>Automated Testing<br/>CURRENT"]
     P3["Phase 3<br/>Validation<br/>COMPLETE"]
-    P4["Phase 4<br/>Provisioning Plan<br/>CURRENT"]
-    P5["Phase 5<br/>Filesystem Provisioning<br/>PLANNED"]
+    P4["Phase 4<br/>Provisioning Plan<br/>COMPLETE"]
+    P5["Phase 5<br/>Filesystem Provisioning<br/>CURRENT"]
     P6["Phase 6<br/>Verification + Reporting<br/>PLANNED"]
     P7["Phase 7<br/>CLI + Operational Maturity<br/>PLANNED"]
     P8["Phase 8<br/>CI + Release<br/>PLANNED"]
@@ -508,7 +508,7 @@ Plan.
 
 # Phase 4 — Rich Provisioning Plan
 
-**Status:** CURRENT / IMPLEMENTATION COMPLETE, CLOSEOUT IN PROGRESS
+**Status:** COMPLETE
 
 ## Objective
 
@@ -517,114 +517,75 @@ actions without performing filesystem writes.
 
 ## Implemented Model
 
-M4 implements:
+M4 implements `ProvisioningPlan` containing ordered `ProvisioningAction` entries with target path, action type, current
+state, desired state, reason, and warnings.
 
-```text
-ProvisioningPlan
-└── Actions[]
-    └── ProvisioningAction
-        ├── TargetPath
-        ├── ActionType
-        ├── CurrentState
-        ├── DesiredState
-        ├── Reason
-        └── Warnings
-```
-
-The action vocabulary is:
-
-```text
-CREATE
-PRESERVE
-SKIP
-CONFLICT
-REJECT
-```
-
-Current classification emits `CREATE`, `PRESERVE`, `CONFLICT`, and `REJECT`. `SKIP` remains reserved for a future
-condition if one is introduced intentionally.
+The action vocabulary is `CREATE`, `PRESERVE`, `SKIP`, `CONFLICT`, and `REJECT`. Current classification emits
+`CREATE`, `PRESERVE`, `CONFLICT`, and `REJECT`.
 
 ## Existing-State Inspection
 
-`ProvisioningPlanService` now inspects validated target paths without changing them.
+`ProvisioningPlanService` inspects validated target paths without changing them.
 
 ```text
-Missing directory          -> CREATE
+Missing directory           -> CREATE
 Existing expected directory -> PRESERVE
-Existing file              -> CONFLICT
-Invalid direct input       -> REJECT
+Existing file               -> CONFLICT
+Invalid direct input        -> REJECT
 ```
-
-This is an observation/classification boundary only. M4 performs no filesystem provisioning.
 
 ## Structured Dry Run
 
-The current dry run renders the same structured plan contract that future provisioning is expected to consume.
+The dry run renders the same structured plan contract that M5 provisioning is expected to consume. The workflow remains
+explicitly non-destructive.
 
-For each action it displays:
-
-```text
-Action type
-Target path
-Current state
-Desired state
-Reason
-Warnings
-```
-
-The workflow remains explicitly non-destructive.
-
-## Current Verification
+## Final Verification
 
 ```text
 192 total tests
 192 passed
 0 failed
 0 skipped
-```
-
-Stable verification catalog:
-
-```text
 TEST-001 through TEST-023
 ```
 
-M4-specific categories are `TEST-021` through `TEST-023` and cover provisioning-plan model semantics, read-only
-filesystem-state classification, and validation-first structured-plan workflow integration.
-
-Implementation commits:
+Implementation and documentation commits:
 
 ```text
 a15af77  feat: add structured provisioning plan models
 6fff7c2  feat: add read-only provisioning plan classification
 b5b26d3  feat: integrate structured provisioning plan into dry run
+9c65857  docs: synchronize m4 provisioning plan documentation
+d661b69  merge: rich provisioning plan
 ```
 
-## Remaining Phase 4 Closeout
+Final repository state:
 
 ```text
-Finish M4 documentation synchronization.
-Run final repository scans and build/test verification.
-Commit and push the documentation synchronization.
-Review the complete feature branch against main.
-Merge M4 when clean.
-Update main-line roadmap/milestone closeout state.
+dotnet build  -> succeeded
+dotnet test   -> 192 total, 192 passed, 0 failed, 0 skipped
+origin/main   -> d661b69
+working tree  -> clean
 ```
 
-## Expected Outcome
+## Phase 4 Outcome
 
-The application now understands desired state and observed state and can explain the proposed action before any
-write-capable provisioning occurs.
+The application understands desired state and observed state and can explain the proposed action before any
+write-capable provisioning occurs. M4 is complete and provides the validated structured-plan boundary that M5 will
+consume.
 
 ---
 
 # Phase 5 — Safe Filesystem Provisioning
 
-**Status:** PLANNED
+**Status:** CURRENT
 
 ## Objective
 
 Enable controlled creation of missing CareerOS directories while preserving existing valid user content.
+
+M5 is the current implementation phase. It should consume the validated M4 `ProvisioningPlan`, keep dry-run behavior
+read-only, and introduce filesystem writes only behind explicit provisioning intent and write-time safety checks.
 
 ## Planned Provisioning Boundary
 

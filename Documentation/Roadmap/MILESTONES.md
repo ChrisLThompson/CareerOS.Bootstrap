@@ -29,8 +29,8 @@ Milestone status should reflect repository evidence rather than intention alone.
 | M1 | Documentation and design baseline | COMPLETE |
 | M2 | Automated testing foundation | COMPLETE |
 | M3 | Comprehensive validation | COMPLETE |
-| M4 | Rich provisioning plan | IN PROGRESS |
-| M5 | Safe filesystem provisioning | PLANNED |
+| M4 | Rich provisioning plan | COMPLETE |
+| M5 | Safe filesystem provisioning | CURRENT |
 | M6 | Verification and structured results | PLANNED |
 | M7 | CLI and operational maturity | PLANNED |
 | M8 | CI and release maturity | PLANNED |
@@ -553,7 +553,7 @@ The M3 exit condition is satisfied and the milestone is complete.
 
 # M4 — Rich Provisioning Plan
 
-**Status:** IN PROGRESS
+**Status:** COMPLETE
 
 ## Goal
 
@@ -562,7 +562,7 @@ preview today and future execution without allowing M4 to perform filesystem wri
 
 ## Implemented M4 Model
 
-The current implementation introduces:
+The completed M4 implementation introduces:
 
 ```text
 ProvisioningPlan
@@ -576,23 +576,12 @@ ProvisioningPlan
         └── Warnings
 ```
 
-The current action vocabulary is:
-
-```text
-CREATE
-PRESERVE
-SKIP
-CONFLICT
-REJECT
-```
-
+The action vocabulary is `CREATE`, `PRESERVE`, `SKIP`, `CONFLICT`, and `REJECT`.
 `SKIP` is reserved in the model; current M4 classification emits `CREATE`, `PRESERVE`, `CONFLICT`, and `REJECT`.
 
 ## Existing-State Inspection
 
 `ProvisioningPlanService` performs controlled, read-only inspection of validated planned paths.
-
-Current classification behavior:
 
 ```text
 Missing target                 -> CREATE
@@ -605,35 +594,27 @@ The service does not create, modify, move, or delete filesystem objects.
 
 ## Dry-Run Upgrade
 
-The current dry-run workflow consumes the structured `ProvisioningPlan` and renders:
+The dry-run workflow consumes the structured `ProvisioningPlan` and renders action type, target path, observed current
+state, desired state, reason, warnings, and per-profile action counts. Runtime verification confirms the preview remains
+non-destructive and `_Preview` is not physically created.
 
-```text
-Action type
-Target path
-Observed current state
-Desired state
-Reason
-Warnings when present
-Per-profile action count
-```
-
-Runtime verification confirms the preview remains non-destructive and `_Preview` is not physically created.
-
-## Current M4 Evidence
-
-Implementation commits:
+## M4 Completion Evidence
 
 ```text
 a15af77  feat: add structured provisioning plan models
 6fff7c2  feat: add read-only provisioning plan classification
 b5b26d3  feat: integrate structured provisioning plan into dry run
+9c65857  docs: synchronize m4 provisioning plan documentation
+d661b69  merge: rich provisioning plan
 ```
 
-Verification checkpoint:
+Final verification:
 
 ```text
 dotnet build  -> succeeded
 dotnet test   -> 192 total, 192 passed, 0 failed, 0 skipped
+origin/main   -> d661b69
+working tree  -> clean
 ```
 
 Stable verification catalog:
@@ -662,37 +643,29 @@ TEST-023  Validation-first structured provisioning-plan workflow integration
 [x] Existing valid directories are recognized as preserved.
 [x] Unit tests cover action classification.
 [x] Integration tests cover controlled filesystem states.
-[ ] Requirements, architecture, data flow, and diagrams are fully synchronized.
-[x] Build and tests pass at the current implementation checkpoint.
+[x] Requirements, architecture, data flow, and diagrams are fully synchronized.
+[x] Build and tests pass at the final implementation checkpoint.
 [x] Implementation changes are committed and pushed.
-[ ] Commit and push M4 documentation synchronization.
-[ ] Review the complete M4 feature-branch diff against `main`.
-[ ] Merge the completed M4 branch.
-```
-
-## Remaining M4 Closeout
-
-The implementation portion of M4 is complete. Remaining work is documentation and Git closeout:
-
-```text
-[ ] Finish architecture/diagram/roadmap synchronization.
-[ ] Run final stale-reference and whitespace scans.
-[ ] Run dotnet build and dotnet test.
-[ ] Commit and push synchronized M4 documentation.
-[ ] Review main...HEAD.
-[ ] Merge M4 when review is clean.
+[x] M4 documentation synchronization is committed and pushed.
+[x] Complete M4 feature-branch diff reviewed against `main`.
+[x] Completed M4 branch merged into `main`.
+[x] Post-merge build and test verification passed.
+[x] Merge published to `origin/main`.
 ```
 
 ## Exit Condition
 
-The technical exit behavior is present: the application can explain exactly what it intends to do before it is allowed
-to do it. M4 remains `IN PROGRESS` until documentation synchronization, final review, and merge closeout are complete.
+The M4 exit condition is satisfied. The application can explain exactly what it intends to do before it is allowed to
+do it, using a validated structured plan that records desired state, observed state, proposed action, reason, and
+warnings while remaining read-only.
+
+M4 is complete.
 
 ---
 
 # M5 — Safe Filesystem Provisioning
 
-**Status:** PLANNED
+**Status:** CURRENT
 
 ## Goal
 
@@ -1199,15 +1172,17 @@ When changing milestone scope:
 
 # Immediate Next Milestone Transition
 
-M0 through M3 are complete. M4 implementation is complete and the milestone is currently in documentation, review, and Git closeout.
+M0 through M4 are complete. M5 is now the current implementation milestone.
 
-After M4 is reviewed and merged, the next implementation milestone is:
+The preferred next implementation milestone is:
 
 ```text
 M5 — Safe Filesystem Provisioning
 ```
 
-This sequencing preserves the project's safety boundary: structured desired-state planning, current-state inspection, and action classification are established and tested before the application gains meaningful filesystem write capability.
+M5 will consume the validated M4 `ProvisioningPlan` rather than rebuilding profile/template intent independently.
+The write-capable boundary must preserve existing valid directories, reject conflicts safely, retain containment
+guarantees, and revalidate relevant state before filesystem changes occur.
 
 The expected progression is:
 
@@ -1238,8 +1213,8 @@ M0  Foundation                 COMPLETE
 M1  Documentation              COMPLETE
 M2  Automated Testing          COMPLETE
 M3  Validation                 COMPLETE
-M4  Rich Provisioning Plan     IN PROGRESS
-M5  Filesystem Provisioning    PLANNED
+M4  Rich Provisioning Plan     COMPLETE
+M5  Filesystem Provisioning    CURRENT
 M6  Verification / Results     PLANNED
 M7  CLI Maturity               PLANNED
 M8  CI / Releases              PLANNED
