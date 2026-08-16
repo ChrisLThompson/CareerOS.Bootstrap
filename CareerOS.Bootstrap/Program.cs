@@ -32,15 +32,15 @@ internal class Program
                     configurationDirectory,
                     "templates.json");
 
-            var bootstrapConfiguration =
+            BootstrapConfiguration bootstrapConfiguration =
                 jsonService.LoadBootstrapConfiguration(
                     bootstrapPath);
 
-            var templateConfiguration =
+            TemplateConfiguration templateConfiguration =
                 jsonService.LoadTemplateConfiguration(
                     templatesPath);
 
-            var configurationValidation =
+            ValidationResult configurationValidation =
                 validationService.Validate(
                     bootstrapConfiguration,
                     templateConfiguration);
@@ -51,6 +51,9 @@ internal class Program
                     "Configuration validation failed.",
                     configurationValidation);
             }
+
+            string destinationRoot =
+                bootstrapConfiguration.DestinationRoot;
 
             Console.WriteLine();
             Console.WriteLine("CareerOS Bootstrap");
@@ -65,53 +68,30 @@ internal class Program
             Console.WriteLine($"  {configurationDirectory}");
             Console.WriteLine();
 
+            Console.WriteLine("Destination:");
+            Console.WriteLine($"  {destinationRoot}");
+            Console.WriteLine();
+
             Console.WriteLine("DRY RUN");
             Console.WriteLine("No directories will be created.");
             Console.WriteLine();
 
-            /*
-             * TEMPORARY PREVIEW ROOT
-             *
-             * This path exists only so we can validate template traversal.
-             *
-             * FUTURE:
-             * The destination root will be supplied by bootstrap.json
-             * and/or a command-line option.
-             *
-             * Do not use this value for actual directory creation.
-             */
-            string previewRoot =
-                Path.Combine(
-                    repositoryRoot,
-                    "_Preview");
-
-            var destinationValidation =
-                validationService.ValidateDestinationRoot(
-                    previewRoot);
-
-            if (!destinationValidation.IsValid)
+            foreach (ProfileConfiguration profile in bootstrapConfiguration.Profiles)
             {
-                return WriteValidationFailure(
-                    "Destination validation failed.",
-                    destinationValidation);
-            }
-
-            foreach (var profile in bootstrapConfiguration.Profiles)
-            {
-                var template =
+                CareerTemplate template =
                     templateResolver.ResolveTemplate(
                         templateConfiguration,
                         profile.Template);
 
                 IReadOnlyList<string> directoryPlan =
                     directoryPlanService.BuildPlan(
-                        previewRoot,
+                        destinationRoot,
                         profile,
                         template);
 
-                var planValidation =
+                ValidationResult planValidation =
                     validationService.ValidatePlannedPaths(
-                        previewRoot,
+                        destinationRoot,
                         directoryPlan);
 
                 if (!planValidation.IsValid)
@@ -193,7 +173,7 @@ internal class Program
 
     private static int WriteValidationFailure(
         string heading,
-        Models.ValidationResult result)
+        ValidationResult result)
     {
         Console.ForegroundColor =
             ConsoleColor.Red;
@@ -202,7 +182,7 @@ internal class Program
         Console.WriteLine(heading);
         Console.WriteLine();
 
-        foreach (var error in result.Errors)
+        foreach (ValidationError error in result.Errors)
         {
             string location =
                 string.IsNullOrWhiteSpace(error.PropertyName)
