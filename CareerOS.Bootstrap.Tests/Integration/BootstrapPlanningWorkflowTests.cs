@@ -17,6 +17,7 @@ public class BootstrapPlanningWorkflowTests
                 "bootstrap.json",
                 """
                 {
+                  "destinationRoot": "C:\\CareerOS",
                   "profiles": [
                     {
                       "name": "Chris",
@@ -145,6 +146,7 @@ public class BootstrapPlanningWorkflowTests
                 "bootstrap.json",
                 """
                 {
+                  "destinationRoot": "C:\\CareerOS",
                   "profiles": [
                     {
                       "name": "Chris",
@@ -292,6 +294,7 @@ public class BootstrapPlanningWorkflowTests
                 "bootstrap.json",
                 """
                 {
+                  "destinationRoot": "C:\\CareerOS",
                   "profiles": [
                     {
                       "name": "Chris",
@@ -402,6 +405,7 @@ public class BootstrapPlanningWorkflowTests
                 "bootstrap.json",
                 """
                 {
+                  "destinationRoot": "C:\\CareerOS",
                   "profiles": [
                     {
                       "name": "Chris",
@@ -468,6 +472,7 @@ public class BootstrapPlanningWorkflowTests
                 "bootstrap.json",
                 """
                 {
+                  "destinationRoot": "C:\\CareerOS",
                   "profiles": [
                     {
                       "name": "Chris",
@@ -580,6 +585,7 @@ public class BootstrapPlanningWorkflowTests
                 "bootstrap.json",
                 """
                 {
+                  "destinationRoot": "C:\\CareerOS",
                   "profiles": [
                     {
                       "name": "Chris",

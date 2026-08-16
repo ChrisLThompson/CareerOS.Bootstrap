@@ -40,6 +40,10 @@ public sealed class ConfigurationValidationService
 
         ValidationResult result = new();
 
+        ValidateDestinationRootCore(
+            bootstrapConfiguration.DestinationRoot,
+            result);
+
         ValidateProfiles(
             bootstrapConfiguration,
             result);

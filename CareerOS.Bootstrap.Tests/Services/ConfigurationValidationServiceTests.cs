@@ -758,6 +758,66 @@ public class ConfigurationValidationServiceTests
     }
 
     [Fact]
+    public void Validate_WithMissingDestinationRoot_ReturnsDestinationRootRequiredError()
+    {
+        BootstrapConfiguration bootstrap =
+            CreateBootstrap(
+                CreateProfile(
+                    "Chris",
+                    "CareerOS_Chris",
+                    "CareerProfessional"));
+
+        bootstrap.DestinationRoot = string.Empty;
+
+        ValidationResult result =
+            _service.Validate(
+                bootstrap,
+                CreateTemplates(
+                    CreateTemplate("CareerProfessional")));
+
+        ValidationError error =
+            Assert.Single(
+                result.Errors,
+                error => error.Code == "DESTINATION_ROOT_REQUIRED");
+
+        Assert.False(result.IsValid);
+        Assert.Equal(
+            "DestinationRoot",
+            error.PropertyName);
+    }
+
+    [Fact]
+    public void Validate_WithRelativeDestinationRoot_ReturnsFullyQualifiedError()
+    {
+        BootstrapConfiguration bootstrap =
+            CreateBootstrap(
+                CreateProfile(
+                    "Chris",
+                    "CareerOS_Chris",
+                    "CareerProfessional"));
+
+        bootstrap.DestinationRoot = "CareerOS";
+
+        ValidationResult result =
+            _service.Validate(
+                bootstrap,
+                CreateTemplates(
+                    CreateTemplate("CareerProfessional")));
+
+        ValidationError error =
+            Assert.Single(
+                result.Errors,
+                error =>
+                    error.Code ==
+                    "DESTINATION_ROOT_NOT_FULLY_QUALIFIED");
+
+        Assert.False(result.IsValid);
+        Assert.Equal(
+            "DestinationRoot",
+            error.PropertyName);
+    }
+
+    [Fact]
     public void ValidateDestinationRoot_WithFullyQualifiedPath_ReturnsValidResult()
     {
         string destinationRoot =
@@ -1112,6 +1172,10 @@ public class ConfigurationValidationServiceTests
     {
         return new BootstrapConfiguration
         {
+            DestinationRoot =
+                Path.Combine(
+                    Path.GetTempPath(),
+                    "CareerOS"),
             Profiles = [.. profiles]
         };
     }
